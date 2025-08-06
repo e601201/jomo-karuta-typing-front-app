@@ -4,14 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- `npm run dev` - Start development server with hot reload
-- `npm run dev -- --open` - Start dev server and open in browser
-- `npm run build` - Build production version
-- `npm run preview` - Preview production build locally
-- `npm run check` - Run Svelte type checking
-- `npm run check:watch` - Run type checking in watch mode
-- `npm run lint` - Check code formatting and linting (Prettier + ESLint)
-- `npm run format` - Format code with Prettier
+- `bun --bun run dev` - Start development server with hot reload
+- `bun --bun run dev -- --open` - Start dev server and open in browser
+- `bun --bun run build` - Build production version
+- `bun --bun run preview` - Preview production build locally
+- `bun --bun run check` - Run Svelte type checking
+- `bun --bun run check:watch` - Run type checking in watch mode
+- `bun --bun run lint` - Check code formatting and linting (Prettier + ESLint)
+- `bun --bun run format` - Format code with Prettier
 
 ## Project Architecture
 
