@@ -23,7 +23,7 @@ export function validateKarutaData(): ValidationResult {
 	// 2. IDの重複チェック
 	const idSet = new Set<string>();
 	const duplicateIds: string[] = [];
-	karutaCards.forEach(card => {
+	karutaCards.forEach((card) => {
 		if (idSet.has(card.id)) {
 			duplicateIds.push(card.id);
 		}
@@ -57,7 +57,7 @@ export function validateKarutaData(): ValidationResult {
 
 	// 4. カテゴリーの妥当性チェック
 	const validCategories = ['history', 'geography', 'culture', 'nature', 'industry'];
-	karutaCards.forEach(card => {
+	karutaCards.forEach((card) => {
 		if (!validCategories.includes(card.category)) {
 			errors.push(`札[${card.id}]: 無効なカテゴリー: ${card.category}`);
 		}
@@ -65,7 +65,7 @@ export function validateKarutaData(): ValidationResult {
 
 	// 5. 難易度の妥当性チェック
 	const validDifficulties = ['easy', 'medium', 'hard'];
-	karutaCards.forEach(card => {
+	karutaCards.forEach((card) => {
 		if (!validDifficulties.includes(card.difficulty)) {
 			errors.push(`札[${card.id}]: 無効な難易度: ${card.difficulty}`);
 		}
@@ -73,7 +73,7 @@ export function validateKarutaData(): ValidationResult {
 
 	// 6. カテゴリー分布のチェック（警告）
 	const categoryCount: Record<string, number> = {};
-	karutaCards.forEach(card => {
+	karutaCards.forEach((card) => {
 		categoryCount[card.category] = (categoryCount[card.category] || 0) + 1;
 	});
 	Object.entries(categoryCount).forEach(([category, count]) => {
@@ -84,7 +84,7 @@ export function validateKarutaData(): ValidationResult {
 
 	// 7. 難易度分布のチェック（警告）
 	const difficultyCount: Record<string, number> = {};
-	karutaCards.forEach(card => {
+	karutaCards.forEach((card) => {
 		difficultyCount[card.difficulty] = (difficultyCount[card.difficulty] || 0) + 1;
 	});
 	Object.entries(difficultyCount).forEach(([difficulty, count]) => {
@@ -103,41 +103,41 @@ export function validateKarutaData(): ValidationResult {
 // スタンドアロン実行用の関数
 export function runValidation() {
 	const result = validateKarutaData();
-	
+
 	console.log('=== 上毛カルタデータ検証結果 ===');
 	console.log(`総札数: ${karutaCards.length}枚`);
-	
+
 	if (result.valid) {
 		console.log('✅ データは正常です');
 	} else {
 		console.log('❌ エラーが見つかりました:');
-		result.errors.forEach(error => console.log(`  - ${error}`));
+		result.errors.forEach((error) => console.log(`  - ${error}`));
 	}
-	
+
 	if (result.warnings.length > 0) {
 		console.log('⚠️  警告:');
-		result.warnings.forEach(warning => console.log(`  - ${warning}`));
+		result.warnings.forEach((warning) => console.log(`  - ${warning}`));
 	}
-	
+
 	// カテゴリー別集計
 	const categoryCount: Record<string, number> = {};
-	karutaCards.forEach(card => {
+	karutaCards.forEach((card) => {
 		categoryCount[card.category] = (categoryCount[card.category] || 0) + 1;
 	});
 	console.log('\n📊 カテゴリー別集計:');
 	Object.entries(categoryCount).forEach(([category, count]) => {
 		console.log(`  - ${category}: ${count}枚`);
 	});
-	
+
 	// 難易度別集計
 	const difficultyCount: Record<string, number> = {};
-	karutaCards.forEach(card => {
+	karutaCards.forEach((card) => {
 		difficultyCount[card.difficulty] = (difficultyCount[card.difficulty] || 0) + 1;
 	});
 	console.log('\n📊 難易度別集計:');
 	Object.entries(difficultyCount).forEach(([difficulty, count]) => {
 		console.log(`  - ${difficulty}: ${count}枚`);
 	});
-	
+
 	return result.valid;
 }

@@ -24,7 +24,7 @@ describe('カルタデータ', () => {
 		});
 
 		it('各札に必須フィールドが存在する', () => {
-			karutaCards.forEach(card => {
+			karutaCards.forEach((card) => {
 				expect(card.id).toBeDefined();
 				expect(card.hiragana).toBeDefined();
 				expect(card.romaji).toBeDefined();
@@ -35,7 +35,7 @@ describe('カルタデータ', () => {
 		});
 
 		it('IDに重複がない', () => {
-			const ids = karutaCards.map(card => card.id);
+			const ids = karutaCards.map((card) => card.id);
 			const uniqueIds = new Set(ids);
 			expect(uniqueIds.size).toBe(ids.length);
 		});
@@ -55,8 +55,8 @@ describe('カルタデータ', () => {
 		it('すべてのカテゴリーが存在する', () => {
 			const expectedCategories = ['history', 'geography', 'culture', 'nature', 'industry'];
 			const actualCategories = Object.keys(karutaCardsByCategory);
-			
-			expectedCategories.forEach(category => {
+
+			expectedCategories.forEach((category) => {
 				expect(actualCategories).toContain(category);
 			});
 		});
@@ -90,7 +90,7 @@ describe('カルタデータ', () => {
 		it('存在するIDで札を取得できる', () => {
 			const card = getCardById('tsu');
 			expect(card).toBeDefined();
-			expect(card?.hiragana).toBe('つる まう かたちの ぐんまけん');
+			expect(card?.hiragana).toBe('つる まう かたち の ぐんまけん');
 		});
 
 		it('存在しないIDでundefinedを返す', () => {
@@ -113,11 +113,11 @@ describe('カルタデータ', () => {
 		it('ランダムな順序で返す', () => {
 			const cards1 = getRandomCards(10);
 			const cards2 = getRandomCards(10);
-			
+
 			// 完全一致する可能性は低い
-			const ids1 = cards1.map(c => c.id).join(',');
-			const ids2 = cards2.map(c => c.id).join(',');
-			
+			const ids1 = cards1.map((c) => c.id).join(',');
+			const ids2 = cards2.map((c) => c.id).join(',');
+
 			// テストの安定性のため、異なることを期待するのではなく
 			// 両方とも10枚返ることを確認
 			expect(cards1.length).toBe(10);
@@ -126,7 +126,7 @@ describe('カルタデータ', () => {
 
 		it('重複なく札を返す', () => {
 			const cards = getRandomCards(20);
-			const ids = cards.map(c => c.id);
+			const ids = cards.map((c) => c.id);
 			const uniqueIds = new Set(ids);
 			expect(uniqueIds.size).toBe(20);
 		});

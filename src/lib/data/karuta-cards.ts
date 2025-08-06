@@ -12,26 +12,32 @@ export const karutaCards: KarutaCard[] = karutaCardsJson as KarutaCard[];
 export const sortedKarutaCards = [...karutaCards].sort((a, b) => a.id.localeCompare(b.id));
 
 // カテゴリー別にグループ化
-export const karutaCardsByCategory = karutaCards.reduce((acc, card) => {
-	if (!acc[card.category]) {
-		acc[card.category] = [];
-	}
-	acc[card.category].push(card);
-	return acc;
-}, {} as Record<string, KarutaCard[]>);
+export const karutaCardsByCategory = karutaCards.reduce(
+	(acc, card) => {
+		if (!acc[card.category]) {
+			acc[card.category] = [];
+		}
+		acc[card.category].push(card);
+		return acc;
+	},
+	{} as Record<string, KarutaCard[]>
+);
 
 // 難易度別にグループ化
-export const karutaCardsByDifficulty = karutaCards.reduce((acc, card) => {
-	if (!acc[card.difficulty]) {
-		acc[card.difficulty] = [];
-	}
-	acc[card.difficulty].push(card);
-	return acc;
-}, {} as Record<string, KarutaCard[]>);
+export const karutaCardsByDifficulty = karutaCards.reduce(
+	(acc, card) => {
+		if (!acc[card.difficulty]) {
+			acc[card.difficulty] = [];
+		}
+		acc[card.difficulty].push(card);
+		return acc;
+	},
+	{} as Record<string, KarutaCard[]>
+);
 
 // IDで特定の札を取得
 export const getCardById = (id: string): KarutaCard | undefined => {
-	return karutaCards.find(card => card.id === id);
+	return karutaCards.find((card) => card.id === id);
 };
 
 // ランダムに札を取得

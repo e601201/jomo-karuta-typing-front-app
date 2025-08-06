@@ -19,13 +19,7 @@ export type {
 } from './game';
 
 // ユーザー関連
-export type {
-	UserStats,
-	CardProgress,
-	Achievement,
-	UserProfile,
-	UserSettings
-} from './user';
+export type { UserStats, CardProgress, Achievement, UserProfile, UserSettings } from './user';
 
 // ストレージ関連
 export type { LocalStorageData, IndexedDBSchema } from './storage';
