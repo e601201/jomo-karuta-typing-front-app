@@ -15,7 +15,11 @@ export type {
 	CardInputState,
 	InputEvent,
 	GameResult,
-	CardResult
+	CardResult,
+	PartialInputConfig,
+	PartialInputMode,
+	PartialInputRange,
+	PartialInputPreset
 } from './game';
 
 // ユーザー関連

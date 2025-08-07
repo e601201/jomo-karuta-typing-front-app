@@ -179,7 +179,7 @@ describe('IndexedDBService - ゲーム履歴', () => {
 			endTime: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000)
 		};
 		await service.saveGameHistory(oldHistory);
-		
+
 		// 最近の履歴
 		await service.saveGameHistory(mockGameHistory);
 
@@ -251,10 +251,7 @@ describe('IndexedDBService - 詳細統計', () => {
 			});
 		}
 
-		const stats = await service.getStatsRange(
-			new Date('2024-01-02'),
-			new Date('2024-01-04')
-		);
+		const stats = await service.getStatsRange(new Date('2024-01-02'), new Date('2024-01-04'));
 
 		expect(stats).toHaveLength(3);
 		expect(stats[0].date.toISOString().split('T')[0]).toBe('2024-01-02');

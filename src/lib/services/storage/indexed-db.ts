@@ -219,10 +219,7 @@ export class IndexedDBService {
 		this.ensureInitialized();
 
 		// 既存のデータがあれば更新、なければ追加
-		const existing = await this.db.detailedStats
-			.where('date')
-			.equals(stats.date)
-			.first();
+		const existing = await this.db.detailedStats.where('date').equals(stats.date).first();
 
 		if (existing) {
 			await this.db.detailedStats.update(existing.id!, stats);
@@ -400,10 +397,7 @@ export class IndexedDBService {
 	async getStruggleCards(limit: number): Promise<CardHistory[]> {
 		this.ensureInitialized();
 
-		return await this.db.cardHistory
-			.orderBy('bestAccuracy')
-			.limit(limit)
-			.toArray();
+		return await this.db.cardHistory.orderBy('bestAccuracy').limit(limit).toArray();
 	}
 
 	/**
@@ -439,21 +433,27 @@ export class IndexedDBService {
 		}
 
 		// トランザクションで一括インポート
-		await this.db.transaction('rw', this.db.gameHistory, this.db.detailedStats, this.db.cardHistory, async () => {
-			// 既存データをクリア
-			await this.clearDatabase();
+		await this.db.transaction(
+			'rw',
+			this.db.gameHistory,
+			this.db.detailedStats,
+			this.db.cardHistory,
+			async () => {
+				// 既存データをクリア
+				await this.clearDatabase();
 
-			// データを復元
-			if (data.gameHistory) {
-				await this.db.gameHistory.bulkAdd(data.gameHistory);
+				// データを復元
+				if (data.gameHistory) {
+					await this.db.gameHistory.bulkAdd(data.gameHistory);
+				}
+				if (data.detailedStats) {
+					await this.db.detailedStats.bulkAdd(data.detailedStats);
+				}
+				if (data.cardHistory) {
+					await this.db.cardHistory.bulkAdd(data.cardHistory);
+				}
 			}
-			if (data.detailedStats) {
-				await this.db.detailedStats.bulkAdd(data.detailedStats);
-			}
-			if (data.cardHistory) {
-				await this.db.cardHistory.bulkAdd(data.cardHistory);
-			}
-		});
+		);
 	}
 
 	/**
@@ -654,5 +654,49 @@ export class IndexedDBService {
 		if (!this.initialized) {
 			throw new Error('IndexedDBService is not initialized');
 		}
+	}
+
+	/**
+	 * 初期化のエイリアス（+page.svelteから使用）
+	 */
+	async init(): Promise<void> {
+		return this.initialize();
+	}
+
+	/**
+	 * 最新のセッションを取得
+	 */
+	async getLatestSession(): Promise<{
+		id: string;
+		mode: 'practice' | 'specific' | 'random';
+		startedAt: Date;
+		completedCards: number;
+		totalCards: number;
+	} | null> {
+		this.ensureInitialized();
+
+		const latestHistory = await this.db.gameHistory.orderBy('startTime').reverse().first();
+
+		if (!latestHistory) {
+			return null;
+		}
+
+		return {
+			id: latestHistory.sessionId,
+			mode: latestHistory.mode,
+			startedAt: latestHistory.startTime,
+			completedCards: latestHistory.cards.length,
+			totalCards: 44 // 上毛カルタの総数
+		};
+	}
+
+	/**
+	 * 進捗があるかチェック
+	 */
+	async hasProgress(): Promise<boolean> {
+		this.ensureInitialized();
+
+		const session = await this.getLatestSession();
+		return session !== null && session.completedCards < session.totalCards;
 	}
 }

@@ -130,3 +130,181 @@ export interface CardResult {
 	accuracy: number; // 正確率（％）
 	completed: boolean;
 }
+
+/**
+ * 部分入力モード設定
+ */
+export interface PartialInputConfig {
+	enabled: boolean; // 部分入力モードの有効/無効
+	characterCount: number; // 入力対象文字数
+	mode: PartialInputMode; // 範囲決定モード
+	highlightRange: boolean; // 範囲ハイライトの有無
+}
+
+/**
+ * 部分入力モードの種類
+ */
+export type PartialInputMode = 'start' | 'random' | 'important';
+
+/**
+ * 部分入力範囲
+ */
+export interface PartialInputRange {
+	start: number; // 開始位置（0ベース）
+	end: number; // 終了位置（含まない）
+	text: string; // 対象テキスト
+	fullText: string; // 全文
+}
+
+/**
+ * 部分入力プリセット
+ */
+export type PartialInputPreset = 'beginner' | 'intermediate' | 'advanced' | 'custom';
+
+/**
+ * 統計データ - 全体統計
+ */
+export interface OverallStats {
+	totalSessions: number;
+	totalPlayTime: number; // milliseconds
+	totalKeysTyped: number;
+	totalCardsCompleted: number;
+	averageWPM: number;
+	maxWPM: number;
+	averageAccuracy: number;
+	maxAccuracy: number;
+	currentStreak: number;
+	longestStreak: number;
+	totalScore: number;
+	level: number;
+	rank: string;
+}
+
+/**
+ * 統計データ - セッション統計
+ */
+export interface SessionStats {
+	id: string;
+	timestamp: Date;
+	mode: GameMode;
+	duration: number;
+	cardsCompleted: number;
+	wpm: number;
+	accuracy: number;
+	score: number;
+	mistakes: number;
+	partialInputUsed: boolean;
+}
+
+/**
+ * 統計データ - カード別統計
+ */
+export interface CardStats {
+	cardId: string;
+	timesPlayed: number;
+	bestTime: number;
+	averageTime: number;
+	accuracy: number;
+	lastPlayed: Date;
+}
+
+/**
+ * グラフ用データ構造
+ */
+export interface ChartData {
+	labels: string[];
+	datasets: {
+		label: string;
+		data: number[];
+		color?: string;
+	}[];
+}
+
+/**
+ * フィルターオプション
+ */
+export interface FilterOptions {
+	period?: 'today' | 'week' | 'month' | 'all';
+	mode?: GameMode;
+	cardId?: string;
+}
+
+/**
+ * トレンドデータ
+ */
+export interface TrendData {
+	wpmTrend: number[]; // 日別WPM
+	accuracyTrend: number[]; // 日別正確率
+	playTimeTrend: number[]; // 日別プレイ時間
+	labels: string[]; // 日付ラベル
+}
+
+/**
+ * ユーザー設定（GameSettingsを拡張）
+ */
+export interface UserSettings extends GameSettings {
+	display: DisplaySettings;
+	sound: SoundSettings;
+	practice: PracticeSettings;
+	keyboard: KeyboardSettings;
+	accessibility: AccessibilitySettings;
+}
+
+/**
+ * 表示設定
+ */
+export interface DisplaySettings {
+	fontSize: 'small' | 'medium' | 'large' | 'extra-large';
+	theme: 'light' | 'dark' | 'auto';
+	animations: boolean;
+	animationSpeed: 'slow' | 'normal' | 'fast';
+	showFurigana: boolean;
+	showMeaning: boolean;
+}
+
+/**
+ * サウンド設定
+ */
+export interface SoundSettings {
+	effectsEnabled: boolean;
+	effectsVolume: number; // 0-100
+	bgmEnabled: boolean;
+	bgmVolume: number; // 0-100
+	typingSoundEnabled: boolean;
+	typingSoundVolume: number; // 0-100
+	voiceEnabled: boolean;
+	voiceSpeed: number; // 0.5-2.0
+}
+
+/**
+ * 練習設定
+ */
+export interface PracticeSettings {
+	order: 'sequential' | 'random' | 'weak-first';
+	repetitions: number; // 1-5
+	timeLimit: number | null; // seconds or null for unlimited
+	difficulty: 'beginner' | 'intermediate' | 'advanced' | 'custom';
+}
+
+/**
+ * キーボード設定
+ */
+export interface KeyboardSettings {
+	layout: 'JIS' | 'US';
+	inputMethod: 'romaji' | 'kana';
+	shortcuts: {
+		pause: string;
+		skip: string;
+		retry: string;
+	};
+}
+
+/**
+ * アクセシビリティ設定
+ */
+export interface AccessibilitySettings {
+	highContrast: boolean;
+	reduceMotion: boolean;
+	screenReaderMode: boolean;
+	keyboardOnly: boolean;
+}

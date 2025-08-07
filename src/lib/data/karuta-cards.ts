@@ -23,6 +23,13 @@ export const karutaCardsByCategory = karutaCards.reduce(
 	{} as Record<string, KarutaCard[]>
 );
 
+// カードを取得する関数
+export function getKarutaCards(): KarutaCard[] {
+	console.log('getKarutaCards called, returning', karutaCards.length, 'cards');
+	console.log('First card:', karutaCards[0]);
+	return [...karutaCards];
+}
+
 // 難易度別にグループ化
 export const karutaCardsByDifficulty = karutaCards.reduce(
 	(acc, card) => {

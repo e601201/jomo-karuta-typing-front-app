@@ -14,6 +14,8 @@ export interface ValidationResult {
 	currentPosition?: number;
 	/** 誤入力回数 */
 	mistakeCount?: number;
+	/** 入力が完了したか */
+	isComplete?: boolean;
 }
 
 /**
@@ -151,11 +153,30 @@ const ROMAJI_MAP: Record<string, string[]> = {
 /**
  * ローマ字入力検証クラス
  */
+import type { PartialInputRange } from '$lib/types';
+
 export class InputValidator {
 	private currentPosition: number = 0;
 	private currentInput: string = '';
 	private mistakeCount: number = 0;
 	private validPatterns: string[] = [];
+	private partialRange: PartialInputRange | null = null;
+	private targetText: string = '';
+	
+	/**
+	 * ターゲットテキストを設定
+	 */
+	setTarget(text: string): void {
+		this.targetText = text;
+		this.reset();
+	}
+	
+	/**
+	 * 現在のターゲットテキストを取得
+	 */
+	getTarget(): string {
+		return this.targetText;
+	}
 
 	/**
 	 * ひらがな文字列からローマ字パターンを取得
@@ -280,14 +301,15 @@ export class InputValidator {
 	/**
 	 * 入力文字列全体を検証
 	 */
-	validateInput(hiragana: string, input: string): ValidationResult {
+	validateInput(hiragana: string, input: string, position: number = 0): ValidationResult {
 		const patterns = this.getRomajiPatterns(hiragana);
 
 		// 完全一致チェック
 		if (patterns.includes(input)) {
 			return {
 				isValid: true,
-				progress: 1.0
+				progress: 1.0,
+				isComplete: true
 			};
 		}
 
@@ -296,25 +318,19 @@ export class InputValidator {
 			if (pattern.startsWith(input)) {
 				return {
 					isValid: true,
-					progress: input.length / pattern.length
+					progress: input.length / pattern.length,
+					isComplete: false
 				};
 			}
 		}
 
 		return {
 			isValid: false,
-			progress: 0
+			progress: 0,
+			isComplete: false
 		};
 	}
 
-	/**
-	 * ターゲットテキストを設定
-	 * @param hiragana 判定対象のひらがな文字列
-	 */
-	setTarget(hiragana: string): void {
-		this.validPatterns = this.getRomajiPatterns(hiragana);
-		this.reset();
-	}
 
 	/**
 	 * 1文字ずつ入力を検証
@@ -375,5 +391,52 @@ export class InputValidator {
 		this.currentPosition = 0;
 		this.currentInput = '';
 		this.mistakeCount = 0;
+	}
+
+	/**
+	 * 部分入力範囲を設定
+	 */
+	setPartialRange(range: PartialInputRange): void {
+		this.partialRange = range;
+		this.targetText = range.text;
+		this.validPatterns = this.getRomajiPatterns(range.text);
+		this.reset();
+	}
+
+	/**
+	 * 部分入力の検証
+	 */
+	validatePartialInput(input: string, position: number): ValidationResult {
+		if (!this.partialRange) {
+			return this.validateInput(this.targetText, input);
+		}
+
+		// 範囲外の入力は無効
+		if (position >= this.partialRange.text.length) {
+			return {
+				isValid: false,
+				progress: 1.0,
+				isComplete: true
+			};
+		}
+
+		const result = this.validateInput(this.partialRange.text, input);
+
+		// 部分入力の完了判定
+		if (result.isValid && result.progress === 1.0) {
+			result.isComplete = true;
+		}
+
+		return result;
+	}
+
+	/**
+	 * 部分入力用のローマ字パターンを取得
+	 */
+	getPartialRomajiPatterns(): string[] {
+		if (!this.partialRange) {
+			return this.validPatterns;
+		}
+		return this.getRomajiPatterns(this.partialRange.text);
 	}
 }

@@ -49,6 +49,8 @@ export interface GameTimer {
 	isPaused: boolean;
 	pausedDuration: number;
 	pauseStartTime: Date | null;
+	pauseCount: number;
+	totalPauseTime: number;
 }
 
 export interface GameState {
@@ -104,7 +106,9 @@ const initialState: GameState = {
 		cardElapsedTime: 0,
 		isPaused: false,
 		pausedDuration: 0,
-		pauseStartTime: null
+		pauseStartTime: null,
+		pauseCount: 0,
+		totalPauseTime: 0
 	}
 };
 
@@ -186,7 +190,9 @@ export function createGameStore() {
 				cardElapsedTime: 0,
 				isPaused: false,
 				pausedDuration: 0,
-				pauseStartTime: null
+				pauseStartTime: null,
+				pauseCount: 0,
+				totalPauseTime: 0
 			}
 		}));
 
@@ -390,7 +396,8 @@ export function createGameStore() {
 			timer: {
 				...state.timer,
 				isPaused: true,
-				pauseStartTime: new Date()
+				pauseStartTime: new Date(),
+				pauseCount: state.timer.pauseCount + 1
 			}
 		}));
 
@@ -417,6 +424,7 @@ export function createGameStore() {
 				...s.timer,
 				isPaused: false,
 				pausedDuration: s.timer.pausedDuration + pauseDuration,
+				totalPauseTime: s.timer.totalPauseTime + pauseDuration,
 				pauseStartTime: null
 			}
 		}));
@@ -542,3 +550,12 @@ export function createGameStore() {
 		destroy
 	};
 }
+
+// Export singleton instance
+const storeInstance = createGameStore();
+export const gameStore = {
+	...storeInstance,
+	subscribe: storeInstance.gameStore.subscribe,
+	set: storeInstance.gameStore.set,
+	update: storeInstance.gameStore.update
+};

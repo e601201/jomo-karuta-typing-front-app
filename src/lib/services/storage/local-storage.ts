@@ -460,9 +460,8 @@ export class LocalStorageService {
 		// UTF-8文字列をBase64に変換
 		if (typeof btoa !== 'undefined') {
 			// UTF-8 → UTF-16 → Base64
-			const utf16 = encodeURIComponent(jsonStr).replace(
-				/%([0-9A-F]{2})/g,
-				(match, p1) => String.fromCharCode(parseInt(p1, 16))
+			const utf16 = encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) =>
+				String.fromCharCode(parseInt(p1, 16))
 			);
 			return btoa(utf16);
 		}
