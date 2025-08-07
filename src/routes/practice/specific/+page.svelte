@@ -27,7 +27,7 @@
 
 	function handleRepeatChange(e: Event) {
 		const value = (e.target as HTMLSelectElement).value;
-		repeatCount = value === 'infinite' ? Infinity : parseInt(value);
+		repeatCount = parseInt(value);
 		specificCardsStore.setRepeatCount(repeatCount);
 	}
 
@@ -106,7 +106,6 @@
 							<option value="1">1回</option>
 							<option value="3">3回</option>
 							<option value="5">5回</option>
-							<option value="infinite">無限</option>
 						</select>
 					</div>
 

@@ -12,14 +12,23 @@
 
 	let { cards }: Props = $props();
 
+	// ストアの値をリアクティブに取得
 	let selectedCardIds = $state(new Set<string>());
 
-	specificCardsStore.subscribe((state) => {
-		selectedCardIds = state.selectedCardIds;
+	// ストアの更新を監視
+	$effect(() => {
+		const unsubscribe = specificCardsStore.subscribe((state) => {
+			// 新しいSetを作成して反応性を確保
+			selectedCardIds = new Set(state.selectedCardIds);
+		});
+		
+		return () => unsubscribe();
 	});
 
 	function toggleCard(cardId: string) {
+		console.log('Toggling card:', cardId);
 		specificCardsStore.toggleCard(cardId);
+		console.log('After toggle, selectedCardIds:', selectedCardIds);
 	}
 
 	function selectAll() {

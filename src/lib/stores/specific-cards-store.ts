@@ -64,12 +64,16 @@ function createSpecificCardsStore() {
 		 */
 		toggleCard(cardId: string) {
 			update((state) => {
-				if (state.selectedCardIds.has(cardId)) {
-					state.selectedCardIds.delete(cardId);
+				const newSelectedCardIds = new Set(state.selectedCardIds);
+				if (newSelectedCardIds.has(cardId)) {
+					newSelectedCardIds.delete(cardId);
 				} else {
-					state.selectedCardIds.add(cardId);
+					newSelectedCardIds.add(cardId);
 				}
-				return { ...state };
+				return {
+					...state,
+					selectedCardIds: newSelectedCardIds
+				};
 			});
 		},
 
@@ -193,7 +197,7 @@ function createSpecificCardsStore() {
 
 			// 繰り返し回数分の札を生成
 			let practiceCards: KarutaCard[] = [];
-			const repeatCount = state.settings.repeatCount === Infinity ? 1 : state.settings.repeatCount;
+			const repeatCount = state.settings.repeatCount;
 
 			for (let i = 0; i < repeatCount; i++) {
 				if (state.settings.shuffleOrder) {
