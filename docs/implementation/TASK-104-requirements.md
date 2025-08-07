@@ -1,11 +1,13 @@
 # TASK-104: IndexedDB実装 - 要件定義
 
 ## 概要
+
 Dexie.jsを使用してIndexedDBによる大容量データの永続化機能を実装する。LocalStorageの制限を超える詳細な成績データやゲーム履歴を保存可能にする。
 
 ## 機能要件
 
 ### 1. データベース設計
+
 - **データベース名**: `JomoKarutaDB`
 - **バージョン管理**: スキーマ変更時の自動マイグレーション
 - **テーブル構造**:
@@ -19,69 +21,69 @@ Dexie.jsを使用してIndexedDBによる大容量データの永続化機能を
 
 ```typescript
 interface GameHistory {
-  id?: number; // auto-increment
-  sessionId: string;
-  mode: 'practice' | 'specific' | 'random';
-  startTime: Date;
-  endTime: Date;
-  cards: CardResult[];
-  score: {
-    total: number;
-    accuracy: number;
-    speed: number;
-    maxCombo: number;
-  };
-  settings: GameSettings;
+	id?: number; // auto-increment
+	sessionId: string;
+	mode: 'practice' | 'specific' | 'random';
+	startTime: Date;
+	endTime: Date;
+	cards: CardResult[];
+	score: {
+		total: number;
+		accuracy: number;
+		speed: number;
+		maxCombo: number;
+	};
+	settings: GameSettings;
 }
 
 interface CardResult {
-  cardId: string;
-  startTime: Date;
-  endTime: Date;
-  inputHistory: InputEvent[];
-  mistakes: number;
-  wpm: number;
-  accuracy: number;
+	cardId: string;
+	startTime: Date;
+	endTime: Date;
+	inputHistory: InputEvent[];
+	mistakes: number;
+	wpm: number;
+	accuracy: number;
 }
 
 interface InputEvent {
-  timestamp: Date;
-  input: string;
-  expected: string;
-  correct: boolean;
-  position: number;
+	timestamp: Date;
+	input: string;
+	expected: string;
+	correct: boolean;
+	position: number;
 }
 
 interface DetailedStats {
-  id?: number;
-  date: Date;
-  dailyStats: {
-    gamesPlayed: number;
-    cardsCompleted: number;
-    totalTime: number;
-    averageAccuracy: number;
-    averageSpeed: number;
-    bestScore: number;
-  };
-  weeklyAggregates?: WeeklyStats;
-  monthlyAggregates?: MonthlyStats;
+	id?: number;
+	date: Date;
+	dailyStats: {
+		gamesPlayed: number;
+		cardsCompleted: number;
+		totalTime: number;
+		averageAccuracy: number;
+		averageSpeed: number;
+		bestScore: number;
+	};
+	weeklyAggregates?: WeeklyStats;
+	monthlyAggregates?: MonthlyStats;
 }
 
 interface CardHistory {
-  id?: number;
-  cardId: string;
-  attempts: AttemptRecord[];
-  bestTime: number;
-  bestAccuracy: number;
-  lastAttempt: Date;
+	id?: number;
+	cardId: string;
+	attempts: AttemptRecord[];
+	bestTime: number;
+	bestAccuracy: number;
+	lastAttempt: Date;
 }
 
 interface AttemptRecord {
-  date: Date;
-  time: number;
-  accuracy: number;
-  mistakes: number;
-  wpm: number;
+	date: Date;
+	time: number;
+	accuracy: number;
+	mistakes: number;
+	wpm: number;
 }
 ```
 
@@ -89,54 +91,57 @@ interface AttemptRecord {
 
 ```typescript
 class IndexedDBService {
-  private db: Dexie;
-  
-  // 初期化
-  async initialize(): Promise<void>;
-  
-  // ゲーム履歴
-  async saveGameHistory(history: GameHistory): Promise<number>;
-  async getGameHistory(limit?: number, offset?: number): Promise<GameHistory[]>;
-  async getGameHistoryByMode(mode: string): Promise<GameHistory[]>;
-  async deleteOldHistory(daysToKeep: number): Promise<void>;
-  
-  // 詳細統計
-  async saveDailyStats(stats: DetailedStats): Promise<void>;
-  async getDailyStats(date: Date): Promise<DetailedStats | null>;
-  async getStatsRange(startDate: Date, endDate: Date): Promise<DetailedStats[]>;
-  async aggregateWeeklyStats(weekStart: Date): Promise<WeeklyStats>;
-  async aggregateMonthlyStats(month: Date): Promise<MonthlyStats>;
-  
-  // カード履歴
-  async saveCardAttempt(cardId: string, attempt: AttemptRecord): Promise<void>;
-  async getCardHistory(cardId: string): Promise<CardHistory | null>;
-  async getTopCards(limit: number): Promise<CardHistory[]>;
-  async getStruggleCards(limit: number): Promise<CardHistory[]>;
-  
-  // データ管理
-  async exportDatabase(): Promise<Blob>;
-  async importDatabase(data: Blob): Promise<void>;
-  async clearDatabase(): Promise<void>;
-  async getDatabaseSize(): Promise<number>;
-  async vacuum(): Promise<void>; // 不要データの削除
-  
-  // クエリ機能
-  async searchHistory(query: SearchQuery): Promise<GameHistory[]>;
-  async getStatsSummary(): Promise<StatsSummary>;
-  async getAchievementProgress(): Promise<AchievementProgress[]>;
+	private db: Dexie;
+
+	// 初期化
+	async initialize(): Promise<void>;
+
+	// ゲーム履歴
+	async saveGameHistory(history: GameHistory): Promise<number>;
+	async getGameHistory(limit?: number, offset?: number): Promise<GameHistory[]>;
+	async getGameHistoryByMode(mode: string): Promise<GameHistory[]>;
+	async deleteOldHistory(daysToKeep: number): Promise<void>;
+
+	// 詳細統計
+	async saveDailyStats(stats: DetailedStats): Promise<void>;
+	async getDailyStats(date: Date): Promise<DetailedStats | null>;
+	async getStatsRange(startDate: Date, endDate: Date): Promise<DetailedStats[]>;
+	async aggregateWeeklyStats(weekStart: Date): Promise<WeeklyStats>;
+	async aggregateMonthlyStats(month: Date): Promise<MonthlyStats>;
+
+	// カード履歴
+	async saveCardAttempt(cardId: string, attempt: AttemptRecord): Promise<void>;
+	async getCardHistory(cardId: string): Promise<CardHistory | null>;
+	async getTopCards(limit: number): Promise<CardHistory[]>;
+	async getStruggleCards(limit: number): Promise<CardHistory[]>;
+
+	// データ管理
+	async exportDatabase(): Promise<Blob>;
+	async importDatabase(data: Blob): Promise<void>;
+	async clearDatabase(): Promise<void>;
+	async getDatabaseSize(): Promise<number>;
+	async vacuum(): Promise<void>; // 不要データの削除
+
+	// クエリ機能
+	async searchHistory(query: SearchQuery): Promise<GameHistory[]>;
+	async getStatsSummary(): Promise<StatsSummary>;
+	async getAchievementProgress(): Promise<AchievementProgress[]>;
 }
 ```
 
 ### 4. インデックス設計
+
 効率的なクエリのためのインデックス:
+
 - `gameHistory`: `[mode+startTime]`, `sessionId`, `startTime`
 - `detailedStats`: `date`, `[date+dailyStats.gamesPlayed]`
 - `cardHistory`: `cardId`, `[cardId+lastAttempt]`, `bestTime`
 
 ### 5. パフォーマンス要件
+
 - **初期化時間**: 200ms以内
 - **データ保存**: 50ms以内
-- **クエリ実行**: 
+- **クエリ実行**:
   - 単純クエリ: 30ms以内
   - 集計クエリ: 100ms以内
   - 範囲クエリ: 150ms以内
@@ -146,15 +151,18 @@ class IndexedDBService {
 ### 6. データ管理戦略
 
 #### 自動削除ポリシー
+
 - ゲーム履歴: 90日以上前のデータを自動削除
 - 詳細統計: 日次データは30日、集計データは永続保存
 - カード履歴: 最新100件のみ保持
 
 #### バックアップ戦略
+
 - 週次で自動エクスポート（LocalStorageに最終バックアップ日時を記録）
 - 手動エクスポート/インポート機能
 
 #### データ整合性
+
 - トランザクション使用による整合性保証
 - 破損データの自動検出と修復
 - LocalStorageとの同期（重要データのみ）
@@ -162,15 +170,17 @@ class IndexedDBService {
 ## 技術要件
 
 ### 依存関係
+
 ```json
 {
-  "dependencies": {
-    "dexie": "^4.0.0"
-  }
+	"dependencies": {
+		"dexie": "^4.0.0"
+	}
 }
 ```
 
 ### ブラウザ要件
+
 - Chrome 24+
 - Firefox 16+
 - Safari 15+
@@ -179,6 +189,7 @@ class IndexedDBService {
 ### エラーハンドリング
 
 #### 考慮すべきエラー
+
 1. **容量超過**
    - QuotaExceededError
    - 古いデータの自動削除で対応
@@ -199,6 +210,7 @@ class IndexedDBService {
 ## テスト要件
 
 ### 単体テスト
+
 1. **CRUD操作**
    - 各テーブルの作成・読込・更新・削除
    - トランザクション処理
@@ -215,6 +227,7 @@ class IndexedDBService {
    - サイズ計算
 
 ### 統合テスト
+
 1. **マイグレーション**
    - スキーマバージョンアップ
    - データ変換
@@ -231,6 +244,7 @@ class IndexedDBService {
    - データ破損対応
 
 ### エッジケース
+
 - 100,000件以上のデータ
 - 500MB超のストレージ使用
 - 複数タブでの同時操作
