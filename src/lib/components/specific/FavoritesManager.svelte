@@ -108,8 +108,8 @@
 	{/if}
 
 	{#if showNewDialog}
-		<div class="dialog-overlay" onclick={closeDialog} onkeydown={(e) => e.key === 'Escape' && closeDialog()} role="dialog" aria-modal="true">
-			<div class="dialog" onclick={(e) => e.stopPropagation()} role="document">
+		<div class="dialog-overlay" onclick={closeDialog} onkeydown={(e) => e.key === 'Escape' && closeDialog()} role="dialog" aria-modal="true" tabindex="-1">
+			<div class="dialog" onclick={(e) => e.stopPropagation()}>
 				<h4 class="mb-3 text-lg font-semibold">お気に入りを保存</h4>
 				<input
 					type="text"

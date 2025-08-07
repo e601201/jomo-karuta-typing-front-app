@@ -33,10 +33,10 @@
 	}: Props = $props();
 
 	let containerElement: HTMLDivElement;
-	let tooltipVisible = false;
-	let tooltipContent = '';
-	let tooltipX = 0;
-	let tooltipY = 0;
+	let tooltipVisible = $state(false);
+	let tooltipContent = $state('');
+	let tooltipX = $state(0);
+	let tooltipY = $state(0);
 
 	let isEmpty = $derived(
 		!data.datasets || data.datasets.length === 0 || data.datasets[0].data.length === 0
@@ -171,6 +171,8 @@
 						cy={`${100 - (data.datasets[0].data[i] / maxValue) * 90}%`}
 						r="4"
 						fill={data.datasets[0].color || '#3B82F6'}
+						role="img"
+						aria-label={`${label}: ${data.datasets[0].data[i]}`}
 						onmouseenter={(e) => handleDataPointHover(e, data.datasets[0].data[i], label)}
 						onmouseleave={handleMouseLeave}
 					/>
@@ -197,6 +199,8 @@
 							class="w-full rounded-t bg-blue-500 {animate ? 'animate-grow-height' : ''}"
 							style="height: {(data.datasets[0].data[i] / maxValue) * 90}%; animation-delay: {i *
 								animationDelay}ms; background-color: {data.datasets[0].color || '#10B981'}"
+							role="img"
+							aria-label={`${label}: ${data.datasets[0].data[i]}`}
 							onmouseenter={(e) => handleDataPointHover(e, data.datasets[0].data[i], label)}
 							onmouseleave={handleMouseLeave}
 						></div>

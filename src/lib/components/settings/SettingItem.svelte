@@ -97,7 +97,6 @@
 				<input
 					id={inputId}
 					type="range"
-					role="slider"
 					aria-label={ariaLabel || label}
 					aria-valuemin={min}
 					aria-valuemax={max}
