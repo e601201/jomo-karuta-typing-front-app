@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { get } from 'svelte/store';
 	import { gameStore } from '$lib/stores/game';
 	import { practiceModeStore } from '$lib/stores/practice-mode';
 	import { InputValidator } from '$lib/services/typing/input-validator';
 	import { LocalStorageService } from '$lib/services/storage/local-storage';
 	import type { GameMode, KarutaCard } from '$lib/types';
-	
+
 	// Page data from +page.ts
 	interface Props {
 		data: {
@@ -14,9 +15,10 @@
 			cards: KarutaCard[];
 			resume: boolean;
 			error: string | null;
+			isFromSpecific?: boolean;
 		};
 	}
-	
+
 	let { data }: Props = $props();
 
 	// Components
@@ -51,7 +53,7 @@
 	// Input validation
 	let validator: InputValidator | null = null;
 	let romajiGuide = $state('');
-	
+
 	// Debug reactive value
 	$effect(() => {
 		if (currentCard) {
@@ -74,7 +76,7 @@
 		try {
 			// Check for error in page data
 			if (data.error) {
-				console.log("data.error", data.error);
+				console.log('data.error', data.error);
 				error = data.error;
 				isLoading = false;
 				return;
@@ -83,8 +85,24 @@
 			// Use data from +page.ts
 			gameMode = data.mode;
 			shouldContinue = data.resume;
-			totalCards = data.cards?.length || 0;
-			console.log('gameMode:', gameMode, 'shouldContinue:', shouldContinue, 'totalCards:', totalCards);
+			
+			// Check if coming from specific mode selection
+			const isFromSpecificMode = data.isFromSpecific || false;
+			
+			// Don't set totalCards from data.cards if coming from specific mode
+			if (!isFromSpecificMode) {
+				totalCards = data.cards?.length || 0;
+			}
+			console.log(
+				'gameMode:',
+				gameMode,
+				'shouldContinue:',
+				shouldContinue,
+				'totalCards:',
+				totalCards,
+				'isFromSpecificMode:',
+				isFromSpecificMode
+			);
 
 			// Initialize game
 			await initializeGame();
@@ -143,16 +161,13 @@
 
 	async function initializeGame() {
 		console.log('initializeGame started');
+		
+		// Check if coming from specific mode selection
+		const isFromSpecificMode = data.isFromSpecific || false;
+		
 		// Use cards from page data
 		const cards = data.cards;
-		console.log('cards from data:', cards?.length, 'first card:', cards?.[0]);
-		
-		if (!cards || cards.length === 0) {
-			console.error('No cards available');
-			error = 'カードデータの読み込みに失敗しました';
-			isLoading = false;
-			return;
-		}
+		console.log('cards from data:', cards?.length, 'first card:', cards?.[0], 'isFromSpecificMode:', isFromSpecificMode);
 
 		// Initialize based on mode
 		if (gameMode === 'practice') {
@@ -160,15 +175,47 @@
 			// Use practice mode store
 			const storage = new LocalStorageService();
 			storage.initialize();
+
+			// Check if practice mode store already has cards (from specific mode selection)
+			const currentState = get(practiceModeStore);
+			const hasExistingCards = currentState.cards && currentState.cards.length > 0;
 			
-			if (shouldContinue) {
+			if (isFromSpecificMode && hasExistingCards) {
+				console.log('Using existing cards from specific mode:', currentState.cards.length);
+				// Don't reinitialize, cards are already set from specific mode
+				totalCards = currentState.cards.length; // Update total cards count
+			} else if (shouldContinue) {
 				console.log('Resuming session');
-				await practiceModeStore.resumeFromSession(cards, storage);
-			} else {
-				console.log('Starting new session');
+				// For resume, we need cards (should be all cards)
+				if (!cards || cards.length === 0) {
+					// Load all cards for resume
+					const { getKarutaCards } = await import('$lib/data/karuta-cards');
+					const allCards = getKarutaCards();
+					await practiceModeStore.resumeFromSession(allCards, storage);
+					totalCards = allCards.length;
+				} else {
+					await practiceModeStore.resumeFromSession(cards, storage);
+					totalCards = cards.length;
+				}
+			} else if (!isFromSpecificMode) {
+				// Only initialize with all cards if not from specific mode
+				if (!cards || cards.length === 0) {
+					console.error('No cards available');
+					error = 'カードデータの読み込みに失敗しました';
+					isLoading = false;
+					return;
+				}
+				console.log('Starting new session with all cards');
 				practiceModeStore.initialize(cards, storage);
+				totalCards = cards.length;
+			} else {
+				// Coming from specific mode but no existing cards - this is an error
+				console.error('From specific mode but no cards in store');
+				error = '特定札が選択されていません';
+				isLoading = false;
+				return;
 			}
-			
+
 			// Subscribe to practice mode store
 			unsubscribe = practiceModeStore.subscribe((state) => {
 				console.log('Practice mode store update:', {
@@ -177,46 +224,58 @@
 					currentCard: state.cards?.[state.currentIndex],
 					firstCard: state.cards?.[0]
 				});
-				
+
 				// Check if game is complete (all cards have been processed)
 				if (state.currentIndex >= state.cards.length && state.cards.length > 0) {
-					console.log('Practice mode complete! currentIndex:', state.currentIndex, 'total:', state.cards.length);
+					console.log(
+						'Practice mode complete! currentIndex:',
+						state.currentIndex,
+						'total:',
+						state.cards.length
+					);
 					isGameComplete = true;
 					practiceModeStore.complete();
 					return;
 				}
-				
+
 				// Update state values
 				const newCard = state.cards?.[state.currentIndex] || null;
 				console.log('Setting currentCard to:', newCard);
-				
+
 				// Update all state values - directly assign without any async operations
 				if (newCard) {
 					currentCard = newCard;
 					console.log('currentCard set to:', currentCard);
 				}
 				cardIndex = state.currentIndex;
-				totalCards = state.cards?.length || 0;
+				// Only update totalCards if we have cards
+				if (state.cards && state.cards.length > 0) {
+					totalCards = state.cards.length;
+				}
 				mistakes = state.statistics?.mistakes || 0;
 				score = {
 					total: state.statistics.totalKeystrokes,
-					accuracy: state.statistics.totalKeystrokes > 0 
-						? (state.statistics.correctKeystrokes / state.statistics.totalKeystrokes) * 100 
-						: 100,
+					accuracy:
+						state.statistics.totalKeystrokes > 0
+							? (state.statistics.correctKeystrokes / state.statistics.totalKeystrokes) * 100
+							: 100,
 					speed: practiceModeStore.calculateWPM(),
 					combo: state.statistics.currentCombo,
 					maxCombo: state.statistics.maxCombo
 				};
-				
+
 				// Update validator if card changed
-				if (currentCard && (!validator || validator.getTarget() !== currentCard.hiragana.replace(/\s/g, ''))) {
+				if (
+					currentCard &&
+					(!validator || validator.getTarget() !== currentCard.hiragana.replace(/\s/g, ''))
+				) {
 					const targetText = currentCard.hiragana.replace(/\s/g, '');
 					validator = new InputValidator();
 					validator.setTarget(targetText);
 					updateRomajiGuide();
 					initializeInputStates();
 				}
-				
+
 				// Set loading to false only after updating all values
 				if (state.cards && state.cards.length > 0) {
 					console.log('Setting isLoading to false');
@@ -226,7 +285,7 @@
 		} else {
 			// Use regular game store for other modes
 			gameStore.startSession(gameMode!, cards);
-			
+
 			// First card is already loaded by startSession
 		}
 	}
@@ -249,20 +308,30 @@
 		}
 	}
 
-	// Track completed characters count 
+	// Track completed characters count
 	let completedHiraganaCount = $state(0);
-	
+
 	// Parse hiragana text into typing units (considering multi-character units like きゃ、しゅ)
 	function parseHiraganaUnits(text: string): string[] {
 		const units: string[] = [];
 		let i = 0;
-		
+
 		while (i < text.length) {
 			const current = text[i];
 			const next = text[i + 1];
-			
+
 			// Check for small ya, yu, yo (拗音)
-			if (next && (next === 'ゃ' || next === 'ゅ' || next === 'ょ' || next === 'ぁ' || next === 'ぃ' || next === 'ぅ' || next === 'ぇ' || next === 'ぉ')) {
+			if (
+				next &&
+				(next === 'ゃ' ||
+					next === 'ゅ' ||
+					next === 'ょ' ||
+					next === 'ぁ' ||
+					next === 'ぃ' ||
+					next === 'ぅ' ||
+					next === 'ぇ' ||
+					next === 'ぉ')
+			) {
 				units.push(current + next);
 				i += 2;
 			}
@@ -276,47 +345,46 @@
 					units.push(current);
 					i++;
 				}
-			}
-			else {
+			} else {
 				units.push(current);
 				i++;
 			}
 		}
-		
+
 		return units;
 	}
-	
+
 	function handleCharacterInput(char: string) {
 		if (!validator || !currentCard) return;
 
 		const newInput = currentInput + char;
 		const targetText = currentCard.hiragana.replace(/\s/g, '');
-		
+
 		console.log(`Input: "${newInput}", Target: "${targetText}"`);
-		
+
 		// Validate the entire input string
 		const result = validator.validateInput(targetText, newInput);
 
 		if (result.isValid) {
 			// Update the current input
 			currentInput = newInput;
-			
+
 			// Parse hiragana more carefully for multi-character units
 			const hiraganaUnits = parseHiraganaUnits(targetText);
 			let completedCount = 0;
 			let partiallyCompleteIndex = -1;
 			let tempInput = newInput;
-			
+
 			for (let i = 0; i < hiraganaUnits.length; i++) {
 				const unit = hiraganaUnits[i];
 				const patterns = validator.getRomajiPatterns(unit);
 				let matched = false;
 				let partial = false;
-				
+
 				// Special handling for 'ん'
 				if (unit === 'ん') {
 					const isLastChar = i === hiraganaUnits.length - 1;
-					
+
 					if (tempInput === 'n') {
 						// Just 'n' - always keep as partial
 						partial = true;
@@ -328,7 +396,7 @@
 						matched = true;
 					} else if (tempInput.startsWith('n') && tempInput.length > 1) {
 						const charAfterN = tempInput[1];
-						
+
 						if (isLastChar) {
 							// Last character is 'ん' - must use 'nn', so this is invalid
 							// Keep as partial, waiting for second 'n'
@@ -338,10 +406,10 @@
 							// Not last character - check if 'n' can be accepted
 							const nextUnit = hiraganaUnits[i + 1];
 							const nextPatterns = validator.getRomajiPatterns(nextUnit);
-							
+
 							// Check if next hiragana can start with n + charAfterN
-							const canStartWithN = nextPatterns.some(p => p.startsWith('n' + charAfterN));
-							
+							const canStartWithN = nextPatterns.some((p) => p.startsWith('n' + charAfterN));
+
 							if (!canStartWithN && charAfterN !== 'n') {
 								// This 'n' must be 'ん', complete it
 								completedCount++;
@@ -366,7 +434,7 @@
 						}
 					}
 				}
-				
+
 				// Check for partial match if not completely matched
 				if (!matched && !partial && tempInput.length > 0) {
 					for (const pattern of patterns) {
@@ -377,17 +445,17 @@
 							break;
 						}
 					}
-					
+
 					if (!partial) {
 						break; // No match at all
 					}
 				}
-				
+
 				if (!matched && !partial) {
 					break;
 				}
 			}
-			
+
 			// Update highlight states
 			for (let i = 0; i < hiraganaUnits.length; i++) {
 				if (i < completedCount) {
@@ -398,9 +466,9 @@
 					inputStates[i] = 'pending';
 				}
 			}
-			
+
 			completedHiraganaCount = completedCount;
-			
+
 			// Update store based on mode
 			if (gameMode === 'practice') {
 				practiceModeStore.processKeystroke(true);
@@ -416,10 +484,10 @@
 		} else {
 			// Show error
 			showError = true;
-			
+
 			// Parse hiragana units for error highlighting
 			const hiraganaUnits = parseHiraganaUnits(targetText);
-			
+
 			// Find which character is being typed incorrectly
 			let errorIndex = completedHiraganaCount;
 			for (let i = 0; i < hiraganaUnits.length; i++) {
@@ -432,9 +500,9 @@
 					inputStates[i] = 'pending';
 				}
 			}
-			
+
 			mistakes++;
-			
+
 			// Update store based on mode
 			if (gameMode === 'practice') {
 				practiceModeStore.processKeystroke(false);
@@ -455,24 +523,24 @@
 	function handleBackspace() {
 		if (currentInput.length > 0) {
 			currentInput = currentInput.slice(0, -1);
-			
+
 			// Recalculate completed characters
 			const targetText = currentCard?.hiragana.replace(/\s/g, '') || '';
 			const hiraganaUnits = parseHiraganaUnits(targetText);
 			let completedCount = 0;
 			let partiallyCompleteIndex = -1;
 			let tempInput = currentInput;
-			
+
 			for (let i = 0; i < hiraganaUnits.length; i++) {
 				const unit = hiraganaUnits[i];
 				const patterns = validator?.getRomajiPatterns(unit) || [];
 				let matched = false;
 				let partial = false;
-				
+
 				// Special handling for 'ん'
 				if (unit === 'ん') {
 					const isLastChar = i === hiraganaUnits.length - 1;
-					
+
 					if (tempInput === 'n') {
 						// Just 'n' - keep as partial
 						partial = true;
@@ -484,7 +552,7 @@
 						matched = true;
 					} else if (tempInput.startsWith('n') && tempInput.length > 1) {
 						const charAfterN = tempInput[1];
-						
+
 						if (isLastChar) {
 							// Last character must be 'nn'
 							partial = true;
@@ -493,8 +561,8 @@
 							// Check if next hiragana could start with this
 							const nextUnit = hiraganaUnits[i + 1];
 							const nextPatterns = validator?.getRomajiPatterns(nextUnit) || [];
-							const canStartWithN = nextPatterns.some(p => p.startsWith('n' + charAfterN));
-							
+							const canStartWithN = nextPatterns.some((p) => p.startsWith('n' + charAfterN));
+
 							if (!canStartWithN && charAfterN !== 'n') {
 								// This 'n' is 'ん'
 								completedCount++;
@@ -518,7 +586,7 @@
 						}
 					}
 				}
-				
+
 				if (!matched && !partial && tempInput.length > 0) {
 					for (const pattern of patterns) {
 						if (pattern.startsWith(tempInput)) {
@@ -528,14 +596,14 @@
 						}
 					}
 				}
-				
+
 				if (!matched && !partial) {
 					break;
 				}
 			}
-			
+
 			completedHiraganaCount = completedCount;
-			
+
 			// Update input states
 			for (let i = 0; i < hiraganaUnits.length; i++) {
 				if (i < completedCount) {
@@ -546,7 +614,7 @@
 					inputStates[i] = 'pending';
 				}
 			}
-			
+
 			if (gameMode === 'practice') {
 				// No need to update practice mode store for backspace
 			} else {
@@ -558,13 +626,13 @@
 
 	function handleCardComplete() {
 		console.log('Card complete! Moving to next card...');
-		
+
 		// Reset input state BEFORE moving to next card
 		inputPosition = 0;
 		currentInput = '';
 		inputProgress = 0;
 		completedHiraganaCount = 0;
-		
+
 		if (gameMode === 'practice') {
 			// Move to next card in practice mode
 			console.log('Calling practiceModeStore.nextCard');
@@ -577,7 +645,7 @@
 				gameStore.nextCard();
 			}
 		}
-		
+
 		// Don't reset validator here - let the subscription handle it
 		console.log('Card complete handler finished');
 	}
@@ -767,12 +835,9 @@
 			{:else}
 				<div class="mb-6 rounded-lg bg-yellow-100 p-8 text-center">
 					<p class="text-gray-800">カードを読み込み中...</p>
-					<p class="text-sm text-gray-600 mt-2">
-						モード: {gameMode || 'なし'}, 
-						カード数: {totalCards}, 
-						インデックス: {cardIndex},
-						currentCard: {JSON.stringify(currentCard)},
-						isLoading: {isLoading}
+					<p class="mt-2 text-sm text-gray-600">
+						モード: {gameMode || 'なし'}, カード数: {totalCards}, インデックス: {cardIndex},
+						currentCard: {JSON.stringify(currentCard)}, isLoading: {isLoading}
 					</p>
 				</div>
 			{/if}

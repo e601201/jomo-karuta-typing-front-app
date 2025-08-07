@@ -163,7 +163,7 @@ export class InputValidator {
 	private validPatterns: string[] = [];
 	private partialRange: PartialInputRange | null = null;
 	private targetText: string = '';
-	
+
 	/**
 	 * ターゲットテキストを設定
 	 */
@@ -171,7 +171,7 @@ export class InputValidator {
 		this.targetText = text;
 		this.reset();
 	}
-	
+
 	/**
 	 * 現在のターゲットテキストを取得
 	 */
@@ -308,11 +308,11 @@ export class InputValidator {
 			// Check if we're at the 'ん' part
 			const beforeN = hiragana.slice(0, -1);
 			const beforeNPatterns = this.getRomajiPatterns(beforeN);
-			
+
 			// Find if input matches everything before 'ん'
 			let matchedBeforeN = false;
 			let remainingInput = '';
-			
+
 			for (const pattern of beforeNPatterns) {
 				if (input.startsWith(pattern)) {
 					matchedBeforeN = true;
@@ -320,7 +320,7 @@ export class InputValidator {
 					break;
 				}
 			}
-			
+
 			if (matchedBeforeN && remainingInput) {
 				// We're typing the final 'ん'
 				if (remainingInput === 'n') {
@@ -340,7 +340,7 @@ export class InputValidator {
 				}
 			}
 		}
-		
+
 		// Normal validation
 		const patterns = this.getRomajiPatterns(hiragana);
 
@@ -370,7 +370,6 @@ export class InputValidator {
 			isComplete: false
 		};
 	}
-
 
 	/**
 	 * 1文字ずつ入力を検証

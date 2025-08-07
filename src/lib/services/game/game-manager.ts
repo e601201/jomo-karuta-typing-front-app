@@ -70,7 +70,7 @@ export class GameManager {
 		if (!card) return;
 
 		// バリデーターを更新
-		this.validator = new InputValidator(card.yomifuda);
+		this.validator = new InputValidator(card.hiragana);
 
 		// 入力状態をリセット
 		this.currentInput = '';

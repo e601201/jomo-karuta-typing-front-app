@@ -115,11 +115,21 @@ export interface AchievementProgress {
 	unlocked: boolean;
 }
 
+// お気に入り型定義
+export interface FavoriteData {
+	id: string;
+	name: string;
+	cardIds: string[];
+	createdAt: string;
+	updatedAt?: string;
+}
+
 // Dexieデータベースクラス
 class JomoKarutaDB extends Dexie {
 	gameHistory!: Table<GameHistory>;
 	detailedStats!: Table<DetailedStats>;
 	cardHistory!: Table<CardHistory>;
+	favorites!: Table<FavoriteData>;
 
 	constructor() {
 		super('JomoKarutaDB');
@@ -129,6 +139,14 @@ class JomoKarutaDB extends Dexie {
 			gameHistory: '++id, sessionId, mode, startTime, [mode+startTime]',
 			detailedStats: '++id, date',
 			cardHistory: '++id, cardId, bestTime, bestAccuracy, lastAttempt'
+		});
+
+		// バージョン2: お気に入り追加
+		this.version(2).stores({
+			gameHistory: '++id, sessionId, mode, startTime, [mode+startTime]',
+			detailedStats: '++id, date',
+			cardHistory: '++id, cardId, bestTime, bestAccuracy, lastAttempt',
+			favorites: 'id, name, createdAt'
 		});
 	}
 }
@@ -700,3 +718,6 @@ export class IndexedDBService {
 		return session !== null && session.completedCards < session.totalCards;
 	}
 }
+
+export const indexedDBService = new IndexedDBService();
+export const db = new JomoKarutaDB();

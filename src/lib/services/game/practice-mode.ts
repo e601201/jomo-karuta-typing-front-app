@@ -152,10 +152,10 @@ export class PracticeModeService {
 		const result = this.inputValidator.validateInput(input, targetText);
 
 		this.state.statistics.totalKeystrokes = input.length;
-		
+
 		if (result.isValid) {
 			this.state.statistics.correctKeystrokes = input.length;
-			
+
 			if (result.isComplete) {
 				this.completeCurrentCard(currentCard);
 				this.moveToNextCard();
@@ -174,10 +174,9 @@ export class PracticeModeService {
 
 	private completeCurrentCard(card: KarutaCard): void {
 		this.state.completedCards.push(card.id);
-		
-		const cardTime = this.cardStartTime ? 
-			new Date().getTime() - this.cardStartTime.getTime() : 0;
-		
+
+		const cardTime = this.cardStartTime ? new Date().getTime() - this.cardStartTime.getTime() : 0;
+
 		const stats: CardStatistics = {
 			cardId: card.id,
 			attempts: 1,
@@ -185,9 +184,9 @@ export class PracticeModeService {
 			mistakes: 0,
 			accuracy: 100
 		};
-		
+
 		this.cardStatistics.set(card.id, stats);
-		
+
 		if (this.onCardComplete) {
 			this.onCardComplete(stats);
 		}
@@ -200,11 +199,11 @@ export class PracticeModeService {
 	private updateStatistics(): void {
 		const total = this.state.statistics.totalKeystrokes;
 		const correct = this.state.statistics.correctKeystrokes;
-		
+
 		if (total > 0) {
 			this.state.statistics.accuracy = (correct / total) * 100;
 		}
-		
+
 		const elapsedMinutes = this.getElapsedTime() / 60000;
 		if (elapsedMinutes > 0) {
 			const words = correct / 5; // 5文字を1単語と仮定
@@ -235,7 +234,7 @@ export class PracticeModeService {
 				totalElapsedTime: this.getElapsedTime(),
 				statistics: { ...this.state.statistics }
 			};
-			
+
 			this.storage.saveSession(session);
 		} catch (error) {
 			console.warn('Failed to save session', error);
@@ -245,7 +244,7 @@ export class PracticeModeService {
 	resumeFromSession(): void {
 		try {
 			const session = this.storage.loadSession() as PracticeModeSession | null;
-			
+
 			if (session && session.mode === 'practice' && this.isValidSession(session)) {
 				this.state = {
 					currentCardIndex: session.currentCardIndex,
@@ -253,7 +252,8 @@ export class PracticeModeService {
 					statistics: { ...session.statistics }
 				};
 				this.startTime = new Date(session.startTime);
-				this.totalPausedTime = new Date().getTime() - this.startTime.getTime() - session.totalElapsedTime;
+				this.totalPausedTime =
+					new Date().getTime() - this.startTime.getTime() - session.totalElapsedTime;
 			} else {
 				this.initialize();
 			}
@@ -274,7 +274,7 @@ export class PracticeModeService {
 	async completeGame(): Promise<void> {
 		this.stopAutoSave();
 		this.storage.clearSession();
-		
+
 		if (this.saveResults) {
 			await this.saveResults();
 		}
@@ -305,7 +305,7 @@ export class PracticeModeService {
 		if (!this.startTime) {
 			return 0;
 		}
-		
+
 		const now = this.pauseTime || new Date();
 		return now.getTime() - this.startTime.getTime() - this.totalPausedTime;
 	}
@@ -314,11 +314,11 @@ export class PracticeModeService {
 		const totalCards = this.cards.length;
 		const completedCards = this.state.completedCards.length;
 		const skippedCards = totalCards - completedCards;
-		
+
 		const difficultCards = Array.from(this.cardStatistics.values())
 			.sort((a, b) => b.mistakes - a.mistakes)
 			.slice(0, 5);
-		
+
 		return {
 			totalCards,
 			completedCards,
@@ -333,25 +333,62 @@ export class PracticeModeService {
 	private getFallbackCards(): KarutaCard[] {
 		// 44枚のフォールバックデータ
 		const ids = [
-			'a', 'i', 'u', 'e', 'o',
-			'ka', 'ki', 'ku', 'ke', 'ko',
-			'sa', 'shi', 'su', 'se', 'so',
-			'ta', 'chi', 'tsu', 'te', 'to',
-			'na', 'ni', 'nu', 'ne', 'no',
-			'ha', 'hi', 'fu', 'he', 'ho',
-			'ma', 'mi', 'mu', 'me', 'mo',
-			'ya', 'yu', 'yo',
-			'ra', 'ri', 'ru', 're', 'ro',
+			'a',
+			'i',
+			'u',
+			'e',
+			'o',
+			'ka',
+			'ki',
+			'ku',
+			'ke',
+			'ko',
+			'sa',
+			'shi',
+			'su',
+			'se',
+			'so',
+			'ta',
+			'chi',
+			'tsu',
+			'te',
+			'to',
+			'na',
+			'ni',
+			'nu',
+			'ne',
+			'no',
+			'ha',
+			'hi',
+			'fu',
+			'he',
+			'ho',
+			'ma',
+			'mi',
+			'mu',
+			'me',
+			'mo',
+			'ya',
+			'yu',
+			'yo',
+			'ra',
+			'ri',
+			'ru',
+			're',
+			'ro',
 			'wa'
 		];
-		
-		return ids.map(id => ({
-			id,
-			hiragana: `${id} の かるた`,
-			romaji: `${id} no karuta`,
-			meaning: `Card ${id}`,
-			category: 'fallback',
-			difficulty: 'medium'
-		} as KarutaCard));
+
+		return ids.map(
+			(id) =>
+				({
+					id,
+					hiragana: `${id} の かるた`,
+					romaji: `${id} no karuta`,
+					meaning: `Card ${id}`,
+					category: 'fallback',
+					difficulty: 'medium'
+				}) as KarutaCard
+		);
 	}
 }

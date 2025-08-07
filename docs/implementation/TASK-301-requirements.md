@@ -1,43 +1,47 @@
 # TASK-301: 練習モード - 要件定義書
 
 ## 概要
+
 上毛カルタタイピングゲームの練習モード機能を実装する。全44枚の札を順番に出題し、時間制限なしでユーザーがタイピング練習できるモードを提供する。
 
 ## 機能要件
 
 ### 1. 練習モードの基本仕様
+
 - **出題順序**: 44枚の札を「あ」から「わ」まで順番に出題
 - **時間制限**: なし（ユーザーのペースで練習可能）
 - **完了条件**: 全44枚の入力完了
 - **スコア計算**: 正確率とWPMを記録（ランキングへの反映なし）
 
 ### 2. ゲーム進行管理
+
 - **開始画面**: モード説明と開始ボタンを表示
 - **進捗表示**: 現在の札番号/全44枚を常時表示
-- **札切り替え**: 
+- **札切り替え**:
   - 自動進行: 正解入力後、次の札へ自動遷移
   - 手動スキップ: スキップボタンで次の札へ移動可能
 - **完了画面**: 全札完了時に結果サマリーを表示
 
 ### 3. 途中再開機能
-- **セッション保存**: 
+
+- **セッション保存**:
   - 自動保存: 5秒ごとに進捗を自動保存
   - 手動保存: 一時停止時に即座に保存
 - **保存データ**:
   ```typescript
   interface PracticeModeSession {
-    mode: 'practice';
-    currentCardIndex: number; // 0-43
-    completedCards: string[]; // 完了した札のID配列
-    startTime: string; // ISO8601
-    totalElapsedTime: number; // ミリ秒
-    statistics: {
-      totalKeystrokes: number;
-      correctKeystrokes: number;
-      mistakes: number;
-      wpm: number;
-      accuracy: number;
-    };
+  	mode: 'practice';
+  	currentCardIndex: number; // 0-43
+  	completedCards: string[]; // 完了した札のID配列
+  	startTime: string; // ISO8601
+  	totalElapsedTime: number; // ミリ秒
+  	statistics: {
+  		totalKeystrokes: number;
+  		correctKeystrokes: number;
+  		mistakes: number;
+  		wpm: number;
+  		accuracy: number;
+  	};
   }
   ```
 - **再開処理**:
@@ -46,6 +50,7 @@
   - 経過時間の累積
 
 ### 4. 統計情報の記録
+
 - **リアルタイム統計**:
   - WPM (Words Per Minute)
   - 正確率 (%)
@@ -62,6 +67,7 @@
   - 総練習時間
 
 ### 5. UI/UX要件
+
 - **画面レイアウト**:
   ```
   ┌──────────────────────────────────┐
@@ -87,6 +93,7 @@
   - →キーでのスキップ
 
 ### 6. エラーハンドリング
+
 - **データ読み込みエラー**: フォールバックデータを使用
 - **保存エラー**: 警告表示後、ゲーム続行可能
 - **セッション復元エラー**: 新規セッションとして開始
@@ -94,10 +101,12 @@
 ## 技術仕様
 
 ### 1. ルーティング
+
 - **パス**: `/game?mode=practice`
 - **再開パス**: `/game?mode=practice&resume=true`
 
 ### 2. データフロー
+
 ```
 MainMenu → PracticeMode → GameSession → Statistics
     ↑                          ↓
@@ -105,6 +114,7 @@ MainMenu → PracticeMode → GameSession → Statistics
 ```
 
 ### 3. 依存関係
+
 - **必須サービス**:
   - `LocalStorageService`: セッション管理
   - `InputValidator`: 入力検証
@@ -114,6 +124,7 @@ MainMenu → PracticeMode → GameSession → Statistics
   - `statisticsStore`: 統計情報管理
 
 ### 4. パフォーマンス要件
+
 - **初期読み込み**: 500ms以内
 - **札切り替え**: 100ms以内
 - **自動保存**: 非同期実行でUIをブロックしない
@@ -139,6 +150,7 @@ MainMenu → PracticeMode → GameSession → Statistics
 ## 受け入れ基準
 
 ### 必須要件
+
 - [ ] 44枚の札が正しい順序で出題される
 - [ ] 各札で正しい入力が受け付けられる
 - [ ] 進捗が自動保存される
@@ -146,6 +158,7 @@ MainMenu → PracticeMode → GameSession → Statistics
 - [ ] 全札完了時に結果が表示される
 
 ### 推奨要件
+
 - [ ] スキップ機能が動作する
 - [ ] 一時停止機能が動作する
 - [ ] 統計情報がリアルタイムで更新される
@@ -155,16 +168,19 @@ MainMenu → PracticeMode → GameSession → Statistics
 ## テスト要件
 
 ### 単体テスト
+
 - 出題順序の正確性
 - セッション保存/復元ロジック
 - 統計計算の正確性
 
 ### 統合テスト
+
 - 完全なゲームフロー（開始→プレイ→完了）
 - 中断と再開のシナリオ
 - エラー時のフォールバック
 
 ### E2Eテスト
+
 - ユーザー操作シナリオ
 - ブラウザ互換性
 - パフォーマンス測定

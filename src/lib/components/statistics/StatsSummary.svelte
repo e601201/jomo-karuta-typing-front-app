@@ -54,14 +54,10 @@
 
 	// Get comparison for WPM
 	let wpmComparison = $derived(
-		previousStats
-			? getComparison(stats.averageWPM, previousStats.averageWPM)
-			: null
+		previousStats ? getComparison(stats.averageWPM, previousStats.averageWPM) : null
 	);
 	let accuracyComparison = $derived(
-		previousStats
-			? getComparison(stats.averageAccuracy, previousStats.averageAccuracy)
-			: null
+		previousStats ? getComparison(stats.averageAccuracy, previousStats.averageAccuracy) : null
 	);
 </script>
 

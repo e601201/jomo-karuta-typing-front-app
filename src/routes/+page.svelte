@@ -90,6 +90,12 @@
 	}
 
 	function navigateToGame(mode: GameMode, continueGame = false) {
+		// 特定札練習モードは専用ページへ
+		if (mode === 'specific') {
+			goto('/practice/specific');
+			return;
+		}
+
 		const params = new URLSearchParams({ mode });
 		if (continueGame) params.append('continue', 'true');
 		goto(`/game?${params.toString()}`);

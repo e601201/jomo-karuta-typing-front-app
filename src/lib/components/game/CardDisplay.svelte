@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { KarutaCard } from '$lib/types';
-	
+
 	interface Props {
 		card: KarutaCard | null;
 		showFurigana?: boolean;

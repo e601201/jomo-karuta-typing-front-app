@@ -29,13 +29,23 @@
 	function parseTextUnits(inputText: string): string[] {
 		const units: string[] = [];
 		let i = 0;
-		
+
 		while (i < inputText.length) {
 			const current = inputText[i];
 			const next = inputText[i + 1];
-			
+
 			// Check for small ya, yu, yo (拗音)
-			if (next && (next === 'ゃ' || next === 'ゅ' || next === 'ょ' || next === 'ぁ' || next === 'ぃ' || next === 'ぅ' || next === 'ぇ' || next === 'ぉ')) {
+			if (
+				next &&
+				(next === 'ゃ' ||
+					next === 'ゅ' ||
+					next === 'ょ' ||
+					next === 'ぁ' ||
+					next === 'ぃ' ||
+					next === 'ぅ' ||
+					next === 'ぇ' ||
+					next === 'ぉ')
+			) {
 				units.push(current + next);
 				i += 2;
 			}
@@ -48,16 +58,15 @@
 					units.push(current);
 					i++;
 				}
-			}
-			else {
+			} else {
 				units.push(current);
 				i++;
 			}
 		}
-		
+
 		return units;
 	}
-	
+
 	// Split text into characters
 	const characters = $derived(parseTextUnits(text));
 	const romajiCharacters = $derived(romaji.split(''));
