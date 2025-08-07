@@ -201,8 +201,8 @@
 	},
 	{
 		"id": "wi",
-		"hiragana": "ゐんちゅう ねごろに やまだかおる",
-		"romaji": "wi nchuu negoro ni yamada kaoru",
+		"hiragana": "いんちゅう ねごろに やまだかおる",
+		"romaji": "in nchuu negoro ni yamada kaoru",
 		"meaning": "井伊直政佐波に統べて",
 		"category": "history",
 		"difficulty": "hard"
@@ -344,9 +344,9 @@
 		"difficulty": "hard"
 	},
 	{
-		"id": "we",
-		"hiragana": "ゑひもせす いろはかるた",
-		"romaji": "we hi mo sesu iroha karuta",
+		"id": "e2",
+		"hiragana": "えひもせす いろはかるた",
+		"romaji": "e hi mo sesu iroha karuta",
 		"meaning": "えひもせすいろはかるた",
 		"category": "culture",
 		"difficulty": "easy"

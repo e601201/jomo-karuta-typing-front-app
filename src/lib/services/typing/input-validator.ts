@@ -77,6 +77,7 @@ const ROMAJI_MAP: Record<string, string[]> = {
 	// わ行
 	わ: ['wa'],
 	を: ['wo', 'o'],
+	// Note: 'ん' at the end of text requires 'nn', but in the middle can be 'n' or 'nn'
 	ん: ['n', 'nn'],
 
 	// が行
@@ -302,6 +303,45 @@ export class InputValidator {
 	 * 入力文字列全体を検証
 	 */
 	validateInput(hiragana: string, input: string, position: number = 0): ValidationResult {
+		// Special handling for text ending with 'ん'
+		if (hiragana.endsWith('ん')) {
+			// Check if we're at the 'ん' part
+			const beforeN = hiragana.slice(0, -1);
+			const beforeNPatterns = this.getRomajiPatterns(beforeN);
+			
+			// Find if input matches everything before 'ん'
+			let matchedBeforeN = false;
+			let remainingInput = '';
+			
+			for (const pattern of beforeNPatterns) {
+				if (input.startsWith(pattern)) {
+					matchedBeforeN = true;
+					remainingInput = input.slice(pattern.length);
+					break;
+				}
+			}
+			
+			if (matchedBeforeN && remainingInput) {
+				// We're typing the final 'ん'
+				if (remainingInput === 'n') {
+					// Just 'n' for final 'ん' - valid but not complete
+					return {
+						isValid: true,
+						progress: 0.95, // Almost complete but need one more 'n'
+						isComplete: false
+					};
+				} else if (remainingInput === 'nn') {
+					// 'nn' for final 'ん' - complete
+					return {
+						isValid: true,
+						progress: 1.0,
+						isComplete: true
+					};
+				}
+			}
+		}
+		
+		// Normal validation
 		const patterns = this.getRomajiPatterns(hiragana);
 
 		// 完全一致チェック

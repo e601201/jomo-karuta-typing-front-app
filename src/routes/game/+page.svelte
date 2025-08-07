@@ -178,6 +178,14 @@
 					firstCard: state.cards?.[0]
 				});
 				
+				// Check if game is complete (all cards have been processed)
+				if (state.currentIndex >= state.cards.length && state.cards.length > 0) {
+					console.log('Practice mode complete! currentIndex:', state.currentIndex, 'total:', state.cards.length);
+					isGameComplete = true;
+					practiceModeStore.complete();
+					return;
+				}
+				
 				// Update state values
 				const newCard = state.cards?.[state.currentIndex] || null;
 				console.log('Setting currentCard to:', newCard);
@@ -217,14 +225,9 @@
 			});
 		} else {
 			// Use regular game store for other modes
-			await gameStore.startSession({
-				mode: gameMode!,
-				cards,
-				continue: shouldContinue
-			});
+			gameStore.startSession(gameMode!, cards);
 			
-			// Load first card
-			await gameStore.nextCard();
+			// First card is already loaded by startSession
 		}
 	}
 
@@ -289,6 +292,8 @@
 		const newInput = currentInput + char;
 		const targetText = currentCard.hiragana.replace(/\s/g, '');
 		
+		console.log(`Input: "${newInput}", Target: "${targetText}"`);
+		
 		// Validate the entire input string
 		const result = validator.validateInput(targetText, newInput);
 
@@ -308,41 +313,68 @@
 				let matched = false;
 				let partial = false;
 				
-				// Check for complete match
-				for (const pattern of patterns) {
-					if (tempInput.startsWith(pattern)) {
-						// This hiragana is complete
+				// Special handling for 'ん'
+				if (unit === 'ん') {
+					const isLastChar = i === hiraganaUnits.length - 1;
+					
+					if (tempInput === 'n') {
+						// Just 'n' - always keep as partial
+						partial = true;
+						partiallyCompleteIndex = i;
+					} else if (tempInput.startsWith('nn')) {
+						// 'nn' always completes 'ん'
 						completedCount++;
-						tempInput = tempInput.slice(pattern.length);
+						tempInput = tempInput.slice(2);
 						matched = true;
-						break;
+					} else if (tempInput.startsWith('n') && tempInput.length > 1) {
+						const charAfterN = tempInput[1];
+						
+						if (isLastChar) {
+							// Last character is 'ん' - must use 'nn', so this is invalid
+							// Keep as partial, waiting for second 'n'
+							partial = true;
+							partiallyCompleteIndex = i;
+						} else {
+							// Not last character - check if 'n' can be accepted
+							const nextUnit = hiraganaUnits[i + 1];
+							const nextPatterns = validator.getRomajiPatterns(nextUnit);
+							
+							// Check if next hiragana can start with n + charAfterN
+							const canStartWithN = nextPatterns.some(p => p.startsWith('n' + charAfterN));
+							
+							if (!canStartWithN && charAfterN !== 'n') {
+								// This 'n' must be 'ん', complete it
+								completedCount++;
+								tempInput = tempInput.slice(1);
+								matched = true;
+							} else {
+								// Ambiguous or waiting for 'nn'
+								partial = true;
+								partiallyCompleteIndex = i;
+							}
+						}
+					}
+				} else {
+					// Normal character matching
+					for (const pattern of patterns) {
+						if (tempInput.startsWith(pattern)) {
+							// This hiragana is complete
+							completedCount++;
+							tempInput = tempInput.slice(pattern.length);
+							matched = true;
+							break;
+						}
 					}
 				}
 				
 				// Check for partial match if not completely matched
-				if (!matched && tempInput.length > 0) {
+				if (!matched && !partial && tempInput.length > 0) {
 					for (const pattern of patterns) {
 						if (pattern.startsWith(tempInput)) {
 							// We're in the middle of typing this character
 							partial = true;
 							partiallyCompleteIndex = i;
 							break;
-						}
-					}
-					
-					// Special handling for 'n' which might be 'ん' or part of 'な', 'に', etc.
-					if (tempInput === 'n' && i < hiraganaUnits.length - 1) {
-						const nextUnit = hiraganaUnits[i + 1];
-						const nextPatterns = validator.getRomajiPatterns(nextUnit);
-						
-						// Check if 'n' could be the start of the next character
-						const couldBeNext = nextPatterns.some(p => p.startsWith('n'));
-						
-						// If next char can't start with 'n', current 'n' must be 'ん'
-						if (!couldBeNext && unit === 'ん') {
-							// Consider it as partially complete 'ん'
-							partial = true;
-							partiallyCompleteIndex = i;
 						}
 					}
 					
@@ -361,7 +393,7 @@
 				if (i < completedCount) {
 					inputStates[i] = 'correct';
 				} else if (i === partiallyCompleteIndex) {
-					inputStates[i] = 'current'; // Show as currently being typed
+					inputStates[i] = 'pending'; // Show as currently being typed
 				} else {
 					inputStates[i] = 'pending';
 				}
@@ -437,16 +469,57 @@
 				let matched = false;
 				let partial = false;
 				
-				for (const pattern of patterns) {
-					if (tempInput.startsWith(pattern)) {
+				// Special handling for 'ん'
+				if (unit === 'ん') {
+					const isLastChar = i === hiraganaUnits.length - 1;
+					
+					if (tempInput === 'n') {
+						// Just 'n' - keep as partial
+						partial = true;
+						partiallyCompleteIndex = i;
+					} else if (tempInput.startsWith('nn')) {
+						// 'nn' completes 'ん'
 						completedCount++;
-						tempInput = tempInput.slice(pattern.length);
+						tempInput = tempInput.slice(2);
 						matched = true;
-						break;
+					} else if (tempInput.startsWith('n') && tempInput.length > 1) {
+						const charAfterN = tempInput[1];
+						
+						if (isLastChar) {
+							// Last character must be 'nn'
+							partial = true;
+							partiallyCompleteIndex = i;
+						} else {
+							// Check if next hiragana could start with this
+							const nextUnit = hiraganaUnits[i + 1];
+							const nextPatterns = validator?.getRomajiPatterns(nextUnit) || [];
+							const canStartWithN = nextPatterns.some(p => p.startsWith('n' + charAfterN));
+							
+							if (!canStartWithN && charAfterN !== 'n') {
+								// This 'n' is 'ん'
+								completedCount++;
+								tempInput = tempInput.slice(1);
+								matched = true;
+							} else {
+								// Ambiguous
+								partial = true;
+								partiallyCompleteIndex = i;
+							}
+						}
+					}
+				} else {
+					// Normal matching
+					for (const pattern of patterns) {
+						if (tempInput.startsWith(pattern)) {
+							completedCount++;
+							tempInput = tempInput.slice(pattern.length);
+							matched = true;
+							break;
+						}
 					}
 				}
 				
-				if (!matched && tempInput.length > 0) {
+				if (!matched && !partial && tempInput.length > 0) {
 					for (const pattern of patterns) {
 						if (pattern.startsWith(tempInput)) {
 							partial = true;

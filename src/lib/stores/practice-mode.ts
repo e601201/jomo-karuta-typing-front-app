@@ -143,12 +143,8 @@ function createPracticeModeStore() {
 					}
 				}
 				
-				// Prevent going beyond the last card
-				if (nextIndex >= state.cards.length) {
-					console.log('Reached end of cards - staying at last card');
-					return state; // Don't update if we're at the end
-				}
-				
+				// Allow index to go beyond array length to signal completion
+				// The game completion will be handled by the component
 				return {
 					...state,
 					currentIndex: nextIndex
