@@ -28,7 +28,8 @@ const defaultSettings: UserSettings = {
 		animations: true,
 		animationSpeed: 'normal',
 		showFurigana: true,
-		showMeaning: true
+		showMeaning: true,
+		showCardImages: true
 	},
 	sound: {
 		effectsEnabled: true,

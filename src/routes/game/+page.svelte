@@ -831,7 +831,7 @@
 				<div class="mb-2 text-xs text-gray-500">
 					デバッグ: カードID = {currentCard.id}, ひらがな = {currentCard.hiragana}
 				</div>
-				<CardDisplay card={currentCard} showFurigana={true} />
+				<CardDisplay card={currentCard} showFurigana={true} shake={showError} />
 			{:else}
 				<div class="mb-6 rounded-lg bg-yellow-100 p-8 text-center">
 					<p class="text-gray-800">カードを読み込み中...</p>
@@ -865,13 +865,6 @@
 					style="width: {inputProgress}%"
 				></div>
 			</div>
-
-			<!-- Error Indicator -->
-			{#if showError}
-				<div data-testid="error-indicator" class="mb-4 text-center">
-					<span class="font-bold text-red-600">✗ ミス！</span>
-				</div>
-			{/if}
 
 			<!-- Score Display -->
 			<div class="mb-6 rounded-lg bg-white p-4 shadow-md">

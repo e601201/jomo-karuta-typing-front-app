@@ -14,6 +14,11 @@ export interface KarutaCard {
 	difficulty: DifficultyLevel; // 難易度
 	imageUrl?: string; // 絵札画像URL (オプション)
 	audioUrl?: string; // 音声URL (オプション)
+	images?: {
+		torifuda: string; // 取り札画像パス
+		yomifuda: string; // 読み札画像パス
+		kaisetsu: string; // 解説画像パス
+	};
 }
 
 /**
@@ -260,6 +265,7 @@ export interface DisplaySettings {
 	animationSpeed: 'slow' | 'normal' | 'fast';
 	showFurigana: boolean;
 	showMeaning: boolean;
+	showCardImages?: boolean;
 }
 
 /**
