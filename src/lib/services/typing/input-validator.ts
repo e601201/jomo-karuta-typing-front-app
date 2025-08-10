@@ -148,7 +148,10 @@ const ROMAJI_MAP: Record<string, string[]> = {
 
 	// スペース
 	' ': [' '],
-	'　': [' ']
+	'　': [' '],
+	
+	// 長音記号
+	'ー': ['-']
 };
 
 /**
@@ -187,8 +190,8 @@ export class InputValidator {
 			return [''];
 		}
 
-		// 非ひらがな文字はそのまま返す
-		if (!/[\u3040-\u309F\s　]/.test(hiragana)) {
+		// 非ひらがな文字はそのまま返す（長音記号も含む）
+		if (!/[\u3040-\u309F\u30FC\s　]/.test(hiragana)) {
 			return [hiragana];
 		}
 
@@ -241,6 +244,10 @@ export class InputValidator {
 				} else {
 					romajiArrays.push(ROMAJI_MAP[char] || [char]);
 				}
+			}
+			// 長音記号の処理
+			else if (char === 'ー') {
+				romajiArrays.push(ROMAJI_MAP[char] || ['-']);
 			}
 			// 通常の文字
 			else {

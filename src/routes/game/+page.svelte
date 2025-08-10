@@ -301,7 +301,7 @@
 		// Handle input
 		if (event.key === 'Backspace') {
 			handleBackspace();
-		} else if (event.key.length === 1 && /^[a-zA-Z]$/.test(event.key)) {
+		} else if (event.key.length === 1 && (/^[a-zA-Z]$/.test(event.key) || event.key === '-')) {
 			handleCharacterInput(event.key.toLowerCase());
 		} else if (event.key === 'Escape') {
 			handlePause();
