@@ -49,6 +49,9 @@
 	let elapsedTime = $state(0);
 	let pauseCount = $state(0);
 	let totalPauseTime = $state(0);
+	
+	// Track previous card index to detect card changes
+	let previousCardIndex = -1;
 
 	// Input validation
 	let validator: InputValidator | null = null;
@@ -242,12 +245,17 @@
 				const newCard = state.cards?.[state.currentIndex] || null;
 				console.log('Setting currentCard to:', newCard);
 
+				// Check if card index changed (even if it's the same card content)
+				const cardIndexChanged = state.currentIndex !== previousCardIndex;
+				
 				// Update all state values - directly assign without any async operations
 				if (newCard) {
 					currentCard = newCard;
 					console.log('currentCard set to:', currentCard);
 				}
 				cardIndex = state.currentIndex;
+				previousCardIndex = state.currentIndex;
+				
 				// Only update totalCards if we have cards
 				if (state.cards && state.cards.length > 0) {
 					totalCards = state.cards.length;
@@ -264,16 +272,24 @@
 					maxCombo: state.statistics.maxCombo
 				};
 
-				// Update validator if card changed
-				if (
-					currentCard &&
-					(!validator || validator.getTarget() !== currentCard.hiragana.replace(/\s/g, ''))
-				) {
+				// Update validator if card changed (check both content and index)
+				if (currentCard && cardIndexChanged) {
 					const targetText = currentCard.hiragana.replace(/\s/g, '');
-					validator = new InputValidator();
-					validator.setTarget(targetText);
+					
+					// Reset validator if text changed
+					if (!validator || validator.getTarget() !== targetText) {
+						validator = new InputValidator();
+						validator.setTarget(targetText);
+					}
+					
+					// Always reset these when card index changes
 					updateRomajiGuide();
 					initializeInputStates();
+					
+					// Reset input tracking variables
+					currentInput = '';
+					completedHiraganaCount = 0;
+					inputProgress = 0;
 				}
 
 				// Set loading to false only after updating all values
@@ -468,6 +484,17 @@
 			}
 
 			completedHiraganaCount = completedCount;
+			
+			// Update dynamic romaji guide based on input
+			updateDynamicRomajiGuide();
+			
+			// Update romaji states to show completed characters
+			for (let i = 0; i < newInput.length; i++) {
+				romajiStates[i] = 'correct';
+			}
+			for (let i = newInput.length; i < romajiGuide.length; i++) {
+				romajiStates[i] = 'pending';
+			}
 
 			// Update store based on mode
 			if (gameMode === 'practice') {
@@ -500,6 +527,18 @@
 					inputStates[i] = 'pending';
 				}
 			}
+			
+			// Update romaji states to show error at current position
+			for (let i = 0; i < currentInput.length; i++) {
+				romajiStates[i] = 'correct';
+			}
+			// Mark the position where error occurred as incorrect
+			if (currentInput.length < romajiGuide.length) {
+				romajiStates[currentInput.length] = 'incorrect';
+			}
+			for (let i = currentInput.length + 1; i < romajiGuide.length; i++) {
+				romajiStates[i] = 'pending';
+			}
 
 			mistakes++;
 
@@ -515,6 +554,10 @@
 				showError = false;
 				if (errorIndex < inputStates.length) {
 					inputStates[errorIndex] = 'pending';
+				}
+				// Reset romaji error state
+				if (currentInput.length < romajiGuide.length) {
+					romajiStates[currentInput.length] = 'pending';
 				}
 			}, 500);
 		}
@@ -614,6 +657,17 @@
 					inputStates[i] = 'pending';
 				}
 			}
+			
+			// Update dynamic romaji guide after backspace
+			updateDynamicRomajiGuide();
+			
+			// Update romaji states after backspace
+			for (let i = 0; i < currentInput.length; i++) {
+				romajiStates[i] = 'correct';
+			}
+			for (let i = currentInput.length; i < romajiGuide.length; i++) {
+				romajiStates[i] = 'pending';
+			}
 
 			if (gameMode === 'practice') {
 				// No need to update practice mode store for backspace
@@ -632,6 +686,14 @@
 		currentInput = '';
 		inputProgress = 0;
 		completedHiraganaCount = 0;
+
+		// Reset input states arrays to clear green highlighting
+		if (currentCard) {
+			const targetText = currentCard.hiragana.replace(/\s/g, '');
+			const hiraganaUnits = parseHiraganaUnits(targetText);
+			inputStates = new Array(hiraganaUnits.length).fill('pending');
+			romajiStates = new Array(romajiGuide.length).fill('pending');
+		}
 
 		if (gameMode === 'practice') {
 			// Move to next card in practice mode
@@ -656,6 +718,199 @@
 		const patterns = validator.getRomajiPatterns(targetText);
 		romajiGuide = patterns[0] || '';
 	}
+	
+	// Dynamically update romaji guide based on user input
+	function updateDynamicRomajiGuide() {
+		if (!validator || !currentCard) {
+			updateRomajiGuide();
+			return;
+		}
+		
+		if (!currentInput) {
+			updateRomajiGuide();
+			return;
+		}
+		
+		const targetText = currentCard.hiragana.replace(/\s/g, '');
+		const hiraganaUnits = parseHiraganaUnits(targetText);
+		let newRomajiGuide = '';
+		let tempInput = currentInput;
+		
+		for (let i = 0; i < hiraganaUnits.length; i++) {
+			const unit = hiraganaUnits[i];
+			const patterns = validator.getRomajiPatterns(unit);
+			let usedPattern = '';
+			let consumed = 0;
+			
+			// Check if we have input for this character
+			if (tempInput.length > 0 && i <= completedHiraganaCount) {
+				// Special handling for 'ん'
+				if (unit === 'ん') {
+					const isLastChar = i === hiraganaUnits.length - 1;
+					
+					if (tempInput.startsWith('nn')) {
+						// User typed 'nn' - show 'nn' pattern
+						usedPattern = 'nn';
+						consumed = 2;
+					} else if (tempInput.startsWith('n')) {
+						// User typed single 'n'
+						const charAfterN = tempInput[1];
+						const nextUnit = hiraganaUnits[i + 1];
+						
+						if (charAfterN === 'n') {
+							// User typed 'nn' - show 'nn' pattern
+							usedPattern = 'nn';
+							consumed = 2;
+						} else if (!nextUnit || isLastChar) {
+							// Last character - always show 'nn' pattern
+							if (charAfterN === 'n') {
+								// User typed 'nn'
+								usedPattern = 'nn';
+								consumed = 2;
+							} else if (!charAfterN && i === completedHiraganaCount) {
+								// Currently typing, show 'nn' as expected
+								usedPattern = 'nn';
+								consumed = 0;
+							} else {
+								// Show 'nn' pattern
+								usedPattern = 'nn';
+								consumed = 1;
+							}
+						} else {
+							// Determine the required pattern based on the next unit
+							let requiredPattern = 'n';
+							
+							// Special cases that require 'nn'
+							if (nextUnit === 'にゃ' || nextUnit === 'にゅ' || nextUnit === 'にょ') {
+								requiredPattern = 'nn';
+							} else if (nextUnit === 'な' || nextUnit === 'に' || nextUnit === 'ぬ' || nextUnit === 'ね' || nextUnit === 'の') {
+								requiredPattern = 'nn';
+							} else if (/^[あいうえおやゆよ]/.test(nextUnit)) {
+								requiredPattern = 'nn';
+							}
+							
+							if (requiredPattern === 'nn') {
+								if (charAfterN === 'n') {
+									// User typed 'nn'
+									usedPattern = 'nn';
+									consumed = 2;
+								} else if (!charAfterN && i === completedHiraganaCount) {
+									// Currently typing, show expected pattern
+									usedPattern = 'nn';
+									consumed = 0;
+								} else {
+									// Show 'nn' pattern
+									usedPattern = 'nn';
+									consumed = 1;
+								}
+							} else {
+								// Single 'n' is valid
+								if (charAfterN && validator.getRomajiPatterns(nextUnit).some(p => p.startsWith(charAfterN))) {
+									// The character after 'n' matches the start of next unit's pattern
+									usedPattern = 'n';
+									consumed = 1;
+								} else if (!charAfterN && i === completedHiraganaCount) {
+									// Currently typing this 'ん' with just 'n'
+									usedPattern = 'n';
+									consumed = 0;
+								} else {
+									usedPattern = 'n';
+									consumed = 1;
+								}
+							}
+						}
+					} else {
+						// No 'n' input yet, choose default based on context
+						const nextUnit = hiraganaUnits[i + 1];
+						if (nextUnit) {
+							// Special case: にゃ, にゅ, にょ are independent sounds - use single 'n'
+							if (nextUnit === 'にゃ' || nextUnit === 'にゅ' || nextUnit === 'にょ') {
+								usedPattern = 'n';
+							} else {
+								const nextPatterns = validator.getRomajiPatterns(nextUnit);
+								const initials = new Set<string>();
+								nextPatterns.forEach((p) => { if (p && p.length > 0) initials.add(p[0]); });
+								const requiresDoubleN = Array.from(initials).some((c) => /[aiueoyn]/.test(c));
+								usedPattern = requiresDoubleN ? 'nn' : 'n';
+							}
+						} else {
+							usedPattern = patterns[0] || 'n';
+						}
+					}
+				} 
+				// Special handling for other characters with alternative inputs
+				else if (unit === 'し' && (tempInput.startsWith('si') || tempInput === 's')) {
+					usedPattern = 'si';
+					consumed = tempInput.startsWith('si') ? 2 : tempInput.length;
+				} else if (unit === 'ち' && (tempInput.startsWith('ti') || tempInput === 't')) {
+					usedPattern = 'ti';
+					consumed = tempInput.startsWith('ti') ? 2 : tempInput.length;
+				} else if (unit === 'つ' && (tempInput.startsWith('tu') || tempInput === 't')) {
+					usedPattern = 'tu';
+					consumed = tempInput.startsWith('tu') ? 2 : tempInput.length;
+				} else if (unit === 'ふ' && (tempInput.startsWith('hu') || tempInput === 'h')) {
+					usedPattern = 'hu';
+					consumed = tempInput.startsWith('hu') ? 2 : tempInput.length;
+				} else {
+					// Check standard patterns
+					for (const pattern of patterns) {
+						if (tempInput.startsWith(pattern)) {
+							usedPattern = pattern;
+							consumed = pattern.length;
+							break;
+						} else if (pattern.startsWith(tempInput) && i === completedHiraganaCount) {
+							// Currently typing this pattern
+							usedPattern = pattern;
+							consumed = tempInput.length;
+							break;
+						}
+					}
+					
+					// If no match found, use default pattern
+					if (!usedPattern) {
+						usedPattern = patterns[0] || '';
+					}
+				}
+				
+				// Update temp input
+				if (consumed > 0) {
+					tempInput = tempInput.slice(consumed);
+				}
+			} else {
+				// No input for this character yet, choose default pattern
+				if (unit === 'ん') {
+					const nextUnit = hiraganaUnits[i + 1];
+					if (nextUnit) {
+						// Special case: にゃ, にゅ, にょ require 'nn' before them
+						if (nextUnit === 'にゃ' || nextUnit === 'にゅ' || nextUnit === 'にょ') {
+							usedPattern = 'nn';
+						}
+						// な行（な、に、ぬ、ね、の）の前は 'nn' が必須
+						else if (nextUnit === 'な' || nextUnit === 'に' || nextUnit === 'ぬ' || nextUnit === 'ね' || nextUnit === 'の') {
+							usedPattern = 'nn';
+						}
+						// 母音・や行の前も 'nn' が必須
+						else if (/^[あいうえおやゆよ]/.test(nextUnit)) {
+							usedPattern = 'nn';
+						}
+						// それ以外は 'n' を表示
+						else {
+							usedPattern = 'n';
+						}
+					} else {
+						// 末尾の「ん」も 'nn' を表示（一貫性のため）
+						usedPattern = 'nn';
+					}
+				} else {
+					usedPattern = patterns[0] || '';
+				}
+			}
+			
+			newRomajiGuide += usedPattern;
+		}
+		
+		romajiGuide = newRomajiGuide;
+	}
 
 	function updateInputProgress() {
 		if (!currentCard || !romajiGuide) return;
@@ -675,17 +930,25 @@
 	}
 
 	function handleSkip() {
-		if (cardIndex < totalCards - 1) {
-			gameStore.nextCard();
+		// Reset input state
+		inputPosition = 0;
+		currentInput = '';
+		inputProgress = 0;
+		completedHiraganaCount = 0;
+		
+		// Reset input states arrays to clear highlighting
+		if (currentCard) {
+			const targetText = currentCard.hiragana.replace(/\s/g, '');
+			const hiraganaUnits = parseHiraganaUnits(targetText);
+			inputStates = new Array(hiraganaUnits.length).fill('pending');
+			romajiStates = new Array(romajiGuide.length).fill('pending');
+		}
 
-			// Reset input state
-			validator = null;
-			inputStates = [];
-			romajiStates = [];
-			inputPosition = 0;
-			currentInput = '';
-			romajiGuide = '';
-			inputProgress = 0;
+		if (gameMode === 'practice') {
+			// Skip card in practice mode
+			practiceModeStore.nextCard(false);
+		} else if (cardIndex < totalCards - 1) {
+			gameStore.nextCard();
 		}
 	}
 
@@ -853,6 +1116,7 @@
 						romaji={romajiGuide}
 						{romajiStates}
 						animateErrors={true}
+						currentRomajiPosition={currentInput.length}
 					/>
 				</div>
 			{/if}

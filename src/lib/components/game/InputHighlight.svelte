@@ -11,6 +11,7 @@
 		animateErrors?: boolean;
 		colorblindMode?: boolean;
 		highContrast?: boolean;
+		currentRomajiPosition?: number;
 	}
 
 	let {
@@ -22,7 +23,8 @@
 		romajiStates = [],
 		animateErrors = false,
 		colorblindMode = false,
-		highContrast = false
+		highContrast = false,
+		currentRomajiPosition = 0
 	}: Props = $props();
 
 	// Parse hiragana text into proper units (considering multi-character units)
@@ -110,7 +112,7 @@
 
 	// Get text size class based on screen size
 	function getTextSizeClass(): string {
-		return 'text-2xl md:text-3xl lg:text-5xl';
+		return 'text-xl md:text-2xl lg:text-4xl';
 	}
 </script>
 
@@ -131,27 +133,6 @@
 				aria-label={getAriaLabel(char, inputStates[index])}
 			>
 				{char}
-
-				<!-- Colorblind mode icons -->
-				{#if colorblindMode}
-					{#if inputStates[index] === 'correct'}
-						<span class="icon-check absolute -top-2 left-1/2 -translate-x-1/2 transform text-xs"
-							>✓</span
-						>
-					{:else if inputStates[index] === 'incorrect'}
-						<span class="icon-cross absolute -top-2 left-1/2 -translate-x-1/2 transform text-xs"
-							>✗</span
-						>
-					{/if}
-				{/if}
-
-				<!-- Cursor -->
-				{#if index === currentPosition}
-					<span
-						data-testid="cursor-{index}"
-						class="absolute -bottom-1 left-0 h-0.5 w-full animate-pulse bg-blue-500"
-					></span>
-				{/if}
 			</span>
 		{/each}
 	{/if}
@@ -161,14 +142,35 @@
 {#if showRomaji && romaji}
 	<div
 		data-testid="romaji-container"
-		class="mt-2 flex items-center justify-center gap-0.5 font-mono text-lg md:text-xl lg:text-2xl"
+		class="mt-2 flex items-center justify-center gap-0.5 font-mono {getTextSizeClass()}"
 	>
 		{#each romajiCharacters as romajiChar, index}
 			<span
 				data-testid="romaji-char-{index}"
-				class="{getColorClass(romajiStates[index] || 'pending')} transition-colors duration-200"
+				class="relative inline-block {getColorClass(romajiStates[index] || 'pending')} transition-colors duration-200"
 			>
 				{romajiChar}
+				
+				<!-- Colorblind mode icons for romaji -->
+				{#if colorblindMode}
+					{#if romajiStates[index] === 'correct'}
+						<span class="icon-check absolute -top-2 left-1/2 -translate-x-1/2 transform text-xs"
+							>✓</span
+						>
+					{:else if romajiStates[index] === 'incorrect'}
+						<span class="icon-cross absolute -top-2 left-1/2 -translate-x-1/2 transform text-xs"
+							>✗</span
+						>
+					{/if}
+				{/if}
+				
+				<!-- Cursor for romaji at current input position -->
+				{#if index === currentRomajiPosition}
+					<span
+						data-testid="romaji-cursor-{index}"
+						class="absolute -bottom-1 left-0 h-0.5 w-full animate-pulse bg-blue-500"
+					></span>
+				{/if}
 			</span>
 		{/each}
 	</div>

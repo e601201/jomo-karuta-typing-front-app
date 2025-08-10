@@ -230,6 +230,15 @@ describe('InputValidator', () => {
 				expect(patterns).toContain('tsuru mau');
 				expect(patterns).toContain('turu mau');
 			});
+
+			it('撥音(ん)の文脈ルール: 次が母音/や行/な行のときはnnのみ許容する', () => {
+				const patterns = validator.getRomajiPatterns('おんせんに');
+				// 先頭の「ん」は次が「せ(se)」なので n/nn の両方許容、
+				// 後半の「ん」は次が「に(ni)」なので nn のみ許容
+				expect(patterns).toEqual(['onsennni', 'onnsennni']);
+				expect(patterns).not.toContain('onsenni');
+				expect(patterns).not.toContain('onnsenni');
+			});
 		});
 	});
 

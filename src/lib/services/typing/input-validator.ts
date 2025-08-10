@@ -173,6 +173,8 @@ export class InputValidator {
 	setTarget(text: string): void {
 		this.targetText = text;
 		this.reset();
+		// 入力対象のパターンを初期化
+		this.validPatterns = this.getRomajiPatterns(text);
 	}
 
 	/**
@@ -243,6 +245,48 @@ export class InputValidator {
 					romajiArrays.push(['u', 'o']);
 				} else {
 					romajiArrays.push(ROMAJI_MAP[char] || [char]);
+				}
+			}
+			// 撥音(ん)の文脈処理
+			else if (char === 'ん') {
+				// 末尾の「ん」も nn を必須にする（一貫性のため）
+				if (i === chars.length - 1) {
+					romajiArrays.push(['nn']);
+					continue;
+				}
+
+				const nextChar = chars[i + 1];
+				// 次が促音の場合は子音開始とみなす（n も nn も許容）
+				if (nextChar === 'っ') {
+					romajiArrays.push(['n', 'nn']);
+					continue;
+				}
+
+				// にゃ/にゅ/にょ の直前は 'nn' が必要（nya と区別するため）
+				if (nextChar === 'にゃ' || nextChar === 'にゅ' || nextChar === 'にょ') {
+					romajiArrays.push(['nn']);
+					continue;
+				}
+
+				// な行（単独）直前は nn のみ
+				if (nextChar === 'な' || nextChar === 'に' || nextChar === 'ぬ' || nextChar === 'ね' || nextChar === 'の') {
+					romajiArrays.push(['nn']);
+					continue;
+				}
+
+				const nextPatterns = ROMAJI_MAP[nextChar] || [nextChar];
+				// 次のローマ字の先頭文字集合を抽出
+				const initials = new Set<string>();
+				nextPatterns.forEach((p) => {
+					if (p && p.length > 0) initials.add(p[0]);
+				});
+
+				// 次が母音/や行で始まる場合は nn のみ許容（曖昧さ排除）
+				const requiresDoubleN = Array.from(initials).some((c) => /[aiueoy]/.test(c));
+				if (requiresDoubleN) {
+					romajiArrays.push(['nn']);
+				} else {
+					romajiArrays.push(['n', 'nn']);
 				}
 			}
 			// 長音記号の処理
@@ -331,10 +375,10 @@ export class InputValidator {
 			if (matchedBeforeN && remainingInput) {
 				// We're typing the final 'ん'
 				if (remainingInput === 'n') {
-					// Just 'n' for final 'ん' - valid but not complete
+					// 末尾の'ん'は 'nn' が必須なので、'n' は未完了
 					return {
 						isValid: true,
-						progress: 0.95, // Almost complete but need one more 'n'
+						progress: 0.5,  // 'n' is half of 'nn'
 						isComplete: false
 					};
 				} else if (remainingInput === 'nn') {
