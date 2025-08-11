@@ -530,9 +530,9 @@ describe('練習モード - エラーハンドリング', () => {
 
 	it('破損したセッションデータで新規開始', () => {
 		vi.mocked(mockStorage.loadSession).mockReturnValue({
-			mode: 'invalid' as any,
-			currentCardIndex: 'not-a-number' as any
-		} as any);
+			mode: 'invalid' as unknown,
+			currentCardIndex: 'not-a-number' as unknown
+		} as SavedSession);
 
 		service.resumeFromSession();
 		const state = service.getState();

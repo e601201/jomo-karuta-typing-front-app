@@ -1,9 +1,13 @@
 <script lang="ts">
-	import { specificCardsStore } from '$lib/stores/specific-cards-store';
+	import {
+		specificCardsStore,
+		type Favorite,
+		type SpecificCardsState
+	} from '$lib/stores/specific-cards-store';
 	import { favoritesService } from '$lib/services/storage/favorites-service';
 	import { onMount } from 'svelte';
 
-	let favorites = $state<any[]>([]);
+	let favorites = $state<Favorite[]>([]);
 	let showNewDialog = $state(false);
 	let newFavoriteName = $state('');
 	let errorMessage = $state('');
@@ -47,7 +51,7 @@
 		const success = specificCardsStore.saveFavorite(newFavoriteName);
 		if (success) {
 			// Get the current state properly
-			let currentState: any;
+			let currentState: SpecificCardsState;
 			const unsubscribe = specificCardsStore.subscribe((s) => (currentState = s));
 			unsubscribe();
 
@@ -86,7 +90,7 @@
 
 	{#if favorites.length > 0}
 		<div class="favorites-list">
-			{#each favorites as favorite}
+			{#each favorites as favorite (favorite.id)}
 				<div class="favorite-item">
 					<button type="button" onclick={() => loadFavorite(favorite.id)} class="favorite-name">
 						{favorite.name}

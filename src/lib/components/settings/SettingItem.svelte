@@ -8,8 +8,8 @@
 		label: string;
 		description?: string;
 		type: 'toggle' | 'slider' | 'select' | 'radio';
-		value: any;
-		onChange: (value: any) => void;
+		value: boolean | number | string;
+		onChange: (value: boolean | number | string) => void;
 		options?: SelectOption[];
 		min?: number;
 		max?: number;
@@ -122,7 +122,7 @@
 				onchange={handleSelectChange}
 				class="select-input"
 			>
-				{#each options as option}
+				{#each options as option (option.value)}
 					<option value={option.value}>
 						{option.label}
 					</option>
@@ -130,7 +130,7 @@
 			</select>
 		{:else if type === 'radio'}
 			<div class="radio-group" role="radiogroup" aria-label={ariaLabel || label}>
-				{#each options as option, index}
+				{#each options as option (option.value)}
 					<label class="radio-label">
 						<input
 							type="radio"

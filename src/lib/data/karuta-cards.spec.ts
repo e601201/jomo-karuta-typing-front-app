@@ -115,8 +115,8 @@ describe('カルタデータ', () => {
 			const cards2 = getRandomCards(10);
 
 			// 完全一致する可能性は低い
-			const ids1 = cards1.map((c) => c.id).join(',');
-			const ids2 = cards2.map((c) => c.id).join(',');
+			cards1.map((c) => c.id).join(',');
+			cards2.map((c) => c.id).join(',');
 
 			// テストの安定性のため、異なることを期待するのではなく
 			// 両方とも10枚返ることを確認

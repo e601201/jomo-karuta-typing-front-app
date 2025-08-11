@@ -123,7 +123,7 @@
 	{#if characters.length === 0}
 		<!-- Empty state -->
 	{:else}
-		{#each characters as char, index}
+		{#each characters as char, index (index)}
 			<span
 				data-testid="char-{index}"
 				class="relative inline-block {getColorClass(inputStates[index])} {getAnimationClass(
@@ -144,7 +144,7 @@
 		data-testid="romaji-container"
 		class="mt-2 flex items-center justify-center gap-0.5 font-mono {getTextSizeClass()}"
 	>
-		{#each romajiCharacters as romajiChar, index}
+		{#each romajiCharacters as romajiChar, index (index)}
 			<span
 				data-testid="romaji-char-{index}"
 				class="relative inline-block {getColorClass(

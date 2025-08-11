@@ -6,7 +6,6 @@
 		totalCards: number;
 		elapsedTime: number;
 		pauseCount: number;
-		totalPauseTime: number;
 		score: number;
 		accuracy: number;
 	}

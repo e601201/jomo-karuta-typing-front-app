@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import StatsChart from './StatsChart.svelte';
 import type { ChartData } from '$lib/types/game';
@@ -61,7 +61,7 @@ describe('StatsChart Component', () => {
 		});
 
 		it('should show tooltip on hover', async () => {
-			const { component } = render(StatsChart, {
+			render(StatsChart, {
 				props: {
 					data: lineChartData,
 					type: 'line',

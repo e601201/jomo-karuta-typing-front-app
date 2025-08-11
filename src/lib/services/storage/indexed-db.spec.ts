@@ -2,20 +2,13 @@
  * IndexedDBサービスのテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // IndexedDBのモック設定（Node.js環境用）
 import 'fake-indexeddb/auto';
 
 import { IndexedDBService } from './indexed-db';
-import type {
-	GameHistory,
-	CardResult,
-	InputEvent,
-	DetailedStats,
-	CardHistory,
-	AttemptRecord
-} from './indexed-db';
+import type { GameHistory, DetailedStats, AttemptRecord } from './indexed-db';
 
 // テスト用モックデータ
 const mockGameHistory: GameHistory = {
@@ -57,22 +50,6 @@ const mockDailyStats: DetailedStats = {
 		averageSpeed: 115,
 		bestScore: 8500
 	}
-};
-
-const mockCardHistory: CardHistory = {
-	cardId: 'tsu',
-	attempts: [
-		{
-			date: new Date('2024-01-01T10:00:00'),
-			time: 120000,
-			accuracy: 95.5,
-			mistakes: 2,
-			wpm: 120
-		}
-	],
-	bestTime: 120000,
-	bestAccuracy: 95.5,
-	lastAttempt: new Date('2024-01-01T10:00:00')
 };
 
 const mockAttempt: AttemptRecord = {
@@ -575,7 +552,7 @@ describe('IndexedDBService - エラーハンドリング', () => {
 			// modeが欠けている
 			startTime: 'not-a-date', // 不正な日付
 			cards: 'not-an-array' // 不正な型
-		} as any;
+		} as unknown as GameHistory;
 
 		// エラーをキャッチして処理
 		await expect(service.saveGameHistory(invalidData)).rejects.toThrow();

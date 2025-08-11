@@ -67,7 +67,7 @@
 	</div>
 
 	<div class="cards-grid">
-		{#each cards as card}
+		{#each cards as card (card.id)}
 			<button
 				type="button"
 				onclick={() => toggleCard(card.id)}

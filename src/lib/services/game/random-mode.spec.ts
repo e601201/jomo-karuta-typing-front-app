@@ -65,10 +65,8 @@ describe('RandomModeService', () => {
 
 	describe('セッション管理', () => {
 		it('TC-006: セッション開始時のシャッフル', async () => {
-			const originalOrder = karutaCards.map((c) => c.id).join(',');
-
 			await service.startSession([...karutaCards]);
-			const firstCard = service.getNextCard();
+			service.getNextCard();
 
 			// セッションを複数回実行して、異なる順序になることを確認
 			const firstCards: string[] = [];
@@ -87,7 +85,7 @@ describe('RandomModeService', () => {
 			await service.startSession([...karutaCards]);
 
 			// 10枚まで進行
-			const firstTenCards: any[] = [];
+			const firstTenCards: KarutaCard[] = [];
 			for (let i = 0; i < 10; i++) {
 				const card = service.getNextCard();
 				if (card) firstTenCards.push(card);
@@ -101,7 +99,7 @@ describe('RandomModeService', () => {
 			newService.restoreSession(sessionState);
 
 			// 残り34枚を取得
-			const remainingCards: any[] = [];
+			const remainingCards: KarutaCard[] = [];
 			for (let i = 0; i < 34; i++) {
 				const card = newService.getNextCard();
 				if (card) remainingCards.push(card);

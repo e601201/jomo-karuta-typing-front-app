@@ -11,7 +11,7 @@ import type { GameMode } from '$lib/types';
 export interface GameConfig {
 	mode: GameMode;
 	continueGame: boolean;
-	cards?: any[];
+	cards?: KarutaCard[];
 }
 
 export interface InputResult {
@@ -28,7 +28,7 @@ export class GameManager {
 	private currentInput = '';
 	private inputPosition = 0;
 	private highlights: string[] = [];
-	private cards: any[] = [];
+	private cards: KarutaCard[] = [];
 
 	/**
 	 * ゲームを初期化
@@ -62,7 +62,7 @@ export class GameManager {
 	/**
 	 * カードが変更されたときの処理
 	 */
-	onCardChange(card: any): void {
+	onCardChange(card: KarutaCard): void {
 		if (!card) return;
 
 		// バリデーターを更新（スペースを除去）

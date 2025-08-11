@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/svelte';
 import PartialInputSettings from './PartialInputSettings.svelte';
 
 describe('PartialInputSettings Component', () => {

@@ -3,7 +3,6 @@
 
 	interface Props {
 		stats: OverallStats;
-		compareWith?: 'yesterday' | 'lastWeek' | 'lastMonth';
 		previousStats?: OverallStats;
 		levelProgress?: {
 			currentLevel: number;
@@ -14,7 +13,7 @@
 		animate?: boolean;
 	}
 
-	let { stats, compareWith, previousStats, levelProgress, animate = false }: Props = $props();
+	let { stats, previousStats, levelProgress, animate = false }: Props = $props();
 
 	// Format time duration
 	function formatDuration(ms: number): string {

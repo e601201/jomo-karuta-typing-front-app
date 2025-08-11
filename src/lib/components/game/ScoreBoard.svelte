@@ -5,7 +5,6 @@
 			accuracy: number;
 			speed: number;
 			combo: number;
-			maxCombo: number;
 		};
 	}
 

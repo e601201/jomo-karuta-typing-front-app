@@ -56,7 +56,7 @@ export class FavoritesService {
 	 */
 	async updateFavorite(favoriteId: string, updates: Partial<Favorite>): Promise<void> {
 		try {
-			const updateData: any = {
+			const updateData: Record<string, unknown> = {
 				updatedAt: new Date().toISOString()
 			};
 

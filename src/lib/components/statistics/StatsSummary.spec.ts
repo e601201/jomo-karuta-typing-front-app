@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import StatsSummary from './StatsSummary.svelte';
 import type { OverallStats } from '$lib/types/game';

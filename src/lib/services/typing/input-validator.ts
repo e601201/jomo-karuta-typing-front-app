@@ -359,7 +359,7 @@ export class InputValidator {
 	/**
 	 * 入力文字列全体を検証
 	 */
-	validateInput(hiragana: string, input: string, position: number = 0): ValidationResult {
+	validateInput(hiragana: string, input: string, _position: number = 0): ValidationResult {
 		// Special handling for text ending with 'ん'
 		if (hiragana.endsWith('ん')) {
 			// Check if we're at the 'ん' part

@@ -94,7 +94,7 @@ describe('PauseOverlay Component', () => {
 		});
 
 		it('TC-013: should show countdown when resuming', async () => {
-			const { rerender } = render(PauseOverlay, {
+			render(PauseOverlay, {
 				props: {
 					isPaused: true,
 					gameStats: defaultGameStats,

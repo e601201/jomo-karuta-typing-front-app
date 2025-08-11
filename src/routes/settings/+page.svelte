@@ -393,7 +393,7 @@
 						type="radio"
 						value={settings.practice.difficulty}
 						options={difficultyOptions}
-						onChange={handleDifficultyChange}
+						onChange={(v) => handleDifficultyChange(String(v))}
 					/>
 
 					<SettingItem
@@ -427,10 +427,10 @@
 							{ value: '60', label: '60秒' },
 							{ value: '120', label: '120秒' }
 						]}
-						onChange={(value) =>
+						onChange={(v) =>
 							settingsStore.updateSetting(
 								'practice.timeLimit',
-								value === 'none' ? null : parseInt(value)
+								v === 'none' ? null : parseInt(String(v))
 							)}
 						disabled={settings.practice.difficulty !== 'custom'}
 					/>
@@ -557,14 +557,16 @@
 	{#if showResetConfirm}
 		<div
 			class="modal-overlay"
-			onclick={cancelReset}
+			onclick={(e) => {
+				if (e.currentTarget === e.target) cancelReset();
+			}}
 			onkeydown={(e) => e.key === 'Escape' && cancelReset()}
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="reset-dialog-title"
 			tabindex="-1"
 		>
-			<div class="modal-content" onclick={(e) => e.stopPropagation()}>
+			<div class="modal-content">
 				<h3 id="reset-dialog-title">設定のリセット</h3>
 				<p>
 					{resetSection

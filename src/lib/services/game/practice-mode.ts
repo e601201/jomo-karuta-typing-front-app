@@ -263,11 +263,12 @@ export class PracticeModeService {
 		}
 	}
 
-	private isValidSession(session: any): boolean {
+	private isValidSession(session: unknown): session is SavedSession {
+		const s = session as Record<string, unknown>;
 		return (
-			typeof session.currentCardIndex === 'number' &&
-			Array.isArray(session.completedCards) &&
-			typeof session.statistics === 'object'
+			typeof s?.currentCardIndex === 'number' &&
+			Array.isArray(s?.completedCards) &&
+			typeof s?.statistics === 'object'
 		);
 	}
 

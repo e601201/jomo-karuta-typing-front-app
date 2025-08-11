@@ -2,25 +2,19 @@
  * ローカルストレージサービスのテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LocalStorageService } from './local-storage';
-import type {
-	GameSettings,
-	UserProfile,
-	GameProgress,
-	SavedSession,
-	GameStatistics
-} from './local-storage';
+import type { GameSettings, UserProfile, SavedSession } from './local-storage';
 
 // Base64 polyfill for Node.js environment (test only)
-// @ts-ignore
+// @ts-expect-error - Node.js環境でのBase64ポリフィル
 if (typeof btoa === 'undefined' && typeof global !== 'undefined') {
-	// @ts-ignore
+	// @ts-expect-error - Node.js環境でのBase64ポリフィル
 	global.btoa = (str: string) => Buffer.from(str, 'utf-8').toString('base64');
 }
-// @ts-ignore
+// @ts-expect-error - Node.js環境でのBase64ポリフィル
 if (typeof atob === 'undefined' && typeof global !== 'undefined') {
-	// @ts-ignore
+	// @ts-expect-error - Node.js環境でのBase64ポリフィル
 	global.atob = (str: string) => Buffer.from(str, 'base64').toString('utf-8');
 }
 
@@ -55,12 +49,12 @@ if (typeof window !== 'undefined') {
 	});
 } else {
 	// Node.js環境用
-	// @ts-ignore
+	// @ts-expect-error - Node.js環境でのBase64ポリフィル
 	if (typeof global !== 'undefined') {
-		// @ts-ignore
-		global.localStorage = localStorageMock as any;
-		// @ts-ignore
-		global.window = { localStorage: localStorageMock } as any;
+		// @ts-expect-error - Node.js環境でのBase64ポリフィル
+		global.localStorage = localStorageMock as Storage;
+		// @ts-expect-error - Node.js環境でのBase64ポリフィル
+		global.window = { localStorage: localStorageMock } as Window & typeof globalThis;
 	}
 }
 
@@ -131,19 +125,19 @@ describe('LocalStorageService - 初期化', () => {
 
 	it('ストレージが利用できない場合にフォールバックする', () => {
 		// LocalStorageを無効化
-		// @ts-ignore
+		// @ts-expect-error - Node.js環境でのBase64ポリフィル
 		const globalObj = typeof global !== 'undefined' ? global : window;
-		// @ts-ignore
+		// @ts-expect-error - Node.js環境でのBase64ポリフィル
 		const originalLocalStorage = globalObj.window?.localStorage || globalObj.localStorage;
-		// @ts-ignore
+		// @ts-expect-error - Node.js環境でのBase64ポリフィル
 		if (globalObj.window) {
-			// @ts-ignore
+			// @ts-expect-error - Node.js環境でのBase64ポリフィル
 			Object.defineProperty(globalObj.window, 'localStorage', {
 				value: null,
 				writable: true
 			});
 		} else {
-			// @ts-ignore
+			// @ts-expect-error - Node.js環境でのBase64ポリフィル
 			globalObj.localStorage = null as any;
 		}
 
@@ -155,15 +149,15 @@ describe('LocalStorageService - 初期化', () => {
 		expect(() => service.getSettings()).not.toThrow();
 
 		// 元に戻す
-		// @ts-ignore
+		// @ts-expect-error - Node.js環境でのBase64ポリフィル
 		if (globalObj.window) {
-			// @ts-ignore
+			// @ts-expect-error - Node.js環境でのBase64ポリフィル
 			Object.defineProperty(globalObj.window, 'localStorage', {
 				value: originalLocalStorage,
 				writable: true
 			});
 		} else {
-			// @ts-ignore
+			// @ts-expect-error - Node.js環境でのBase64ポリフィル
 			globalObj.localStorage = originalLocalStorage as any;
 		}
 	});
@@ -419,7 +413,7 @@ describe('LocalStorageService - データ管理', () => {
 
 		expect(exportedData).toBeTypeOf('string');
 		// Base64エンコードされていることを確認
-		// @ts-ignore
+		// @ts-expect-error - Node.js環境でのBase64ポリフィル
 		const decoded = JSON.parse(
 			typeof Buffer !== 'undefined'
 				? Buffer.from(exportedData, 'base64').toString('utf-8')
@@ -436,7 +430,7 @@ describe('LocalStorageService - データ管理', () => {
 			profile: mockProfile,
 			progress: { completedCards: ['tsu', 'ne'] }
 		};
-		// @ts-ignore
+		// @ts-expect-error - Node.js環境でのBase64ポリフィル
 		const encoded =
 			typeof Buffer !== 'undefined'
 				? Buffer.from(JSON.stringify(dataToImport), 'utf-8').toString('base64')

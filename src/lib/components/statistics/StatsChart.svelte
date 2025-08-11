@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { ChartData } from '$lib/types/game';
-	import { onMount } from 'svelte';
 
 	interface ChartOptions {
 		height?: number;
@@ -44,7 +43,7 @@
 	let chartHeight = $derived(options.height || 300);
 
 	// Handle data point hover
-	function handleDataPointHover(event: MouseEvent, value: number, label: string) {
+	function handleDataPointHover(event: MouseEvent, value: number) {
 		if (!showTooltip) return;
 
 		const rect = containerElement.getBoundingClientRect();
@@ -87,7 +86,18 @@
 	}
 
 	// Create SVG path for pie segment
-	function createPieSegmentPath(segment: any, radius: number, centerX: number, centerY: number) {
+	interface PieSegment {
+		startAngle: number;
+		endAngle: number;
+		largeArc: number;
+	}
+
+	function createPieSegmentPath(
+		segment: PieSegment,
+		radius: number,
+		centerX: number,
+		centerY: number
+	) {
 		const startAngleRad = (segment.startAngle * Math.PI) / 180;
 		const endAngleRad = (segment.endAngle * Math.PI) / 180;
 
@@ -135,7 +145,7 @@
 			<svg class="h-full w-full">
 				<!-- Grid lines -->
 				{#if options.showGrid !== false}
-					{#each Array(5) as _, i}
+					{#each Array(5) as _, i (i)}
 						<line
 							x1="0"
 							y1={`${i * 25}%`}
@@ -164,7 +174,7 @@
 				/>
 
 				<!-- Data points -->
-				{#each data.labels as label, i}
+				{#each data.labels as label, i (i)}
 					<circle
 						data-testid={`data-point-${i}`}
 						cx={`${(i / (data.labels.length - 1)) * 100}%`}
@@ -173,7 +183,7 @@
 						fill={data.datasets[0].color || '#3B82F6'}
 						role="img"
 						aria-label={`${label}: ${data.datasets[0].data[i]}`}
-						onmouseenter={(e) => handleDataPointHover(e, data.datasets[0].data[i], label)}
+						onmouseenter={(e) => handleDataPointHover(e, data.datasets[0].data[i])}
 						onmouseleave={handleMouseLeave}
 					/>
 				{/each}
@@ -181,7 +191,7 @@
 
 			<!-- X-axis labels -->
 			<div class="mt-2 flex justify-between text-xs text-gray-600 dark:text-gray-400">
-				{#each data.labels as label}
+				{#each data.labels as label (label)}
 					<span>{label}</span>
 				{/each}
 			</div>
@@ -192,7 +202,7 @@
 				data-testid="chart-scroll-container"
 				class="flex h-full min-w-full items-end gap-2 overflow-x-auto"
 			>
-				{#each data.labels as label, i}
+				{#each data.labels as label, i (i)}
 					<div class="flex flex-1 flex-col items-center">
 						<div
 							data-testid={`bar-${i}`}
@@ -201,7 +211,7 @@
 								animationDelay}ms; background-color: {data.datasets[0].color || '#10B981'}"
 							role="img"
 							aria-label={`${label}: ${data.datasets[0].data[i]}`}
-							onmouseenter={(e) => handleDataPointHover(e, data.datasets[0].data[i], label)}
+							onmouseenter={(e) => handleDataPointHover(e, data.datasets[0].data[i])}
 							onmouseleave={handleMouseLeave}
 						></div>
 						<span class="mt-1 text-xs text-gray-600 dark:text-gray-400">{label}</span>
@@ -212,7 +222,7 @@
 	{:else if type === 'pie'}
 		<div data-testid="pie-chart" class="relative flex h-full items-center justify-center">
 			<svg viewBox="0 0 200 200" class="h-full w-full max-w-xs">
-				{#each calculatePieSegments() as segment, i}
+				{#each calculatePieSegments() as segment, i (i)}
 					<path
 						data-testid={`pie-segment-${i}`}
 						d={createPieSegmentPath(segment, 80, 100, 100)}
@@ -228,7 +238,7 @@
 			<!-- Legend -->
 			{#if showLegend}
 				<div data-testid="chart-legend" class="absolute top-0 right-0">
-					{#each calculatePieSegments() as segment}
+					{#each calculatePieSegments() as segment (segment.label)}
 						<div class="flex items-center gap-2 text-sm">
 							<div class="h-3 w-3 rounded" style="background-color: {segment.color}"></div>
 							<span>{segment.label} ({segment.percentage.toFixed(0)}%)</span>
@@ -238,7 +248,7 @@
 			{:else}
 				<!-- Inline labels -->
 				<div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-					{#each calculatePieSegments() as segment}
+					{#each calculatePieSegments() as segment (segment.label)}
 						<p class="text-xs">{segment.label} ({segment.percentage.toFixed(0)}%)</p>
 					{/each}
 				</div>

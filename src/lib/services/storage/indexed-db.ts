@@ -19,7 +19,7 @@ export interface GameHistory {
 		speed: number;
 		maxCombo: number;
 	};
-	settings: any; // GameSettings型をインポートする代わりに簡略化
+	settings: Record<string, unknown>; // GameSettings型をインポートする代わりに簡略化
 }
 
 export interface CardResult {
@@ -361,7 +361,7 @@ export class IndexedDBService {
 		this.ensureInitialized();
 
 		// 既存の履歴を取得
-		let history = await this.db.cardHistory.where('cardId').equals(cardId).first();
+		const history = await this.db.cardHistory.where('cardId').equals(cardId).first();
 
 		if (history) {
 			// 履歴に追加

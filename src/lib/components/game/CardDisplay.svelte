@@ -3,12 +3,11 @@
 
 	interface Props {
 		card: KarutaCard | null;
-		showFurigana?: boolean;
 		showImages?: boolean;
 		shake?: boolean;
 	}
 
-	let { card, showFurigana = true, showImages = true, shake = false }: Props = $props();
+	let { card, showImages = true, shake = false }: Props = $props();
 
 	let imageLoadError = $state({
 		torifuda: false,
