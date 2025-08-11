@@ -12,6 +12,7 @@
 	import ErrorDisplay from '$lib/components/main-menu/ErrorDisplay.svelte';
 	import ContinueProgress from '$lib/components/main-menu/ContinueProgress.svelte';
 	import KarutaSlideshow from '$lib/components/main-menu/KarutaSlideshow.svelte';
+	import PracticeModeModal from '$lib/components/main-menu/PracticeModeModal.svelte';
 
 	interface GameModeOption {
 		id: GameMode;
@@ -25,26 +26,21 @@
 	let error = $state<string | null>(null);
 	let hasProgress = $state(false);
 	let progressInfo = $state<{ completedCards: number; totalCards: number } | null>(null);
+	let showPracticeModeModal = $state(false);
 
-	// Game modes configuration
+	// Game modes configuration - 2つのメインボタンに変更
 	const gameModes: GameModeOption[] = [
 		{
 			id: 'practice',
 			title: '練習モード',
-			description: '全44札を順番に練習',
+			description: '順番または特定札で練習',
 			icon: '📚'
 		},
 		{
-			id: 'specific',
-			title: '特定札練習',
-			description: '選択した札のみを練習',
-			icon: '🎯'
-		},
-		{
 			id: 'random',
-			title: 'ランダム出題',
-			description: 'ランダムな順序で練習',
-			icon: '🎲'
+			title: 'プレイ開始',
+			description: 'ランダムな順序でゲーム開始',
+			icon: '🎮'
 		}
 	];
 
@@ -82,7 +78,22 @@
 
 	function handleModeSelect(mode: GameMode) {
 		if (isLoading || error) return;
-		navigateToGame(mode);
+		
+		// 練習モードの場合はモーダルを表示
+		if (mode === 'practice') {
+			showPracticeModeModal = true;
+		} else {
+			// ランダムモード（プレイ開始）の場合は直接遷移
+			navigateToGame(mode);
+		}
+	}
+	
+	function handlePracticeModeSelect(practiceType: 'practice' | 'specific') {
+		if (practiceType === 'specific') {
+			navigateToGame('specific');
+		} else {
+			navigateToGame('practice');
+		}
 	}
 
 	function handleContinue() {
@@ -143,7 +154,7 @@
 			<!-- Game Modes -->
 			<div
 				data-testid="game-modes-container"
-				class="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+				class="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 max-w-2xl mx-auto"
 			>
 				{#each gameModes as mode (mode.id)}
 					<GameModeCard
@@ -184,4 +195,11 @@
 			</nav>
 		{/if}
 	</div>
+	
+	<!-- 練習モード選択モーダル -->
+	<PracticeModeModal
+		isOpen={showPracticeModeModal}
+		onclose={() => showPracticeModeModal = false}
+		onselect={handlePracticeModeSelect}
+	/>
 </main>
