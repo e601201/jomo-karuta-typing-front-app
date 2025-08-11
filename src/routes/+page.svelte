@@ -11,6 +11,7 @@
 	import LoadingSpinner from '$lib/components/main-menu/LoadingSpinner.svelte';
 	import ErrorDisplay from '$lib/components/main-menu/ErrorDisplay.svelte';
 	import ContinueProgress from '$lib/components/main-menu/ContinueProgress.svelte';
+	import KarutaSlideshow from '$lib/components/main-menu/KarutaSlideshow.svelte';
 
 	interface GameModeOption {
 		id: GameMode;
@@ -118,8 +119,10 @@
 <main class="min-h-screen bg-gradient-to-b from-green-50 to-white">
 	<div class="container mx-auto max-w-6xl px-4 py-8">
 		<!-- Header -->
-		<header class="mb-12 text-center">
-			<h1 class="mb-4 text-4xl font-bold text-green-800 md:text-5xl">上毛カルタタイピング</h1>
+		<header class="mb-8 text-center">
+			<h1 class="mb-6 text-4xl font-bold text-green-800 md:text-5xl">上毛カルタタイピング</h1>
+			<!-- カルタスライドショー -->
+			<KarutaSlideshow />
 		</header>
 
 		<!-- Content -->
