@@ -4,18 +4,7 @@
 
 import { writable, derived, get, type Writable, type Readable } from 'svelte/store';
 import { InputValidator } from '../services/typing/input-validator';
-
-// 型定義
-export type GameMode = 'practice' | 'specific' | 'random';
-
-export interface KarutaCard {
-	id: string;
-	hiragana: string;
-	romaji: string;
-	meaning: string;
-	category: string;
-	difficulty: 'easy' | 'medium' | 'hard';
-}
+import type { KarutaCard, GameMode } from '$lib/types';
 
 export interface GameSession {
 	id: string;
@@ -196,10 +185,11 @@ export function createGameStore() {
 			}
 		}));
 
-		// InputValidatorにターゲットを設定
+		// InputValidatorにターゲットを設定（スペースを除去）
 		const state = get(gameStore);
 		if (state.input.validator && state.cards.current) {
-			state.input.validator.setTarget(state.cards.current.hiragana);
+			const targetText = state.cards.current.hiragana.replace(/\s/g, '');
+			state.input.validator.setTarget(targetText);
 		}
 
 		// タイマー開始
@@ -278,9 +268,10 @@ export function createGameStore() {
 			const nextCard = s.cards.remaining[0];
 			const newIndex = s.cards.currentIndex + 1;
 
-			// InputValidatorに新しいターゲットを設定
+			// InputValidatorに新しいターゲットを設定（スペースを除去）
 			if (s.input.validator && nextCard) {
-				s.input.validator.setTarget(nextCard.hiragana);
+				const targetText = nextCard.hiragana.replace(/\s/g, '');
+				s.input.validator.setTarget(targetText);
 			}
 
 			return {
@@ -332,8 +323,9 @@ export function createGameStore() {
 			return;
 		}
 
-		// 入力検証
-		const result = state.input.validator.validateInput(state.cards.current.hiragana, input);
+		// 入力検証（スペースを除去してから検証）
+		const targetText = state.cards.current.hiragana.replace(/\s/g, '');
+		const result = state.input.validator.validateInput(targetText, input);
 
 		if (result.isValid) {
 			// 正しい入力

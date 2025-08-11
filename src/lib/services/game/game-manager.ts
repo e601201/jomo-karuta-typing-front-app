@@ -37,20 +37,16 @@ export class GameManager {
 		// カードを準備
 		this.cards = config.cards || [...karutaCards];
 
-		// ランダムモードの場合はシャッフル
+		// ランダムモードの場合はシャッフル（gameStore側でもシャッフルするが、一貫性のためここでも行う）
 		if (config.mode === 'random') {
 			this.shuffleCards();
 		}
 
-		// セッションを開始
-		await gameStore.startSession({
-			mode: config.mode,
-			cards: this.cards,
-			continue: config.continueGame
-		});
+		// セッションを開始（正しい引数形式で呼び出し）
+		gameStore.startSession(config.mode, this.cards);
 
-		// 最初のカードをロード
-		await gameStore.nextCard();
+		// startSessionが最初のカードを設定するため、nextCardは不要
+		// await gameStore.nextCard();
 	}
 
 	/**
@@ -69,8 +65,10 @@ export class GameManager {
 	onCardChange(card: any): void {
 		if (!card) return;
 
-		// バリデーターを更新
-		this.validator = new InputValidator(card.hiragana);
+		// バリデーターを更新（スペースを除去）
+		this.validator = new InputValidator();
+		const targetText = card.hiragana.replace(/\s/g, '');
+		this.validator.setTarget(targetText);
 
 		// 入力状態をリセット
 		this.currentInput = '';
@@ -94,7 +92,9 @@ export class GameManager {
 		}
 
 		const newInput = this.currentInput + char;
-		const result = this.validator.validateInput(newInput, this.inputPosition);
+		// Get target text from validator
+		const targetText = this.validator.getTarget();
+		const result = this.validator.validateInput(targetText, newInput);
 
 		if (result.isValid) {
 			// 正解の処理
@@ -109,7 +109,7 @@ export class GameManager {
 
 			return {
 				isValid: true,
-				isComplete: result.isComplete,
+				isComplete: result.isComplete || false,
 				showError: false,
 				newPosition: this.inputPosition,
 				newInput: this.currentInput,
@@ -175,7 +175,8 @@ export class GameManager {
 	 */
 	getRomajiPatterns(): string[] {
 		if (!this.validator) return [''];
-		return this.validator.getRomajiPatterns();
+		const targetText = this.validator.getTarget();
+		return this.validator.getRomajiPatterns(targetText);
 	}
 
 	/**

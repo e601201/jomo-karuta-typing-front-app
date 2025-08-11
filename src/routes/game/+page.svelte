@@ -66,7 +66,7 @@
 		}
 	});
 	let inputProgress = $state(0);
-	let inputStates = $state<Array<'pending' | 'correct' | 'incorrect'>>([]);
+    let inputStates = $state<Array<'pending' | 'correct' | 'incorrect' | 'current'>>([]);
 	let romajiStates = $state<Array<'pending' | 'correct' | 'incorrect'>>([]);
 	let currentInput = $state('');
 	let showError = $state(false);
@@ -112,6 +112,8 @@
 
 			// Subscribe to store - ONLY for non-practice modes
 			if (gameMode !== 'practice') {
+				let previousCardId: string | null = null;
+				
 				unsubscribe = gameStore.gameStore.subscribe((state) => {
 					currentCard = state.cards.current;
 					cardIndex = state.cards.currentIndex;
@@ -125,10 +127,19 @@
 					currentInput = state.input.current;
 
 					// Update validator if card changed
-					if (currentCard && !validator) {
-						validator = new InputValidator(currentCard.hiragana);
+					if (currentCard && currentCard.id !== previousCardId) {
+						previousCardId = currentCard.id;
+						validator = new InputValidator();
+						// Remove spaces from hiragana text for typing validation
+						const targetText = currentCard.hiragana.replace(/\s/g, '');
+						validator.setTarget(targetText);
 						updateRomajiGuide();
 						initializeInputStates();
+						
+						// Reset input tracking for new card
+						currentInput = '';
+						completedHiraganaCount = 0;
+						inputProgress = 0;
 					}
 
 					// Check if game is complete
