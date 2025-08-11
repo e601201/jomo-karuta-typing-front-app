@@ -386,8 +386,8 @@ export class PracticeModeService {
 					hiragana: `${id} の かるた`,
 					romaji: `${id} no karuta`,
 					meaning: `Card ${id}`,
-					category: 'fallback',
-					difficulty: 'medium'
+					category: 'culture' as const,
+					difficulty: 'medium' as const
 				}) as KarutaCard
 		);
 	}

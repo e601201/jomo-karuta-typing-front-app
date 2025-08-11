@@ -4,7 +4,11 @@
 	import { get } from 'svelte/store';
 	import CardSelector from '$lib/components/specific/CardSelector.svelte';
 	import FavoritesManager from '$lib/components/specific/FavoritesManager.svelte';
-	import { specificCardsStore, selectedCards, canStartPractice } from '$lib/stores/specific-cards-store';
+	import {
+		specificCardsStore,
+		selectedCards,
+		canStartPractice
+	} from '$lib/stores/specific-cards-store';
 	import { practiceModeStore } from '$lib/stores/practice-mode';
 	import { getKarutaCards } from '$lib/data/karuta-cards';
 	import type { KarutaCard } from '$lib/types';
@@ -47,12 +51,15 @@
 		console.log('=== SPECIFIC MODE START PRACTICE ===');
 		console.log('Selected cards count:', $selectedCards);
 		console.log('Generated practice cards:', practiceCards.length, 'cards');
-		console.log('Practice cards IDs:', practiceCards.map(c => c.id));
+		console.log(
+			'Practice cards IDs:',
+			practiceCards.map((c) => c.id)
+		);
 		console.log('First practice card:', practiceCards[0]);
 
 		// 練習モードストアを初期化
 		practiceModeStore.initialize(practiceCards);
-		
+
 		// ストアの状態を確認
 		const storeState = get(practiceModeStore);
 		console.log('Practice mode store after init:', {

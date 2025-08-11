@@ -28,8 +28,8 @@ function createPracticeModeStore() {
 	const initialState: PracticeModeState = {
 		cards: [],
 		currentIndex: 0,
-		completedCards: new Set(),
-		skippedCards: new Set(),
+		completedCards: new Set<string>(),
+		skippedCards: new Set<string>(),
 		startTime: null,
 		pausedTime: null,
 		totalPausedDuration: 0,
@@ -67,8 +67,8 @@ function createPracticeModeStore() {
 					...state,
 					cards,
 					currentIndex: 0,
-					completedCards: new Set(),
-					skippedCards: new Set(),
+					completedCards: new Set<string>(),
+					skippedCards: new Set<string>(),
 					startTime: Date.now(),
 					pausedTime: null,
 					totalPausedDuration: 0,
@@ -105,7 +105,7 @@ function createPracticeModeStore() {
 						cards,
 						currentIndex: session.cards.currentIndex,
 						completedCards: new Set(session.cards.completed.map((c: any) => c.id)),
-						skippedCards: new Set(), // セッションでは保存しない
+						skippedCards: new Set<string>(), // セッションでは保存しない
 						startTime: new Date(session.startTime).getTime(),
 						pausedTime: null,
 						totalPausedDuration:

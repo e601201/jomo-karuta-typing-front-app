@@ -326,7 +326,7 @@ function createStatisticsStore() {
 				...session,
 				accuracy: Math.round(session.accuracy * 100) / 100
 			};
-			
+
 			update((state) => {
 				const newSessions = [...state.sessions, roundedSession];
 				const overall = calculateOverallStats(newSessions);

@@ -20,9 +20,30 @@ describe('練習モード - 初期化', () => {
 	beforeEach(() => {
 		mockStorage = new LocalStorageService();
 		vi.mocked(getKarutaCards).mockReturnValue([
-			{ id: 'a', hiragana: 'あさまのいぶき かぜもさわやかに', kanji: '浅間の息吹 風も爽やかに' },
-			{ id: 'i', hiragana: 'いそべのはまの あきのすなやま', kanji: '磯部の浜の 秋の砂山' },
-			{ id: 'u', hiragana: 'うすいとうげの もみじのまつり', kanji: '碓氷峠の 紅葉の祭り' }
+			{
+				id: 'a',
+				hiragana: 'あさまのいぶき かぜもさわやかに',
+				romaji: 'asama no ibuki kaze mo sawayaka ni',
+				meaning: '浅間の息吹 風も爽やかに',
+				category: 'nature',
+				difficulty: 'medium'
+			},
+			{
+				id: 'i',
+				hiragana: 'いそべのはまの あきのすなやま',
+				romaji: 'isobe no hama no aki no sunayama',
+				meaning: '磯部の浜の 秋の砂山',
+				category: 'nature',
+				difficulty: 'medium'
+			},
+			{
+				id: 'u',
+				hiragana: 'うすいとうげの もみじのまつり',
+				romaji: 'usui touge no momiji no matsuri',
+				meaning: '碓氷峠の 紅葉の祭り',
+				category: 'nature',
+				difficulty: 'medium'
+			}
 		] as KarutaCard[]);
 
 		service = new PracticeModeService(mockStorage);
@@ -63,9 +84,30 @@ describe('練習モード - 出題ロジック', () => {
 	let service: PracticeModeService;
 	let mockStorage: LocalStorageService;
 	const mockCards = [
-		{ id: 'a', hiragana: 'あさまのいぶき かぜもさわやかに', kanji: '浅間の息吹 風も爽やかに' },
-		{ id: 'i', hiragana: 'いそべのはまの あきのすなやま', kanji: '磯部の浜の 秋の砂山' },
-		{ id: 'u', hiragana: 'うすいとうげの もみじのまつり', kanji: '碓氷峠の 紅葉の祭り' }
+		{
+			id: 'a',
+			hiragana: 'あさまのいぶき かぜもさわやかに',
+			romaji: 'asama no ibuki kaze mo sawayaka ni',
+			meaning: '浅間の息吹 風も爽やかに',
+			category: 'nature',
+			difficulty: 'medium'
+		},
+		{
+			id: 'i',
+			hiragana: 'いそべのはまの あきのすなやま',
+			romaji: 'isobe no hama no aki no sunayama',
+			meaning: '磯部の浜の 秋の砂山',
+			category: 'nature',
+			difficulty: 'medium'
+		},
+		{
+			id: 'u',
+			hiragana: 'うすいとうげの もみじのまつり',
+			romaji: 'usui touge no momiji no matsuri',
+			meaning: '碓氷峠の 紅葉の祭り',
+			category: 'nature',
+			difficulty: 'medium'
+		}
 	] as KarutaCard[];
 
 	beforeEach(() => {
@@ -112,7 +154,14 @@ describe('練習モード - 入力処理', () => {
 	beforeEach(() => {
 		mockStorage = new LocalStorageService();
 		vi.mocked(getKarutaCards).mockReturnValue([
-			{ id: 'a', hiragana: 'あさまのいぶき かぜもさわやかに', kanji: '浅間の息吹 風も爽やかに' }
+			{
+				id: 'a',
+				hiragana: 'あさまのいぶき かぜもさわやかに',
+				romaji: 'asama no ibuki kaze mo sawayaka ni',
+				meaning: '浅間の息吹 風も爽やかに',
+				category: 'nature',
+				difficulty: 'medium'
+			}
 		] as KarutaCard[]);
 		service = new PracticeModeService(mockStorage);
 		service.initialize();
@@ -121,22 +170,25 @@ describe('練習モード - 入力処理', () => {
 	it('正解入力で次の札に進む', () => {
 		const result = service.processInput('あさまのいぶきかぜもさわやかに');
 
-		expect(result.isCorrect).toBe(true);
-		expect(result.isComplete).toBe(true);
+		expect(result).not.toBeNull();
+		expect(result?.isCorrect).toBe(true);
+		expect(result?.isComplete).toBe(true);
 		expect(service.getState().completedCards).toContain('a');
 	});
 
 	it('部分入力が正しく判定される', () => {
 		const result = service.processInput('あさまの');
 
-		expect(result.isCorrect).toBe(true);
-		expect(result.isComplete).toBe(false);
+		expect(result).not.toBeNull();
+		expect(result?.isCorrect).toBe(true);
+		expect(result?.isComplete).toBe(false);
 	});
 
 	it('間違った入力が検出される', () => {
 		const result = service.processInput('あさまのやま');
 
-		expect(result.isCorrect).toBe(false);
+		expect(result).not.toBeNull();
+		expect(result?.isCorrect).toBe(false);
 		expect(service.getState().statistics.mistakes).toBe(1);
 	});
 
@@ -157,8 +209,22 @@ describe('練習モード - セッション管理', () => {
 		vi.useFakeTimers();
 		mockStorage = new LocalStorageService();
 		vi.mocked(getKarutaCards).mockReturnValue([
-			{ id: 'a', hiragana: 'あさまのいぶき かぜもさわやかに', kanji: '浅間の息吹 風も爽やかに' },
-			{ id: 'i', hiragana: 'いそべのはまの あきのすなやま', kanji: '磯部の浜の 秋の砂山' }
+			{
+				id: 'a',
+				hiragana: 'あさまのいぶき かぜもさわやかに',
+				romaji: 'asama no ibuki kaze mo sawayaka ni',
+				meaning: '浅間の息吹 風も爽やかに',
+				category: 'nature',
+				difficulty: 'medium'
+			},
+			{
+				id: 'i',
+				hiragana: 'いそべのはまの あきのすなやま',
+				romaji: 'isobe no hama no aki no sunayama',
+				meaning: '磯部の浜の 秋の砂山',
+				category: 'nature',
+				difficulty: 'medium'
+			}
 		] as KarutaCard[]);
 		service = new PracticeModeService(mockStorage);
 	});
@@ -207,17 +273,25 @@ describe('練習モード - セッション管理', () => {
 
 	it('セッションから復元できる', () => {
 		const mockSession = {
-			mode: 'practice' as const,
-			currentCardIndex: 1,
-			completedCards: ['a'],
+			id: 'test-session',
+			mode: 'practice',
 			startTime: '2024-01-01T10:00:00Z',
-			totalElapsedTime: 60000,
-			statistics: {
-				totalKeystrokes: 30,
-				correctKeystrokes: 29,
-				mistakes: 1,
-				wpm: 75,
-				accuracy: 96.7
+			cards: {
+				current: { id: 'i', hiragana: 'いそべのはまの あきのすなやま' },
+				currentIndex: 1,
+				remaining: [],
+				completed: [{ id: 'a', hiragana: 'あさまのいぶき かぜもさわやかに' }]
+			},
+			score: {
+				total: 1000,
+				accuracy: 96.7,
+				speed: 75,
+				combo: 10,
+				maxCombo: 10
+			},
+			timer: {
+				elapsedTime: 60000,
+				pausedDuration: 0
 			}
 		};
 
@@ -228,13 +302,20 @@ describe('練習モード - セッション管理', () => {
 
 		expect(state.currentCardIndex).toBe(1);
 		expect(state.completedCards).toEqual(['a']);
-		expect(state.statistics).toEqual(mockSession.statistics);
+		expect(state.statistics.accuracy).toBe(96.7);
 	});
 
 	it('ゲーム完了時にセッションがクリアされる', () => {
 		service.initialize();
 		vi.mocked(getKarutaCards).mockReturnValue([
-			{ id: 'a', hiragana: 'あさまのいぶき かぜもさわやかに', kanji: '浅間の息吹 風も爽やかに' }
+			{
+				id: 'a',
+				hiragana: 'あさまのいぶき かぜもさわやかに',
+				romaji: 'asama no ibuki kaze mo sawayaka ni',
+				meaning: '浅間の息吹 風も爽やかに',
+				category: 'nature',
+				difficulty: 'medium'
+			}
 		] as KarutaCard[]);
 
 		const clearSpy = vi.spyOn(mockStorage, 'clearSession');
@@ -254,7 +335,14 @@ describe('練習モード - 統計記録', () => {
 		vi.useFakeTimers();
 		mockStorage = new LocalStorageService();
 		vi.mocked(getKarutaCards).mockReturnValue([
-			{ id: 'a', hiragana: 'あさまのいぶき かぜもさわやかに', kanji: '浅間の息吹 風も爽やかに' }
+			{
+				id: 'a',
+				hiragana: 'あさまのいぶき かぜもさわやかに',
+				romaji: 'asama no ibuki kaze mo sawayaka ni',
+				meaning: '浅間の息吹 風も爽やかに',
+				category: 'nature',
+				difficulty: 'medium'
+			}
 		] as KarutaCard[]);
 		service = new PracticeModeService(mockStorage);
 		service.initialize();
@@ -360,7 +448,14 @@ describe('練習モード - 完了処理', () => {
 	beforeEach(() => {
 		mockStorage = new LocalStorageService();
 		vi.mocked(getKarutaCards).mockReturnValue([
-			{ id: 'a', hiragana: 'あさまのいぶき かぜもさわやかに', kanji: '浅間の息吹 風も爽やかに' }
+			{
+				id: 'a',
+				hiragana: 'あさまのいぶき かぜもさわやかに',
+				romaji: 'asama no ibuki kaze mo sawayaka ni',
+				meaning: '浅間の息吹 風も爽やかに',
+				category: 'nature',
+				difficulty: 'medium'
+			}
 		] as KarutaCard[]);
 		service = new PracticeModeService(mockStorage);
 		service.initialize();

@@ -564,10 +564,7 @@
 			aria-labelledby="reset-dialog-title"
 			tabindex="-1"
 		>
-			<div 
-				class="modal-content" 
-				onclick={(e) => e.stopPropagation()}
-			>
+			<div class="modal-content" onclick={(e) => e.stopPropagation()}>
 				<h3 id="reset-dialog-title">設定のリセット</h3>
 				<p>
 					{resetSection

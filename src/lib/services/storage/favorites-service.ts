@@ -56,10 +56,14 @@ export class FavoritesService {
 	 */
 	async updateFavorite(favoriteId: string, updates: Partial<Favorite>): Promise<void> {
 		try {
-			await db.favorites.update(favoriteId, {
-				...updates,
+			const updateData: any = {
 				updatedAt: new Date().toISOString()
-			});
+			};
+
+			if (updates.name !== undefined) updateData.name = updates.name;
+			if (updates.cardIds !== undefined) updateData.cardIds = updates.cardIds;
+
+			await db.favorites.update(favoriteId, updateData);
 		} catch (error) {
 			console.error('Failed to update favorite:', error);
 			throw error;

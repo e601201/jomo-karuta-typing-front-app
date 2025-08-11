@@ -147,10 +147,12 @@
 		{#each romajiCharacters as romajiChar, index}
 			<span
 				data-testid="romaji-char-{index}"
-				class="relative inline-block {getColorClass(romajiStates[index] || 'pending')} transition-colors duration-200"
+				class="relative inline-block {getColorClass(
+					romajiStates[index] || 'pending'
+				)} transition-colors duration-200"
 			>
 				{romajiChar}
-				
+
 				<!-- Colorblind mode icons for romaji -->
 				{#if colorblindMode}
 					{#if romajiStates[index] === 'correct'}
@@ -163,7 +165,7 @@
 						>
 					{/if}
 				{/if}
-				
+
 				<!-- Cursor for romaji at current input position -->
 				{#if index === currentRomajiPosition}
 					<span

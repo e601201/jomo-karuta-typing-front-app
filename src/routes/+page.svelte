@@ -78,7 +78,7 @@
 
 	function handleModeSelect(mode: GameMode) {
 		if (isLoading || error) return;
-		
+
 		// 練習モードの場合はモーダルを表示
 		if (mode === 'practice') {
 			showPracticeModeModal = true;
@@ -87,7 +87,7 @@
 			navigateToGame(mode);
 		}
 	}
-	
+
 	function handlePracticeModeSelect(practiceType: 'practice' | 'specific') {
 		if (practiceType === 'specific') {
 			navigateToGame('specific');
@@ -154,7 +154,7 @@
 			<!-- Game Modes -->
 			<div
 				data-testid="game-modes-container"
-				class="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 max-w-2xl mx-auto"
+				class="mx-auto mb-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2"
 			>
 				{#each gameModes as mode (mode.id)}
 					<GameModeCard
@@ -195,11 +195,11 @@
 			</nav>
 		{/if}
 	</div>
-	
+
 	<!-- 練習モード選択モーダル -->
 	<PracticeModeModal
 		isOpen={showPracticeModeModal}
-		onclose={() => showPracticeModeModal = false}
+		onclose={() => (showPracticeModeModal = false)}
 		onselect={handlePracticeModeSelect}
 	/>
 </main>

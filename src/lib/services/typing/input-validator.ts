@@ -149,9 +149,9 @@ const ROMAJI_MAP: Record<string, string[]> = {
 	// スペース
 	' ': [' '],
 	'　': [' '],
-	
+
 	// 長音記号
-	'ー': ['-']
+	ー: ['-']
 };
 
 /**
@@ -269,7 +269,13 @@ export class InputValidator {
 				}
 
 				// な行（単独）直前は nn のみ
-				if (nextChar === 'な' || nextChar === 'に' || nextChar === 'ぬ' || nextChar === 'ね' || nextChar === 'の') {
+				if (
+					nextChar === 'な' ||
+					nextChar === 'に' ||
+					nextChar === 'ぬ' ||
+					nextChar === 'ね' ||
+					nextChar === 'の'
+				) {
 					romajiArrays.push(['nn']);
 					continue;
 				}
@@ -378,7 +384,7 @@ export class InputValidator {
 					// 末尾の'ん'は 'nn' が必須なので、'n' は未完了
 					return {
 						isValid: true,
-						progress: 0.5,  // 'n' is half of 'nn'
+						progress: 0.5, // 'n' is half of 'nn'
 						isComplete: false
 					};
 				} else if (remainingInput === 'nn') {

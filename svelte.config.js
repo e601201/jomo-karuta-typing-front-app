@@ -3,10 +3,10 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'; // ← 元の場�
 
 /** @type {import('@sveltejs/kit').Config} */
 export default {
-  preprocess: vitePreprocess(),
-  kit: {
-    adapter: adapter({
-      runtime: 'nodejs22.x'
-    })
-  }
+	preprocess: vitePreprocess(),
+	kit: {
+		adapter: adapter({
+			runtime: 'nodejs22.x'
+		})
+	}
 };

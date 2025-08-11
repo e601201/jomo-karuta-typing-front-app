@@ -4,13 +4,8 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { get } from 'svelte/store';
-import {
-	createGameStore,
-	type GameState,
-	type GameSession,
-	type KarutaCard,
-	type GameMode
-} from './game';
+import { createGameStore, type GameState, type GameSession } from './game';
+import type { KarutaCard, GameMode } from '$lib/types';
 import { InputValidator } from '../services/typing/input-validator';
 
 // モックデータ

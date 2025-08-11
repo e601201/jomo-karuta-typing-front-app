@@ -22,28 +22,28 @@ export class RandomModeService {
 	/**
 	 * カードデックをシャッフル
 	 * Fisher-Yatesアルゴリズムを使用して均等な分布を保証
-	 * 
+	 *
 	 * @param cards - シャッフルするカードの配列
 	 * @returns シャッフルされたカードの新しい配列
 	 */
 	shuffleCards(cards: KarutaCard[]): KarutaCard[] {
 		// 元の配列を変更しないように新しい配列を作成
 		const shuffled = [...cards];
-		
+
 		// Fisher-Yatesアルゴリズム
 		// 配列の最後から順に、ランダムに選んだ要素と交換していく
 		for (let i = shuffled.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
 			[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
 		}
-		
+
 		return shuffled;
 	}
 
 	/**
 	 * セッションを開始
 	 * カードをシャッフルして新しいセッションを開始する
-	 * 
+	 *
 	 * @param cards - 使用するカードの配列
 	 */
 	async startSession(cards: KarutaCard[]): Promise<void> {
@@ -56,7 +56,7 @@ export class RandomModeService {
 	/**
 	 * 次のカードを取得
 	 * 現在のインデックスのカードを返し、インデックスを進める
-	 * 
+	 *
 	 * @returns 次のカード、またはセッション終了時はnull
 	 */
 	getNextCard(): KarutaCard | null {
@@ -64,7 +64,7 @@ export class RandomModeService {
 		if (!this.sessionStarted || this.currentIndex >= this.cards.length) {
 			return null;
 		}
-		
+
 		const card = this.cards[this.currentIndex];
 		this.currentIndex++;
 		return card;
@@ -72,7 +72,7 @@ export class RandomModeService {
 
 	/**
 	 * セッションが完了したかどうか
-	 * 
+	 *
 	 * @returns 全カードが出題済みの場合true
 	 */
 	isSessionComplete(): boolean {
@@ -82,7 +82,7 @@ export class RandomModeService {
 	/**
 	 * セッション状態を取得
 	 * 途中終了時の状態保存用
-	 * 
+	 *
 	 * @returns 現在のセッション状態
 	 */
 	getSessionState(): RandomSessionState {
@@ -96,7 +96,7 @@ export class RandomModeService {
 	/**
 	 * セッション状態を復元
 	 * 保存された状態から再開用
-	 * 
+	 *
 	 * @param state - 復元するセッション状態
 	 */
 	restoreSession(state: RandomSessionState): void {
@@ -107,7 +107,7 @@ export class RandomModeService {
 
 	/**
 	 * 現在の進捗を取得
-	 * 
+	 *
 	 * @returns 現在のカードインデックスと総カード数
 	 */
 	getProgress(): { current: number; total: number } {

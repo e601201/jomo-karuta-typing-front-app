@@ -72,15 +72,19 @@ vi.mock('$lib/data/karuta-cards.json', () => ({
 	default: [
 		{
 			id: 'card-1',
-			yomifuda: 'つる舞う形の群馬県',
-			torifuda: 'つ',
-			furigana: 'つるまうかたちのぐんまけん'
+			hiragana: 'つるまうかたちのぐんまけん',
+			romaji: 'tsuru mau katachi no gunma ken',
+			meaning: 'つる舞う形の群馬県',
+			category: 'geography' as const,
+			difficulty: 'easy' as const
 		},
 		{
 			id: 'card-2',
-			yomifuda: '力あわせる二百万',
-			torifuda: 'ち',
-			furigana: 'ちからあわせるにひゃくまん'
+			hiragana: 'ちからあわせるにひゃくまん',
+			romaji: 'chikara awaseru nihyakuman',
+			meaning: '力あわせる二百万',
+			category: 'culture' as const,
+			difficulty: 'easy' as const
 		}
 	]
 }));
@@ -178,9 +182,11 @@ describe('Game Page', () => {
 					...state.cards,
 					current: {
 						id: 'card-1',
-						yomifuda: 'つる舞う形の群馬県',
-						torifuda: 'つ',
-						furigana: 'つるまうかたちのぐんまけん'
+						hiragana: 'つるまうかたちのぐんまけん',
+						romaji: 'tsuru mau katachi no gunma ken',
+						meaning: 'つる舞う形の群馬県',
+						category: 'geography',
+						difficulty: 'easy'
 					},
 					currentIndex: 0
 				},
@@ -227,9 +233,11 @@ describe('Game Page', () => {
 					...state.cards,
 					current: {
 						id: 'card-1',
-						yomifuda: 'つる舞う形の群馬県',
-						torifuda: 'つ',
-						furigana: 'つるまうかたちのぐんまけん'
+						hiragana: 'つるまうかたちのぐんまけん',
+						romaji: 'tsuru mau katachi no gunma ken',
+						meaning: 'つる舞う形の群馬県',
+						category: 'geography',
+						difficulty: 'easy'
 					}
 				},
 				session: {
@@ -263,9 +271,11 @@ describe('Game Page', () => {
 					...state.cards,
 					current: {
 						id: 'card-1',
-						yomifuda: 'つる舞う形の群馬県',
-						torifuda: 'つ',
-						furigana: 'つるまうかたちのぐんまけん'
+						hiragana: 'つるまうかたちのぐんまけん',
+						romaji: 'tsuru mau katachi no gunma ken',
+						meaning: 'つる舞う形の群馬県',
+						category: 'geography',
+						difficulty: 'easy'
 					}
 				},
 				session: {
@@ -315,9 +325,11 @@ describe('Game Page', () => {
 					...state.cards,
 					current: {
 						id: 'card-1',
-						yomifuda: 'つる舞う形の群馬県',
-						torifuda: 'つ',
-						furigana: 'つるまうかたちのぐんまけん'
+						hiragana: 'つるまうかたちのぐんまけん',
+						romaji: 'tsuru mau katachi no gunma ken',
+						meaning: 'つる舞う形の群馬県',
+						category: 'geography',
+						difficulty: 'easy'
 					}
 				}
 			}));

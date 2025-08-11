@@ -377,7 +377,12 @@ export class IndexedDBService {
 			history.bestAccuracy = Math.max(history.bestAccuracy, attempt.accuracy);
 			history.lastAttempt = attempt.date;
 
-			await this.db.cardHistory.update(history.id!, history);
+			await this.db.cardHistory.update(history.id!, {
+				attempts: history.attempts,
+				bestTime: history.bestTime,
+				bestAccuracy: history.bestAccuracy,
+				lastAttempt: history.lastAttempt
+			});
 		} else {
 			// 新規作成
 			await this.db.cardHistory.add({
@@ -532,7 +537,12 @@ export class IndexedDBService {
 		for (const history of cardHistories) {
 			if (history.attempts.length > 100) {
 				history.attempts = history.attempts.slice(-100);
-				await this.db.cardHistory.update(history.id!, history);
+				await this.db.cardHistory.update(history.id!, {
+					attempts: history.attempts,
+					bestTime: history.bestTime,
+					bestAccuracy: history.bestAccuracy,
+					lastAttempt: history.lastAttempt
+				});
 			}
 		}
 	}

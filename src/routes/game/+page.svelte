@@ -29,6 +29,7 @@
 	import ScoreBoard from '$lib/components/game/ScoreBoard.svelte';
 	import GameControls from '$lib/components/game/GameControls.svelte';
 	import PauseOverlay from '$lib/components/game/PauseOverlay.svelte';
+	import Countdown from '$lib/components/game/Countdown.svelte';
 
 	// State
 	let gameMode: GameMode | null = $state(null);
@@ -37,6 +38,8 @@
 	let error = $state<string | null>(null);
 	let showExitConfirm = $state(false);
 	let isGameComplete = $state(false);
+	let showCountdown = $state(false);
+	let gameStarted = $state(false);
 
 	// Game state from store
 	let currentCard = $state<KarutaCard | null>(null);
@@ -49,7 +52,7 @@
 	let elapsedTime = $state(0);
 	let pauseCount = $state(0);
 	let totalPauseTime = $state(0);
-	
+
 	// Track previous card index to detect card changes
 	let previousCardIndex = -1;
 
@@ -66,7 +69,7 @@
 		}
 	});
 	let inputProgress = $state(0);
-    let inputStates = $state<Array<'pending' | 'correct' | 'incorrect' | 'current'>>([]);
+	let inputStates = $state<Array<'pending' | 'correct' | 'incorrect' | 'current'>>([]);
 	let romajiStates = $state<Array<'pending' | 'correct' | 'incorrect'>>([]);
 	let currentInput = $state('');
 	let showError = $state(false);
@@ -88,10 +91,10 @@
 			// Use data from +page.ts
 			gameMode = data.mode;
 			shouldContinue = data.resume;
-			
+
 			// Check if coming from specific mode selection
 			const isFromSpecificMode = data.isFromSpecific || false;
-			
+
 			// Don't set totalCards from data.cards if coming from specific mode
 			if (!isFromSpecificMode) {
 				totalCards = data.cards?.length || 0;
@@ -113,7 +116,7 @@
 			// Subscribe to store - ONLY for non-practice modes
 			if (gameMode !== 'practice') {
 				let previousCardId: string | null = null;
-				
+
 				unsubscribe = gameStore.gameStore.subscribe((state) => {
 					currentCard = state.cards.current;
 					cardIndex = state.cards.currentIndex;
@@ -135,7 +138,7 @@
 						validator.setTarget(targetText);
 						updateRomajiGuide();
 						initializeInputStates();
-						
+
 						// Reset input tracking for new card
 						currentInput = '';
 						completedHiraganaCount = 0;
@@ -155,6 +158,9 @@
 			}
 
 			isLoading = false;
+			if (!gameStarted) {
+				showCountdown = true;
+			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'ゲームの初期化に失敗しました';
 			isLoading = false;
@@ -175,13 +181,20 @@
 
 	async function initializeGame() {
 		console.log('initializeGame started');
-		
+
 		// Check if coming from specific mode selection
 		const isFromSpecificMode = data.isFromSpecific || false;
-		
+
 		// Use cards from page data
 		const cards = data.cards;
-		console.log('cards from data:', cards?.length, 'first card:', cards?.[0], 'isFromSpecificMode:', isFromSpecificMode);
+		console.log(
+			'cards from data:',
+			cards?.length,
+			'first card:',
+			cards?.[0],
+			'isFromSpecificMode:',
+			isFromSpecificMode
+		);
 
 		// Initialize based on mode
 		if (gameMode === 'practice') {
@@ -193,7 +206,7 @@
 			// Check if practice mode store already has cards (from specific mode selection)
 			const currentState = get(practiceModeStore);
 			const hasExistingCards = currentState.cards && currentState.cards.length > 0;
-			
+
 			if (isFromSpecificMode && hasExistingCards) {
 				console.log('Using existing cards from specific mode:', currentState.cards.length);
 				// Don't reinitialize, cards are already set from specific mode
@@ -258,7 +271,7 @@
 
 				// Check if card index changed (even if it's the same card content)
 				const cardIndexChanged = state.currentIndex !== previousCardIndex;
-				
+
 				// Update all state values - directly assign without any async operations
 				if (newCard) {
 					currentCard = newCard;
@@ -266,7 +279,7 @@
 				}
 				cardIndex = state.currentIndex;
 				previousCardIndex = state.currentIndex;
-				
+
 				// Only update totalCards if we have cards
 				if (state.cards && state.cards.length > 0) {
 					totalCards = state.cards.length;
@@ -276,7 +289,11 @@
 					total: state.statistics.totalKeystrokes,
 					accuracy:
 						state.statistics.totalKeystrokes > 0
-							? Math.round((state.statistics.correctKeystrokes / state.statistics.totalKeystrokes) * 100 * 100) / 100
+							? Math.round(
+									(state.statistics.correctKeystrokes / state.statistics.totalKeystrokes) *
+										100 *
+										100
+								) / 100
 							: 100,
 					speed: practiceModeStore.calculateWPM(),
 					combo: state.statistics.currentCombo,
@@ -286,27 +303,30 @@
 				// Update validator if card changed (check both content and index)
 				if (currentCard && cardIndexChanged) {
 					const targetText = currentCard.hiragana.replace(/\s/g, '');
-					
+
 					// Reset validator if text changed
 					if (!validator || validator.getTarget() !== targetText) {
 						validator = new InputValidator();
 						validator.setTarget(targetText);
 					}
-					
+
 					// Always reset these when card index changes
 					updateRomajiGuide();
 					initializeInputStates();
-					
+
 					// Reset input tracking variables
 					currentInput = '';
 					completedHiraganaCount = 0;
 					inputProgress = 0;
 				}
 
-				// Set loading to false only after updating all values
+				// Set loading to false and show countdown after updating all values
 				if (state.cards && state.cards.length > 0) {
-					console.log('Setting isLoading to false');
+					console.log('Setting isLoading to false and showing countdown');
 					isLoading = false;
+					if (!gameStarted) {
+						showCountdown = true;
+					}
 				}
 			});
 		} else {
@@ -318,7 +338,7 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (isPaused || isGameComplete || !currentCard) return;
+		if (isPaused || isGameComplete || !currentCard || showCountdown) return;
 
 		// Prevent default for game keys
 		if (event.key.length === 1 || event.key === 'Backspace') {
@@ -495,10 +515,10 @@
 			}
 
 			completedHiraganaCount = completedCount;
-			
+
 			// Update dynamic romaji guide based on input
 			updateDynamicRomajiGuide();
-			
+
 			// Update romaji states to show completed characters
 			for (let i = 0; i < newInput.length; i++) {
 				romajiStates[i] = 'correct';
@@ -538,7 +558,7 @@
 					inputStates[i] = 'pending';
 				}
 			}
-			
+
 			// Update romaji states to show error at current position
 			for (let i = 0; i < currentInput.length; i++) {
 				romajiStates[i] = 'correct';
@@ -668,10 +688,10 @@
 					inputStates[i] = 'pending';
 				}
 			}
-			
+
 			// Update dynamic romaji guide after backspace
 			updateDynamicRomajiGuide();
-			
+
 			// Update romaji states after backspace
 			for (let i = 0; i < currentInput.length; i++) {
 				romajiStates[i] = 'correct';
@@ -729,36 +749,36 @@
 		const patterns = validator.getRomajiPatterns(targetText);
 		romajiGuide = patterns[0] || '';
 	}
-	
+
 	// Dynamically update romaji guide based on user input
 	function updateDynamicRomajiGuide() {
 		if (!validator || !currentCard) {
 			updateRomajiGuide();
 			return;
 		}
-		
+
 		if (!currentInput) {
 			updateRomajiGuide();
 			return;
 		}
-		
+
 		const targetText = currentCard.hiragana.replace(/\s/g, '');
 		const hiraganaUnits = parseHiraganaUnits(targetText);
 		let newRomajiGuide = '';
 		let tempInput = currentInput;
-		
+
 		for (let i = 0; i < hiraganaUnits.length; i++) {
 			const unit = hiraganaUnits[i];
 			const patterns = validator.getRomajiPatterns(unit);
 			let usedPattern = '';
 			let consumed = 0;
-			
+
 			// Check if we have input for this character
 			if (tempInput.length > 0 && i <= completedHiraganaCount) {
 				// Special handling for 'ん'
 				if (unit === 'ん') {
 					const isLastChar = i === hiraganaUnits.length - 1;
-					
+
 					if (tempInput.startsWith('nn')) {
 						// User typed 'nn' - show 'nn' pattern
 						usedPattern = 'nn';
@@ -767,7 +787,7 @@
 						// User typed single 'n'
 						const charAfterN = tempInput[1];
 						const nextUnit = hiraganaUnits[i + 1];
-						
+
 						if (charAfterN === 'n') {
 							// User typed 'nn' - show 'nn' pattern
 							usedPattern = 'nn';
@@ -790,16 +810,22 @@
 						} else {
 							// Determine the required pattern based on the next unit
 							let requiredPattern = 'n';
-							
+
 							// Special cases that require 'nn'
 							if (nextUnit === 'にゃ' || nextUnit === 'にゅ' || nextUnit === 'にょ') {
 								requiredPattern = 'nn';
-							} else if (nextUnit === 'な' || nextUnit === 'に' || nextUnit === 'ぬ' || nextUnit === 'ね' || nextUnit === 'の') {
+							} else if (
+								nextUnit === 'な' ||
+								nextUnit === 'に' ||
+								nextUnit === 'ぬ' ||
+								nextUnit === 'ね' ||
+								nextUnit === 'の'
+							) {
 								requiredPattern = 'nn';
 							} else if (/^[あいうえおやゆよ]/.test(nextUnit)) {
 								requiredPattern = 'nn';
 							}
-							
+
 							if (requiredPattern === 'nn') {
 								if (charAfterN === 'n') {
 									// User typed 'nn'
@@ -816,7 +842,10 @@
 								}
 							} else {
 								// Single 'n' is valid
-								if (charAfterN && validator.getRomajiPatterns(nextUnit).some(p => p.startsWith(charAfterN))) {
+								if (
+									charAfterN &&
+									validator.getRomajiPatterns(nextUnit).some((p) => p.startsWith(charAfterN))
+								) {
 									// The character after 'n' matches the start of next unit's pattern
 									usedPattern = 'n';
 									consumed = 1;
@@ -840,7 +869,9 @@
 							} else {
 								const nextPatterns = validator.getRomajiPatterns(nextUnit);
 								const initials = new Set<string>();
-								nextPatterns.forEach((p) => { if (p && p.length > 0) initials.add(p[0]); });
+								nextPatterns.forEach((p) => {
+									if (p && p.length > 0) initials.add(p[0]);
+								});
 								const requiresDoubleN = Array.from(initials).some((c) => /[aiueoyn]/.test(c));
 								usedPattern = requiresDoubleN ? 'nn' : 'n';
 							}
@@ -848,7 +879,7 @@
 							usedPattern = patterns[0] || 'n';
 						}
 					}
-				} 
+				}
 				// Special handling for other characters with alternative inputs
 				else if (unit === 'し' && (tempInput.startsWith('si') || tempInput === 's')) {
 					usedPattern = 'si';
@@ -876,13 +907,13 @@
 							break;
 						}
 					}
-					
+
 					// If no match found, use default pattern
 					if (!usedPattern) {
 						usedPattern = patterns[0] || '';
 					}
 				}
-				
+
 				// Update temp input
 				if (consumed > 0) {
 					tempInput = tempInput.slice(consumed);
@@ -897,7 +928,13 @@
 							usedPattern = 'nn';
 						}
 						// な行（な、に、ぬ、ね、の）の前は 'nn' が必須
-						else if (nextUnit === 'な' || nextUnit === 'に' || nextUnit === 'ぬ' || nextUnit === 'ね' || nextUnit === 'の') {
+						else if (
+							nextUnit === 'な' ||
+							nextUnit === 'に' ||
+							nextUnit === 'ぬ' ||
+							nextUnit === 'ね' ||
+							nextUnit === 'の'
+						) {
 							usedPattern = 'nn';
 						}
 						// 母音・や行の前も 'nn' が必須
@@ -916,10 +953,10 @@
 					usedPattern = patterns[0] || '';
 				}
 			}
-			
+
 			newRomajiGuide += usedPattern;
 		}
-		
+
 		romajiGuide = newRomajiGuide;
 	}
 
@@ -946,7 +983,7 @@
 		currentInput = '';
 		inputProgress = 0;
 		completedHiraganaCount = 0;
-		
+
 		// Reset input states arrays to clear highlighting
 		if (currentCard) {
 			const targetText = currentCard.hiragana.replace(/\s/g, '');
@@ -1001,6 +1038,18 @@
 
 		for (let i = startIdx; i < endIdx; i++) {
 			romajiStates[i] = isCorrect ? 'correct' : 'pending';
+		}
+	}
+
+	function handleCountdownComplete() {
+		showCountdown = false;
+		gameStarted = true;
+
+		// Start the game timer
+		if (gameMode === 'practice') {
+			practiceModeStore.resume();
+		} else {
+			gameStore.resumeGame();
 		}
 	}
 </script>
@@ -1071,6 +1120,11 @@
 				onResume={handleResumeFromOverlay}
 				onExit={confirmExit}
 			/>
+
+			<!-- Countdown Overlay -->
+			{#if showCountdown}
+				<Countdown onComplete={handleCountdownComplete} />
+			{/if}
 
 			<!-- Exit Confirmation -->
 			{#if showExitConfirm}

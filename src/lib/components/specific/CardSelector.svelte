@@ -21,7 +21,7 @@
 			// 新しいSetを作成して反応性を確保
 			selectedCardIds = new Set(state.selectedCardIds);
 		});
-		
+
 		return () => unsubscribe();
 	});
 

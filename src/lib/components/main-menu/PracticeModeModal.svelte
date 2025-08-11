@@ -31,7 +31,7 @@
 </script>
 
 {#if isOpen}
-	<div 
+	<div
 		class="modal-backdrop"
 		onclick={handleBackdropClick}
 		onkeydown={handleKeydown}
@@ -41,47 +41,27 @@
 		tabindex="-1"
 	>
 		<div class="modal-content">
-			<h2 id="practice-modal-title" class="modal-title">
-				練習モードを選択
-			</h2>
-			
+			<h2 id="practice-modal-title" class="modal-title">練習モードを選択</h2>
+
 			<div class="modal-body">
-				<p class="modal-description">
-					どちらの練習モードで始めますか？
-				</p>
-				
+				<p class="modal-description">どちらの練習モードで始めますか？</p>
+
 				<div class="button-container">
-					<button
-						onclick={handlePracticeMode}
-						class="mode-button practice-button"
-						type="button"
-					>
+					<button onclick={handlePracticeMode} class="mode-button practice-button" type="button">
 						<span class="button-icon">📚</span>
 						<span class="button-title">全44札を順番に練習</span>
 					</button>
-					
-					<button
-						onclick={handleSpecificMode}
-						class="mode-button specific-button"
-						type="button"
-					>
+
+					<button onclick={handleSpecificMode} class="mode-button specific-button" type="button">
 						<span class="button-icon">🎯</span>
 						<span class="button-title">特定札で練習</span>
-						<span class="button-description">
-							好みの札を選んで、集中的に練習します
-						</span>
+						<span class="button-description"> 好みの札を選んで、集中的に練習します </span>
 					</button>
 				</div>
 			</div>
-			
+
 			<div class="modal-footer">
-				<button
-					onclick={onclose}
-					class="cancel-button"
-					type="button"
-				>
-					キャンセル
-				</button>
+				<button onclick={onclose} class="cancel-button" type="button"> キャンセル </button>
 			</div>
 		</div>
 	</div>
@@ -110,7 +90,9 @@
 		width: 90%;
 		max-height: 90vh;
 		overflow-y: auto;
-		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		box-shadow:
+			0 20px 25px -5px rgba(0, 0, 0, 0.1),
+			0 10px 10px -5px rgba(0, 0, 0, 0.04);
 		animation: slideUp 0.3s ease-out;
 	}
 
@@ -155,7 +137,9 @@
 		border-color: #22c55e; /* green-500 */
 		background: #f0fdf4; /* green-50 */
 		transform: translateY(-2px);
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 	}
 
 	.button-icon {

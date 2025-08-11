@@ -1,79 +1,79 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { karutaCards } from '$lib/data/karuta-cards';
-	
+
 	// カルタカードをランダムに並べ替えて重複させる（スムーズなループのため）
 	const shuffledYomifuda = [...karutaCards].sort(() => Math.random() - 0.5);
 	const shuffledTorifuda = [...karutaCards].sort(() => Math.random() - 0.5);
 	// 2セット用意してシームレスなループを実現
 	const displayYomifuda = [...shuffledYomifuda, ...shuffledYomifuda];
 	const displayTorifuda = [...shuffledTorifuda, ...shuffledTorifuda];
-	
+
 	let yomifudaRef: HTMLDivElement;
 	let torifudaRef: HTMLDivElement;
 	let animationId: number;
 	let yomifudaScrollPosition = 0;
 	let torifudaScrollPosition = 0;
 	let isPaused = false;
-	
+
 	// アニメーション設定
 	const SCROLL_SPEED = 0.5; // ピクセル/フレーム
 	const YOMIFUDA_CARD_WIDTH = 170; // 読み札の幅 + 間隔（120→170に拡大）
 	const TORIFUDA_CARD_WIDTH = 160; // 取り札の幅 + 間隔（120→160に拡大）
 	const YOMIFUDA_TOTAL_WIDTH = shuffledYomifuda.length * YOMIFUDA_CARD_WIDTH;
 	const TORIFUDA_TOTAL_WIDTH = shuffledTorifuda.length * TORIFUDA_CARD_WIDTH;
-	
+
 	onMount(() => {
 		startAnimation();
 	});
-	
+
 	onDestroy(() => {
 		if (animationId) {
 			cancelAnimationFrame(animationId);
 		}
 	});
-	
+
 	function startAnimation() {
 		// 取り札の初期位置を右端に設定（負の値で右側から開始）
 		torifudaScrollPosition = -TORIFUDA_TOTAL_WIDTH;
-		
+
 		function animate() {
 			if (!isPaused) {
 				// 読み札は右から左へ（既存のまま）
 				yomifudaScrollPosition += SCROLL_SPEED;
-				
+
 				// 取り札は左から右へ（値を増やして右へ移動）
 				torifudaScrollPosition += SCROLL_SPEED;
-				
+
 				// 読み札: 1セット分スクロールしたらリセット
 				if (yomifudaScrollPosition >= YOMIFUDA_TOTAL_WIDTH) {
 					yomifudaScrollPosition = 0;
 				}
-				
+
 				// 取り札: 右端に達したらリセット（左端から再開）
 				if (torifudaScrollPosition >= 0) {
 					torifudaScrollPosition = -TORIFUDA_TOTAL_WIDTH;
 				}
-				
+
 				if (yomifudaRef) {
 					yomifudaRef.style.transform = `translateX(-${yomifudaScrollPosition}px)`;
 				}
-				
+
 				if (torifudaRef) {
 					torifudaRef.style.transform = `translateX(${torifudaScrollPosition}px)`;
 				}
 			}
-			
+
 			animationId = requestAnimationFrame(animate);
 		}
-		
+
 		animate();
 	}
-	
+
 	function handleMouseEnter() {
 		isPaused = true;
 	}
-	
+
 	function handleMouseLeave() {
 		isPaused = false;
 	}
@@ -82,7 +82,7 @@
 <div class="karuta-slideshow-container">
 	<!-- 取り札（上段、左から右へ） -->
 	<div class="karuta-slideshow-wrapper torifuda-wrapper">
-		<div 
+		<div
 			class="karuta-slideshow"
 			bind:this={torifudaRef}
 			onmouseenter={handleMouseEnter}
@@ -102,10 +102,10 @@
 			{/each}
 		</div>
 	</div>
-	
+
 	<!-- 読み札（下段、右から左へ） -->
 	<div class="karuta-slideshow-wrapper yomifuda-wrapper">
-		<div 
+		<div
 			class="karuta-slideshow"
 			bind:this={yomifudaRef}
 			onmouseenter={handleMouseEnter}
@@ -125,7 +125,7 @@
 			{/each}
 		</div>
 	</div>
-	
+
 	<!-- グラデーションマスク（左右のフェード効果） -->
 	<div class="gradient-mask gradient-mask-left"></div>
 	<div class="gradient-mask gradient-mask-right"></div>
@@ -139,7 +139,7 @@
 		overflow: hidden;
 		margin: 1.5rem 0;
 	}
-	
+
 	.karuta-slideshow-wrapper {
 		position: absolute;
 		width: 100%;
@@ -148,22 +148,22 @@
 		align-items: center;
 		overflow: hidden;
 	}
-	
+
 	.torifuda-wrapper {
 		top: 0;
 	}
-	
+
 	.yomifuda-wrapper {
 		bottom: 0;
 	}
-	
+
 	.karuta-slideshow {
 		display: flex;
 		gap: 1rem;
 		transition: transform 0.1s linear;
 		will-change: transform;
 	}
-	
+
 	.karuta-card {
 		flex-shrink: 0;
 		width: 150px; /* 100px → 150px に拡大 */
@@ -172,32 +172,34 @@
 		border-radius: 8px;
 		overflow: hidden;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		transition: transform 0.3s ease, box-shadow 0.3s ease;
+		transition:
+			transform 0.3s ease,
+			box-shadow 0.3s ease;
 		cursor: pointer;
 	}
-	
+
 	.karuta-card:hover {
 		transform: translateY(-5px) scale(1.05);
 		box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
 		z-index: 10;
 	}
-	
+
 	.karuta-image {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 	}
-	
+
 	/* 取り札のスタイル調整 */
 	.torifuda-card {
 		width: 140px; /* 幅は140pxのまま */
 		height: 168px; /* 読み札と同じ縦横比（140 * 1.2 = 168）に修正 */
 	}
-	
+
 	.torifuda-image {
 		object-fit: contain; /* coverからcontainに戻して見切れを防ぐ */
 	}
-	
+
 	.karuta-overlay {
 		position: absolute;
 		bottom: 0;
@@ -209,14 +211,14 @@
 		justify-content: center;
 		align-items: flex-end;
 	}
-	
+
 	.karuta-id {
 		color: white;
 		font-weight: bold;
 		font-size: 0.875rem;
 		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 	}
-	
+
 	/* グラデーションマスク */
 	.gradient-mask {
 		position: absolute;
@@ -226,58 +228,62 @@
 		pointer-events: none;
 		z-index: 5;
 	}
-	
+
 	.gradient-mask-left {
 		left: 0;
-		background: linear-gradient(to right, 
+		background: linear-gradient(
+			to right,
 			rgba(248, 254, 247, 1) 0%,
 			rgba(248, 254, 247, 0.8) 30%,
-			rgba(248, 254, 247, 0) 100%);
+			rgba(248, 254, 247, 0) 100%
+		);
 	}
-	
+
 	.gradient-mask-right {
 		right: 0;
-		background: linear-gradient(to left, 
+		background: linear-gradient(
+			to left,
 			rgba(248, 254, 247, 1) 0%,
 			rgba(248, 254, 247, 0.8) 30%,
-			rgba(248, 254, 247, 0) 100%);
+			rgba(248, 254, 247, 0) 100%
+		);
 	}
-	
+
 	/* レスポンシブ対応 */
 	@media (max-width: 640px) {
 		.karuta-slideshow-container {
 			height: 320px; /* 2段分に調整 240px → 320px */
 		}
-		
+
 		.karuta-slideshow-wrapper {
 			height: 150px; /* 110px → 150px */
 		}
-		
+
 		.karuta-card {
 			width: 110px; /* 80px → 110px */
 			height: 140px; /* 104px → 140px */
 		}
-		
+
 		.torifuda-card {
 			width: 110px; /* 幅は110px */
 			height: 132px; /* 読み札と同じ縦横比（110 * 1.2 = 132）に修正 */
 		}
-		
+
 		.karuta-id {
 			font-size: 0.875rem; /* 少し大きく */
 		}
-		
+
 		.gradient-mask {
 			width: 60px;
 		}
 	}
-	
+
 	/* アニメーションの滑らかさを向上 */
 	@media (prefers-reduced-motion: reduce) {
 		.karuta-slideshow {
 			animation: none !important;
 		}
-		
+
 		.karuta-card:hover {
 			transform: none;
 		}
