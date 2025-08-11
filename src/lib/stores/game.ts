@@ -382,7 +382,7 @@ export function createGameStore() {
 				...state,
 				score: {
 					...state.score,
-					accuracy: Math.round(accuracy * 10) / 10,
+					accuracy: accuracy,
 					speed
 				}
 			};

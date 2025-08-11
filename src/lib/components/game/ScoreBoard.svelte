@@ -20,7 +20,7 @@
 		</div>
 		<div>
 			<p class="text-sm text-gray-600">正確率</p>
-			<p class="text-xl font-bold">{score.accuracy}%</p>
+			<p class="text-xl font-bold">{score.accuracy.toFixed(2)}%</p>
 		</div>
 		<div>
 			<p class="text-sm text-gray-600">WPM</p>

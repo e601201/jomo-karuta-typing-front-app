@@ -168,7 +168,7 @@
 						</div>
 						<div class="rounded-lg bg-gray-50 p-3 text-center">
 							<p class="text-sm text-gray-600">正確率</p>
-							<p class="text-xl font-bold">正確率: {gameStats.accuracy}%</p>
+							<p class="text-xl font-bold">正確率: {gameStats.accuracy.toFixed(2)}%</p>
 						</div>
 					</div>
 

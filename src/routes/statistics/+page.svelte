@@ -319,7 +319,7 @@
 										{session.wpm}
 									</td>
 									<td class="px-6 py-4 text-sm whitespace-nowrap">
-										{session.accuracy.toFixed(1)}%
+										{session.accuracy.toFixed(2)}%
 									</td>
 									<td class="px-6 py-4 text-sm whitespace-nowrap">
 										{session.score.toLocaleString()}

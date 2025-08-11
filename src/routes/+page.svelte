@@ -120,7 +120,6 @@
 		<!-- Header -->
 		<header class="mb-12 text-center">
 			<h1 class="mb-4 text-4xl font-bold text-green-800 md:text-5xl">上毛カルタタイピング</h1>
-			<p class="text-lg text-gray-600">群馬の郷土カルタでタイピング練習</p>
 		</header>
 
 		<!-- Content -->

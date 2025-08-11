@@ -154,7 +154,7 @@
 			<div>
 				<p class="text-sm text-gray-600 dark:text-gray-400">平均正確率</p>
 				<div class="flex items-baseline gap-2">
-					<p class="text-2xl font-bold">{stats.averageAccuracy.toFixed(1)}%</p>
+					<p class="text-2xl font-bold">{stats.averageAccuracy.toFixed(2)}%</p>
 					{#if accuracyComparison && accuracyComparison.direction !== 'same'}
 						<span
 							data-testid="accuracy-indicator"
@@ -163,11 +163,11 @@
 								: 'text-red-600'}"
 						>
 							{accuracyComparison.direction === 'up' ? '↑' : '↓'}
-							{accuracyComparison.value > 0 ? '+' : ''}{accuracyComparison.value.toFixed(1)}%
+							{accuracyComparison.value > 0 ? '+' : ''}{accuracyComparison.value.toFixed(2)}%
 						</span>
 					{/if}
 				</div>
-				<p class="text-xs text-gray-500">最高: {stats.maxAccuracy.toFixed(1)}%</p>
+				<p class="text-xs text-gray-500">最高: {stats.maxAccuracy.toFixed(2)}%</p>
 			</div>
 			<svg class="h-8 w-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path

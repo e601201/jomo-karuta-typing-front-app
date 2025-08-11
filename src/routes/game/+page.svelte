@@ -265,7 +265,7 @@
 					total: state.statistics.totalKeystrokes,
 					accuracy:
 						state.statistics.totalKeystrokes > 0
-							? (state.statistics.correctKeystrokes / state.statistics.totalKeystrokes) * 100
+							? Math.round((state.statistics.correctKeystrokes / state.statistics.totalKeystrokes) * 100 * 100) / 100
 							: 100,
 					speed: practiceModeStore.calculateWPM(),
 					combo: state.statistics.currentCombo,
@@ -1018,7 +1018,7 @@
 				<h2 class="mb-4 text-3xl font-bold text-green-800">ゲーム完了！</h2>
 				<div data-testid="final-score" class="mb-6">
 					<p class="text-xl">スコア: {score.total}</p>
-					<p>正確率: {score.accuracy}%</p>
+					<p>正確率: {score.accuracy.toFixed(2)}%</p>
 					<p>WPM: {score.speed}</p>
 					<p>最大コンボ: {score.maxCombo}</p>
 				</div>
@@ -1120,15 +1120,6 @@
 					/>
 				</div>
 			{/if}
-
-			<!-- Input Progress -->
-			<div class="mb-6 h-4 w-full rounded-full bg-gray-200">
-				<div
-					data-testid="input-progress"
-					class="h-4 rounded-full bg-blue-600 transition-all duration-300"
-					style="width: {inputProgress}%"
-				></div>
-			</div>
 
 			<!-- Score Display -->
 			<div class="mb-6 rounded-lg bg-white p-4 shadow-md">

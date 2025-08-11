@@ -321,8 +321,14 @@ function createStatisticsStore() {
 
 		// Save session
 		saveSession: async (session: SessionStats) => {
+			// Round accuracy to 2 decimal places
+			const roundedSession = {
+				...session,
+				accuracy: Math.round(session.accuracy * 100) / 100
+			};
+			
 			update((state) => {
-				const newSessions = [...state.sessions, session];
+				const newSessions = [...state.sessions, roundedSession];
 				const overall = calculateOverallStats(newSessions);
 				return {
 					...state,
@@ -332,7 +338,7 @@ function createStatisticsStore() {
 			});
 
 			try {
-				await db.addSession(session);
+				await db.addSession(roundedSession);
 			} catch (error) {
 				console.error('Failed to save session:', error);
 			}
