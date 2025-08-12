@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy, tick } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { get } from 'svelte/store';
 	import { gameStore } from '$lib/stores/game';
@@ -8,7 +8,7 @@
 	import { LocalStorageService } from '$lib/services/storage/local-storage';
 	import type { GameMode, KarutaCard } from '$lib/types';
 
-	// Page data from +page.ts
+	// +page.tsからのページデータ
 	interface Props {
 		data: {
 			mode: GameMode;
@@ -21,17 +21,13 @@
 
 	let { data }: Props = $props();
 
-	// Components
+	// コンポーネント
 	import CardDisplay from '$lib/components/game/CardDisplay.svelte';
-	import InputDisplay from '$lib/components/game/InputDisplay.svelte';
 	import InputHighlight from '$lib/components/game/InputHighlight.svelte';
-	import ProgressBar from '$lib/components/game/ProgressBar.svelte';
-	import ScoreBoard from '$lib/components/game/ScoreBoard.svelte';
-	import GameControls from '$lib/components/game/GameControls.svelte';
 	import PauseOverlay from '$lib/components/game/PauseOverlay.svelte';
 	import Countdown from '$lib/components/game/Countdown.svelte';
 
-	// State
+	// 状態
 	let gameMode: GameMode | null = $state(null);
 	let shouldContinue = $state(false);
 	let isLoading = $state(true);
@@ -41,7 +37,7 @@
 	let showCountdown = $state(false);
 	let gameStarted = $state(false);
 
-	// Game state from store
+	// ストアからのゲーム状態
 	let currentCard = $state<KarutaCard | null>(null);
 	let cardIndex = $state(0);
 	let totalCards = $state(44);
@@ -53,67 +49,47 @@
 	let pauseCount = $state(0);
 	let totalPauseTime = $state(0);
 
-	// Track previous card index to detect card changes
+	// カード変更を検出するための前回のカードインデックスを追跡
 	let previousCardIndex = -1;
 
-	// Input validation
+	// 入力検証
 	let validator: InputValidator | null = null;
 	let romajiGuide = $state('');
 
-	// Debug reactive value
-	$effect(() => {
-		if (currentCard) {
-			console.log('$effect: currentCard is now:', currentCard.id, currentCard.hiragana);
-		} else {
-			console.log('$effect: currentCard is now null');
-		}
-	});
 	let inputProgress = $state(0);
 	let inputStates = $state<Array<'pending' | 'correct' | 'incorrect' | 'current'>>([]);
 	let romajiStates = $state<Array<'pending' | 'correct' | 'incorrect'>>([]);
 	let currentInput = $state('');
 	let showError = $state(false);
 
-	// Store subscription
+	// ストアのサブスクリプション
 	let unsubscribe: (() => void) | null = null;
 
 	onMount(async () => {
-		console.log('onMount started, data:', data);
 		try {
-			// Check for error in page data
+			// ページデータのエラーをチェック
 			if (data.error) {
-				console.log('data.error', data.error);
 				error = data.error;
 				isLoading = false;
 				return;
 			}
 
-			// Use data from +page.ts
+			// +page.tsからのデータを使用
 			gameMode = data.mode;
 			shouldContinue = data.resume;
 
-			// Check if coming from specific mode selection
+			// 特定モード選択から来たかどうかをチェック
 			const isFromSpecificMode = data.isFromSpecific || false;
 
-			// Don't set totalCards from data.cards if coming from specific mode
+			// 特定モードから来た場合はdata.cardsからtotalCardsを設定しない
 			if (!isFromSpecificMode) {
 				totalCards = data.cards?.length || 0;
 			}
-			console.log(
-				'gameMode:',
-				gameMode,
-				'shouldContinue:',
-				shouldContinue,
-				'totalCards:',
-				totalCards,
-				'isFromSpecificMode:',
-				isFromSpecificMode
-			);
 
-			// Initialize game
+			// ゲームを初期化
 			await initializeGame();
 
-			// Subscribe to store - ONLY for non-practice modes
+			// ストアにサブスクライブ - 練習モード以外のみ
 			if (gameMode !== 'practice') {
 				let previousCardId: string | null = null;
 
@@ -129,30 +105,30 @@
 					totalPauseTime = state.timer.totalPauseTime || 0;
 					currentInput = state.input.current;
 
-					// Update validator if card changed
+					// カードが変更された場合はバリデータを更新
 					if (currentCard && currentCard.id !== previousCardId) {
 						previousCardId = currentCard.id;
 						validator = new InputValidator();
-						// Remove spaces from hiragana text for typing validation
+						// タイピング検証用にひらがなテキストからスペースを削除
 						const targetText = currentCard.hiragana.replace(/\s/g, '');
 						validator.setTarget(targetText);
 						updateRomajiGuide();
 						initializeInputStates();
 
-						// Reset input tracking for new card
+						// 新しいカード用に入力追跡をリセット
 						currentInput = '';
 						completedHiraganaCount = 0;
 						inputProgress = 0;
 					}
 
-					// Check if game is complete
+					// ゲームが完了したかチェック
 					if (state.cards.completed.length === totalCards && state.session?.isActive) {
 						isGameComplete = true;
 					}
 				});
 			}
 
-			// Setup keyboard handler
+			// キーボードハンドラの設定
 			if (typeof window !== 'undefined') {
 				document.addEventListener('keydown', handleKeydown);
 			}
@@ -173,49 +149,37 @@
 			document.removeEventListener('keydown', handleKeydown);
 		}
 
-		// Save progress before leaving
+		// 離れる前に進捗を保存
 		if (!isGameComplete) {
 			gameStore.endSession();
 		}
 	});
 
 	async function initializeGame() {
-		console.log('initializeGame started');
 
-		// Check if coming from specific mode selection
+		// 特定モード選択から来たかどうかをチェック
 		const isFromSpecificMode = data.isFromSpecific || false;
 
-		// Use cards from page data
+		// ページデータからカードを使用
 		const cards = data.cards;
-		console.log(
-			'cards from data:',
-			cards?.length,
-			'first card:',
-			cards?.[0],
-			'isFromSpecificMode:',
-			isFromSpecificMode
-		);
 
-		// Initialize based on mode
+		// モードに基づいて初期化
 		if (gameMode === 'practice') {
-			console.log('Initializing practice mode');
-			// Use practice mode store
+			// 練習モードストアを使用
 			const storage = new LocalStorageService();
 			storage.initialize();
 
-			// Check if practice mode store already has cards (from specific mode selection)
+			// 練習モードストアにすでにカードがあるかチェック（特定モード選択から）
 			const currentState = get(practiceModeStore);
 			const hasExistingCards = currentState.cards && currentState.cards.length > 0;
 
 			if (isFromSpecificMode && hasExistingCards) {
-				console.log('Using existing cards from specific mode:', currentState.cards.length);
-				// Don't reinitialize, cards are already set from specific mode
-				totalCards = currentState.cards.length; // Update total cards count
+				// 再初期化しない、カードはすでに特定モードから設定されている
+				totalCards = currentState.cards.length; // 総カード数を更新
 			} else if (shouldContinue) {
-				console.log('Resuming session');
-				// For resume, we need cards (should be all cards)
+				// 再開のためにカードが必要（全カードであるべき）
 				if (!cards || cards.length === 0) {
-					// Load all cards for resume
+					// 再開用に全カードをロード
 					const { getKarutaCards } = await import('$lib/data/karuta-cards');
 					const allCards = getKarutaCards();
 					await practiceModeStore.resumeFromSession(allCards, storage);
@@ -225,62 +189,47 @@
 					totalCards = cards.length;
 				}
 			} else if (!isFromSpecificMode) {
-				// Only initialize with all cards if not from specific mode
+				// 特定モードからでない場合のみ全カードで初期化
 				if (!cards || cards.length === 0) {
 					console.error('No cards available');
 					error = 'カードデータの読み込みに失敗しました';
 					isLoading = false;
 					return;
 				}
-				console.log('Starting new session with all cards');
 				practiceModeStore.initialize(cards, storage);
 				totalCards = cards.length;
 			} else {
-				// Coming from specific mode but no existing cards - this is an error
+				// 特定モードから来たが既存のカードがない - これはエラー
 				console.error('From specific mode but no cards in store');
 				error = '特定札が選択されていません';
 				isLoading = false;
 				return;
 			}
 
-			// Subscribe to practice mode store
+			// 練習モードストアにサブスクライブ
 			unsubscribe = practiceModeStore.subscribe((state) => {
-				console.log('Practice mode store update:', {
-					currentIndex: state.currentIndex,
-					cardsLength: state.cards?.length,
-					currentCard: state.cards?.[state.currentIndex],
-					firstCard: state.cards?.[0]
-				});
 
-				// Check if game is complete (all cards have been processed)
+				// ゲームが完了したかチェック（全カードが処理された）
 				if (state.currentIndex >= state.cards.length && state.cards.length > 0) {
-					console.log(
-						'Practice mode complete! currentIndex:',
-						state.currentIndex,
-						'total:',
-						state.cards.length
-					);
 					isGameComplete = true;
 					practiceModeStore.complete();
 					return;
 				}
 
-				// Update state values
+				// 状態値を更新
 				const newCard = state.cards?.[state.currentIndex] || null;
-				console.log('Setting currentCard to:', newCard);
 
-				// Check if card index changed (even if it's the same card content)
+				// カードインデックスが変更されたかチェック（同じカード内容でも）
 				const cardIndexChanged = state.currentIndex !== previousCardIndex;
 
-				// Update all state values - directly assign without any async operations
+				// 全状態値を更新 - 非同期操作なしで直接割り当て
 				if (newCard) {
 					currentCard = newCard;
-					console.log('currentCard set to:', currentCard);
 				}
 				cardIndex = state.currentIndex;
 				previousCardIndex = state.currentIndex;
 
-				// Only update totalCards if we have cards
+				// カードがある場合のみtotalCardsを更新
 				if (state.cards && state.cards.length > 0) {
 					totalCards = state.cards.length;
 				}
@@ -300,29 +249,28 @@
 					maxCombo: state.statistics.maxCombo
 				};
 
-				// Update validator if card changed (check both content and index)
+				// カードが変更された場合はバリデータを更新（内容とインデックス両方をチェック）
 				if (currentCard && cardIndexChanged) {
 					const targetText = currentCard.hiragana.replace(/\s/g, '');
 
-					// Reset validator if text changed
+					// テキストが変更された場合はバリデータをリセット
 					if (!validator || validator.getTarget() !== targetText) {
 						validator = new InputValidator();
 						validator.setTarget(targetText);
 					}
 
-					// Always reset these when card index changes
+					// カードインデックスが変更されたときは常にこれらをリセット
 					updateRomajiGuide();
 					initializeInputStates();
 
-					// Reset input tracking variables
+					// 入力追跡変数をリセット
 					currentInput = '';
 					completedHiraganaCount = 0;
 					inputProgress = 0;
 				}
 
-				// Set loading to false and show countdown after updating all values
+				// 全値を更新後、ローディングをfalseにしてカウントダウンを表示
 				if (state.cards && state.cards.length > 0) {
-					console.log('Setting isLoading to false and showing countdown');
 					isLoading = false;
 					if (!gameStarted) {
 						showCountdown = true;
@@ -330,22 +278,20 @@
 				}
 			});
 		} else {
-			// Use regular game store for other modes
+			// 他のモードでは通常のゲームストアを使用
 			gameStore.startSession(gameMode!, cards);
-
-			// First card is already loaded by startSession
 		}
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (isPaused || isGameComplete || !currentCard || showCountdown) return;
 
-		// Prevent default for game keys
+		// ゲームキーのデフォルト動作を防止
 		if (event.key.length === 1 || event.key === 'Backspace') {
 			event.preventDefault();
 		}
 
-		// Handle input
+		// 入力を処理
 		if (event.key === 'Backspace') {
 			handleBackspace();
 		} else if (event.key.length === 1 && (/^[a-zA-Z]$/.test(event.key) || event.key === '-')) {
@@ -355,10 +301,10 @@
 		}
 	}
 
-	// Track completed characters count
+	// 完了文字数を追跡
 	let completedHiraganaCount = $state(0);
 
-	// Parse hiragana text into typing units (considering multi-character units like きゃ、しゅ)
+	// ひらがなテキストをタイピング単位にパース（きゃ、しゅなどの複数文字単位を考慮）
 	function parseHiraganaUnits(text: string): string[] {
 		const units: string[] = [];
 		let i = 0;
@@ -367,7 +313,7 @@
 			const current = text[i];
 			const next = text[i + 1];
 
-			// Check for small ya, yu, yo (拗音)
+			// 小さいや、ゆ、よ（拗音）をチェック
 			if (
 				next &&
 				(next === 'ゃ' ||
@@ -382,9 +328,9 @@
 				units.push(current + next);
 				i += 2;
 			}
-			// Check for small tsu (促音)
+			// 小さいつ（促音）をチェック
 			else if (current === 'っ') {
-				// Small tsu is usually typed with the next consonant doubled
+				// 小さいつは通常、次の子音を二重にして入力
 				if (next) {
 					units.push(current + next);
 					i += 2;
@@ -407,16 +353,15 @@
 		const newInput = currentInput + char;
 		const targetText = currentCard.hiragana.replace(/\s/g, '');
 
-		console.log(`Input: "${newInput}", Target: "${targetText}"`);
 
-		// Validate the entire input string
+		// 入力文字列全体を検証
 		const result = validator.validateInput(targetText, newInput);
 
 		if (result.isValid) {
-			// Update the current input
+			// 現在の入力を更新
 			currentInput = newInput;
 
-			// Parse hiragana more carefully for multi-character units
+			// 複数文字単位に対してひらがなをより慎重にパース
 			const hiraganaUnits = parseHiraganaUnits(targetText);
 			let completedCount = 0;
 			let partiallyCompleteIndex = -1;
@@ -428,16 +373,16 @@
 				let matched = false;
 				let partial = false;
 
-				// Special handling for 'ん'
+				// 'ん'の特別処理
 				if (unit === 'ん') {
 					const isLastChar = i === hiraganaUnits.length - 1;
 
 					if (tempInput === 'n') {
-						// Just 'n' - always keep as partial
+						// 'n'のみ - 常に部分的として保持
 						partial = true;
 						partiallyCompleteIndex = i;
 					} else if (tempInput.startsWith('nn')) {
-						// 'nn' always completes 'ん'
+						// 'nn'は常に'ん'を完成
 						completedCount++;
 						tempInput = tempInput.slice(2);
 						matched = true;
@@ -445,35 +390,35 @@
 						const charAfterN = tempInput[1];
 
 						if (isLastChar) {
-							// Last character is 'ん' - must use 'nn', so this is invalid
-							// Keep as partial, waiting for second 'n'
+							// 最後の文字が'ん' - 'nn'を使う必要があるので、これは無効
+							// 2番目の'n'を待って部分的として保持
 							partial = true;
 							partiallyCompleteIndex = i;
 						} else {
-							// Not last character - check if 'n' can be accepted
+							// 最後の文字ではない - 'n'を受け入れられるかチェック
 							const nextUnit = hiraganaUnits[i + 1];
 							const nextPatterns = validator.getRomajiPatterns(nextUnit);
 
-							// Check if next hiragana can start with n + charAfterN
+							// 次のひらがながn + charAfterNで始まるかチェック
 							const canStartWithN = nextPatterns.some((p) => p.startsWith('n' + charAfterN));
 
 							if (!canStartWithN && charAfterN !== 'n') {
-								// This 'n' must be 'ん', complete it
+								// この'n'は'ん'である必要があり、完成する
 								completedCount++;
 								tempInput = tempInput.slice(1);
 								matched = true;
 							} else {
-								// Ambiguous or waiting for 'nn'
+								// 曖昧または'nn'を待っている
 								partial = true;
 								partiallyCompleteIndex = i;
 							}
 						}
 					}
 				} else {
-					// Normal character matching
+					// 通常の文字マッチング
 					for (const pattern of patterns) {
 						if (tempInput.startsWith(pattern)) {
-							// This hiragana is complete
+							// このひらがなは完成
 							completedCount++;
 							tempInput = tempInput.slice(pattern.length);
 							matched = true;
@@ -482,11 +427,11 @@
 					}
 				}
 
-				// Check for partial match if not completely matched
+				// 完全に一致しない場合は部分一致をチェック
 				if (!matched && !partial && tempInput.length > 0) {
 					for (const pattern of patterns) {
 						if (pattern.startsWith(tempInput)) {
-							// We're in the middle of typing this character
+							// この文字を入力中
 							partial = true;
 							partiallyCompleteIndex = i;
 							break;
@@ -494,7 +439,7 @@
 					}
 
 					if (!partial) {
-						break; // No match at all
+						break; // 全く一致しない
 					}
 				}
 
@@ -503,12 +448,12 @@
 				}
 			}
 
-			// Update highlight states
+			// ハイライト状態を更新
 			for (let i = 0; i < hiraganaUnits.length; i++) {
 				if (i < completedCount) {
 					inputStates[i] = 'correct';
 				} else if (i === partiallyCompleteIndex) {
-					inputStates[i] = 'pending'; // Show as currently being typed
+					inputStates[i] = 'pending'; // 現在入力中として表示
 				} else {
 					inputStates[i] = 'pending';
 				}
@@ -516,10 +461,10 @@
 
 			completedHiraganaCount = completedCount;
 
-			// Update dynamic romaji guide based on input
+			// 入力に基づいて動的ローマ字ガイドを更新
 			updateDynamicRomajiGuide();
 
-			// Update romaji states to show completed characters
+			// 完了文字を表示するためローマ字状態を更新
 			for (let i = 0; i < newInput.length; i++) {
 				romajiStates[i] = 'correct';
 			}
@@ -527,7 +472,7 @@
 				romajiStates[i] = 'pending';
 			}
 
-			// Update store based on mode
+			// モードに基づいてストアを更新
 			if (gameMode === 'practice') {
 				practiceModeStore.processKeystroke(true);
 			} else {
@@ -540,13 +485,13 @@
 
 			showError = false;
 		} else {
-			// Show error
+			// エラーを表示
 			showError = true;
 
-			// Parse hiragana units for error highlighting
+			// エラーハイライト用にひらがな単位をパース
 			const hiraganaUnits = parseHiraganaUnits(targetText);
 
-			// Find which character is being typed incorrectly
+			// どの文字が間違って入力されているかを特定
 			let errorIndex = completedHiraganaCount;
 			for (let i = 0; i < hiraganaUnits.length; i++) {
 				if (i < completedHiraganaCount) {
@@ -559,11 +504,11 @@
 				}
 			}
 
-			// Update romaji states to show error at current position
+			// 現在の位置にエラーを表示するためローマ字状態を更新
 			for (let i = 0; i < currentInput.length; i++) {
 				romajiStates[i] = 'correct';
 			}
-			// Mark the position where error occurred as incorrect
+			// エラーが発生した位置を不正としてマーク
 			if (currentInput.length < romajiGuide.length) {
 				romajiStates[currentInput.length] = 'incorrect';
 			}
@@ -573,20 +518,20 @@
 
 			mistakes++;
 
-			// Update store based on mode
+			// モードに基づいてストアを更新
 			if (gameMode === 'practice') {
 				practiceModeStore.processKeystroke(false);
 			} else {
-				gameStore.updateInput(currentInput); // Keep previous input
+				gameStore.updateInput(currentInput); // 前の入力を保持
 			}
 
-			// Reset error indicator after 500ms
+			// 500ms後にエラーインジケータをリセット
 			setTimeout(() => {
 				showError = false;
 				if (errorIndex < inputStates.length) {
 					inputStates[errorIndex] = 'pending';
 				}
-				// Reset romaji error state
+				// ローマ字エラー状態をリセット
 				if (currentInput.length < romajiGuide.length) {
 					romajiStates[currentInput.length] = 'pending';
 				}
@@ -598,7 +543,7 @@
 		if (currentInput.length > 0) {
 			currentInput = currentInput.slice(0, -1);
 
-			// Recalculate completed characters
+			// 完了文字を再計算
 			const targetText = currentCard?.hiragana.replace(/\s/g, '') || '';
 			const hiraganaUnits = parseHiraganaUnits(targetText);
 			let completedCount = 0;
@@ -611,16 +556,16 @@
 				let matched = false;
 				let partial = false;
 
-				// Special handling for 'ん'
+				// 'ん'の特別処理
 				if (unit === 'ん') {
 					const isLastChar = i === hiraganaUnits.length - 1;
 
 					if (tempInput === 'n') {
-						// Just 'n' - keep as partial
+						// 'n'のみ - 部分的として保持
 						partial = true;
 						partiallyCompleteIndex = i;
 					} else if (tempInput.startsWith('nn')) {
-						// 'nn' completes 'ん'
+						// 'nn'は'ん'を完成
 						completedCount++;
 						tempInput = tempInput.slice(2);
 						matched = true;
@@ -628,29 +573,29 @@
 						const charAfterN = tempInput[1];
 
 						if (isLastChar) {
-							// Last character must be 'nn'
+							// 最後の文字は'nn'である必要がある
 							partial = true;
 							partiallyCompleteIndex = i;
 						} else {
-							// Check if next hiragana could start with this
+							// 次のひらがながこれで始まるかチェック
 							const nextUnit = hiraganaUnits[i + 1];
 							const nextPatterns = validator?.getRomajiPatterns(nextUnit) || [];
 							const canStartWithN = nextPatterns.some((p) => p.startsWith('n' + charAfterN));
 
 							if (!canStartWithN && charAfterN !== 'n') {
-								// This 'n' is 'ん'
+								// この'n'は'ん'
 								completedCount++;
 								tempInput = tempInput.slice(1);
 								matched = true;
 							} else {
-								// Ambiguous
+								// 曖昧
 								partial = true;
 								partiallyCompleteIndex = i;
 							}
 						}
 					}
 				} else {
-					// Normal matching
+					// 通常のマッチング
 					for (const pattern of patterns) {
 						if (tempInput.startsWith(pattern)) {
 							completedCount++;
@@ -678,7 +623,7 @@
 
 			completedHiraganaCount = completedCount;
 
-			// Update input states
+			// 入力状態を更新
 			for (let i = 0; i < hiraganaUnits.length; i++) {
 				if (i < completedCount) {
 					inputStates[i] = 'correct';
@@ -689,10 +634,10 @@
 				}
 			}
 
-			// Update dynamic romaji guide after backspace
+			// バックスペース後に動的ローマ字ガイドを更新
 			updateDynamicRomajiGuide();
 
-			// Update romaji states after backspace
+			// バックスペース後にローマ字状態を更新
 			for (let i = 0; i < currentInput.length; i++) {
 				romajiStates[i] = 'correct';
 			}
@@ -701,7 +646,7 @@
 			}
 
 			if (gameMode === 'practice') {
-				// No need to update practice mode store for backspace
+				// バックスペースのために練習モードストアを更新する必要はない
 			} else {
 				gameStore.updateInput(currentInput);
 			}
@@ -710,15 +655,14 @@
 	}
 
 	function handleCardComplete() {
-		console.log('Card complete! Moving to next card...');
 
-		// Reset input state BEFORE moving to next card
+		// 次のカードに移る前に入力状態をリセット
 		inputPosition = 0;
 		currentInput = '';
 		inputProgress = 0;
 		completedHiraganaCount = 0;
 
-		// Reset input states arrays to clear green highlighting
+		// 緑色のハイライトをクリアするため入力状態配列をリセット
 		if (currentCard) {
 			const targetText = currentCard.hiragana.replace(/\s/g, '');
 			const hiraganaUnits = parseHiraganaUnits(targetText);
@@ -727,20 +671,18 @@
 		}
 
 		if (gameMode === 'practice') {
-			// Move to next card in practice mode
-			console.log('Calling practiceModeStore.nextCard');
+			// 練習モードで次のカードに移動
 			practiceModeStore.nextCard(true);
-			// Note: validator will be updated in the subscription callback
+			// 注：バリデータはサブスクリプションコールバックで更新される
 		} else {
 			gameStore.completeCard();
-			// Move to next card
+			// 次のカードに移動
 			if (cardIndex < totalCards - 1) {
 				gameStore.nextCard();
 			}
 		}
 
-		// Don't reset validator here - let the subscription handle it
-		console.log('Card complete handler finished');
+		// ここでバリデータをリセットしない - サブスクリプションに任せる
 	}
 
 	function updateRomajiGuide() {
@@ -750,7 +692,7 @@
 		romajiGuide = patterns[0] || '';
 	}
 
-	// Dynamically update romaji guide based on user input
+	// ユーザー入力に基づいてローマ字ガイドを動的に更新
 	function updateDynamicRomajiGuide() {
 		if (!validator || !currentCard) {
 			updateRomajiGuide();
@@ -773,45 +715,45 @@
 			let usedPattern = '';
 			let consumed = 0;
 
-			// Check if we have input for this character
+			// この文字に入力があるかチェック
 			if (tempInput.length > 0 && i <= completedHiraganaCount) {
-				// Special handling for 'ん'
+				// 'ん'の特別処理
 				if (unit === 'ん') {
 					const isLastChar = i === hiraganaUnits.length - 1;
 
 					if (tempInput.startsWith('nn')) {
-						// User typed 'nn' - show 'nn' pattern
+						// ユーザーが'nn'を入力 - 'nn'パターンを表示
 						usedPattern = 'nn';
 						consumed = 2;
 					} else if (tempInput.startsWith('n')) {
-						// User typed single 'n'
+						// ユーザーが単一の'n'を入力
 						const charAfterN = tempInput[1];
 						const nextUnit = hiraganaUnits[i + 1];
 
 						if (charAfterN === 'n') {
-							// User typed 'nn' - show 'nn' pattern
+							// ユーザーが'nn'を入力 - 'nn'パターンを表示
 							usedPattern = 'nn';
 							consumed = 2;
 						} else if (!nextUnit || isLastChar) {
-							// Last character - always show 'nn' pattern
+							// 最後の文字 - 常に'nn'パターンを表示
 							if (charAfterN === 'n') {
-								// User typed 'nn'
+								// ユーザーが'nn'を入力
 								usedPattern = 'nn';
 								consumed = 2;
 							} else if (!charAfterN && i === completedHiraganaCount) {
-								// Currently typing, show 'nn' as expected
+								// 現在入力中、期待どおり'nn'を表示
 								usedPattern = 'nn';
 								consumed = 0;
 							} else {
-								// Show 'nn' pattern
+								// 'nn'パターンを表示
 								usedPattern = 'nn';
 								consumed = 1;
 							}
 						} else {
-							// Determine the required pattern based on the next unit
+							// 次の単位に基づいて必要なパターンを決定
 							let requiredPattern = 'n';
 
-							// Special cases that require 'nn'
+							// 'nn'が必要な特別なケース
 							if (nextUnit === 'にゃ' || nextUnit === 'にゅ' || nextUnit === 'にょ') {
 								requiredPattern = 'nn';
 							} else if (
@@ -828,29 +770,29 @@
 
 							if (requiredPattern === 'nn') {
 								if (charAfterN === 'n') {
-									// User typed 'nn'
+									// ユーザーが'nn'を入力
 									usedPattern = 'nn';
 									consumed = 2;
 								} else if (!charAfterN && i === completedHiraganaCount) {
-									// Currently typing, show expected pattern
+									// 現在入力中、期待されるパターンを表示
 									usedPattern = 'nn';
 									consumed = 0;
 								} else {
-									// Show 'nn' pattern
+									// 'nn'パターンを表示
 									usedPattern = 'nn';
 									consumed = 1;
 								}
 							} else {
-								// Single 'n' is valid
+								// 単一の'n'が有効
 								if (
 									charAfterN &&
 									validator.getRomajiPatterns(nextUnit).some((p) => p.startsWith(charAfterN))
 								) {
-									// The character after 'n' matches the start of next unit's pattern
+									// 'n'の後の文字が次の単位のパターンの開始と一致
 									usedPattern = 'n';
 									consumed = 1;
 								} else if (!charAfterN && i === completedHiraganaCount) {
-									// Currently typing this 'ん' with just 'n'
+									// 現在'n'だけでこの'ん'を入力中
 									usedPattern = 'n';
 									consumed = 0;
 								} else {
@@ -860,10 +802,10 @@
 							}
 						}
 					} else {
-						// No 'n' input yet, choose default based on context
+						// まだ'n'の入力がない、コンテキストに基づいてデフォルトを選択
 						const nextUnit = hiraganaUnits[i + 1];
 						if (nextUnit) {
-							// Special case: にゃ, にゅ, にょ are independent sounds - use single 'n'
+							// 特別なケース：にゃ、にゅ、にょは独立した音 - 単一の'n'を使用
 							if (nextUnit === 'にゃ' || nextUnit === 'にゅ' || nextUnit === 'にょ') {
 								usedPattern = 'n';
 							} else {
@@ -880,7 +822,7 @@
 						}
 					}
 				}
-				// Special handling for other characters with alternative inputs
+				// 代替入力がある他の文字の特別処理
 				else if (unit === 'し' && (tempInput.startsWith('si') || tempInput === 's')) {
 					usedPattern = 'si';
 					consumed = tempInput.startsWith('si') ? 2 : tempInput.length;
@@ -894,36 +836,36 @@
 					usedPattern = 'hu';
 					consumed = tempInput.startsWith('hu') ? 2 : tempInput.length;
 				} else {
-					// Check standard patterns
+					// 標準パターンをチェック
 					for (const pattern of patterns) {
 						if (tempInput.startsWith(pattern)) {
 							usedPattern = pattern;
 							consumed = pattern.length;
 							break;
 						} else if (pattern.startsWith(tempInput) && i === completedHiraganaCount) {
-							// Currently typing this pattern
+							// 現在このパターンを入力中
 							usedPattern = pattern;
 							consumed = tempInput.length;
 							break;
 						}
 					}
 
-					// If no match found, use default pattern
+					// 一致が見つからない場合はデフォルトパターンを使用
 					if (!usedPattern) {
 						usedPattern = patterns[0] || '';
 					}
 				}
 
-				// Update temp input
+				// 一時入力を更新
 				if (consumed > 0) {
 					tempInput = tempInput.slice(consumed);
 				}
 			} else {
-				// No input for this character yet, choose default pattern
+				// この文字にはまだ入力がない、デフォルトパターンを選択
 				if (unit === 'ん') {
 					const nextUnit = hiraganaUnits[i + 1];
 					if (nextUnit) {
-						// Special case: にゃ, にゅ, にょ require 'nn' before them
+						// 特別なケース：にゃ、にゅ、にょの前には'nn'が必要
 						if (nextUnit === 'にゃ' || nextUnit === 'にゅ' || nextUnit === 'にょ') {
 							usedPattern = 'nn';
 						}
@@ -978,13 +920,13 @@
 	}
 
 	function handleSkip() {
-		// Reset input state
+		// 入力状態をリセット
 		inputPosition = 0;
 		currentInput = '';
 		inputProgress = 0;
 		completedHiraganaCount = 0;
 
-		// Reset input states arrays to clear highlighting
+		// ハイライトをクリアするため入力状態配列をリセット
 		if (currentCard) {
 			const targetText = currentCard.hiragana.replace(/\s/g, '');
 			const hiraganaUnits = parseHiraganaUnits(targetText);
@@ -993,7 +935,7 @@
 		}
 
 		if (gameMode === 'practice') {
-			// Skip card in practice mode
+			// 練習モードでカードをスキップ
 			practiceModeStore.nextCard(false);
 		} else if (cardIndex < totalCards - 1) {
 			gameStore.nextCard();
@@ -1028,24 +970,11 @@
 		romajiStates = new Array(romajiGuide.length).fill('pending');
 	}
 
-	function updateRomajiStates(hiraganaPosition: number, isCorrect: boolean) {
-		if (!romajiGuide) return;
-
-		// Simple mapping - can be improved with actual romaji mapping
-		const romajiPerChar = Math.ceil(romajiGuide.length / inputStates.length);
-		const startIdx = hiraganaPosition * romajiPerChar;
-		const endIdx = Math.min(startIdx + romajiPerChar, romajiGuide.length);
-
-		for (let i = startIdx; i < endIdx; i++) {
-			romajiStates[i] = isCorrect ? 'correct' : 'pending';
-		}
-	}
-
 	function handleCountdownComplete() {
 		showCountdown = false;
 		gameStarted = true;
 
-		// Start the game timer
+		// ゲームタイマーを開始
 		if (gameMode === 'practice') {
 			practiceModeStore.resume();
 		} else {
@@ -1061,19 +990,19 @@
 <main class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
 	<div data-testid="game-container" class="container mx-auto max-w-4xl flex-col px-4 py-8">
 		{#if isLoading}
-			<!-- Loading State -->
+			<!-- ローディング状態 -->
 			<div class="flex min-h-[400px] items-center justify-center">
 				<div class="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
 				<p class="ml-4">ゲームを準備中...</p>
 			</div>
 		{:else if error}
-			<!-- Error State -->
+			<!-- エラー状態 -->
 			<div class="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
 				<p class="mb-4 text-red-600">{error}</p>
 				<a href="/" class="text-blue-600 hover:underline">メインメニューに戻る</a>
 			</div>
 		{:else if isGameComplete}
-			<!-- Game Complete -->
+			<!-- ゲーム完了 -->
 			<div class="rounded-lg border border-green-200 bg-green-50 p-8 text-center">
 				<h2 class="mb-4 text-3xl font-bold text-green-800">ゲーム完了！</h2>
 				<div data-testid="final-score" class="mb-6">
@@ -1090,7 +1019,7 @@
 				</button>
 			</div>
 		{:else}
-			<!-- Game Header -->
+			<!-- ゲームヘッダー -->
 			<header class="mb-6 rounded-lg bg-white p-4 shadow-md">
 				<div class="flex items-center justify-between">
 					<div class="text-sm text-gray-600">
@@ -1105,7 +1034,7 @@
 				</div>
 			</header>
 
-			<!-- Enhanced Pause Overlay -->
+			<!-- 拡張一時停止オーバーレイ -->
 			<PauseOverlay
 				{isPaused}
 				gameStats={{
@@ -1120,12 +1049,12 @@
 				onExit={confirmExit}
 			/>
 
-			<!-- Countdown Overlay -->
+			<!-- カウントダウンオーバーレイ -->
 			{#if showCountdown}
 				<Countdown onComplete={handleCountdownComplete} />
 			{/if}
 
-			<!-- Exit Confirmation -->
+			<!-- 終了確認 -->
 			{#if showExitConfirm}
 				<div class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
 					<div class="rounded-lg bg-white p-8 text-center">
@@ -1149,7 +1078,7 @@
 				</div>
 			{/if}
 
-			<!-- Card Display -->
+			<!-- カード表示 -->
 			{#if isLoading}
 				<div class="mb-6 rounded-lg bg-gray-100 p-8 text-center">
 					<p class="text-gray-800">読み込み中...</p>
@@ -1169,7 +1098,7 @@
 				</div>
 			{/if}
 
-			<!-- Input Highlight Display -->
+			<!-- 入力ハイライト表示 -->
 			{#if currentCard}
 				<div class="mb-6">
 					<InputHighlight
@@ -1185,7 +1114,7 @@
 				</div>
 			{/if}
 
-			<!-- Score Display -->
+			<!-- スコア表示 -->
 			<div class="mb-6 rounded-lg bg-white p-4 shadow-md">
 				<div class="grid grid-cols-3 gap-4 text-center">
 					<div>
@@ -1207,7 +1136,7 @@
 				</div>
 			</div>
 
-			<!-- Game Controls -->
+			<!-- ゲームコントロール -->
 			<div class="flex justify-center gap-4">
 				<button
 					onclick={handlePause}
@@ -1229,7 +1158,7 @@
 				</button>
 			</div>
 
-			<!-- Hidden input for mobile -->
+			<!-- モバイル用の非表示入力 -->
 			<input
 				type="text"
 				class="sr-only"

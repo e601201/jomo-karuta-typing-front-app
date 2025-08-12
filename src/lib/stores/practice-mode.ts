@@ -54,12 +54,6 @@ function createPracticeModeStore() {
 		 * 練習モードを初期化
 		 */
 		initialize(cards: KarutaCard[], storage?: LocalStorageService) {
-			console.log(
-				'PracticeModeStore.initialize called with cards:',
-				cards?.length,
-				'first card:',
-				cards?.[0]
-			);
 			storageService = storage || new LocalStorageService();
 
 			update((state) => {
@@ -80,11 +74,6 @@ function createPracticeModeStore() {
 						maxCombo: 0
 					}
 				};
-				console.log('PracticeModeStore updated state:', {
-					cardsLength: newState.cards?.length,
-					currentIndex: newState.currentIndex,
-					firstCard: newState.cards?.[0]
-				});
 				return newState;
 			});
 
@@ -137,18 +126,9 @@ function createPracticeModeStore() {
 		 * 次の札へ進む
 		 */
 		nextCard(completed: boolean = true) {
-			console.log('PracticeModeStore.nextCard called, completed:', completed);
 			update((state) => {
 				const currentCard = state.cards[state.currentIndex];
 				const nextIndex = state.currentIndex + 1;
-				console.log(
-					'Current index:',
-					state.currentIndex,
-					'Next index:',
-					nextIndex,
-					'Total cards:',
-					state.cards.length
-				);
 
 				if (currentCard) {
 					if (completed) {
