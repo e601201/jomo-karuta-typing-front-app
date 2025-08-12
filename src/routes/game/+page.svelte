@@ -1113,7 +1113,6 @@
 					totalCards,
 					elapsedTime,
 					pauseCount,
-					totalPauseTime,
 					score: score.total || 0,
 					accuracy: score.accuracy || 100
 				}}
@@ -1159,7 +1158,7 @@
 				<div class="mb-2 text-xs text-gray-500">
 					デバッグ: カードID = {currentCard.id}, ひらがな = {currentCard.hiragana}
 				</div>
-				<CardDisplay card={currentCard} showFurigana={true} shake={showError} />
+				<CardDisplay card={currentCard} shake={showError} />
 			{:else}
 				<div class="mb-6 rounded-lg bg-yellow-100 p-8 text-center">
 					<p class="text-gray-800">カードを読み込み中...</p>
