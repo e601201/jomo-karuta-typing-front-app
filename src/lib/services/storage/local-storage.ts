@@ -561,8 +561,6 @@ export class LocalStorageService {
 	 * データマイグレーション
 	 */
 	private migrate(oldVersion: string, newVersion: string): void {
-		console.log(`Migrating from ${oldVersion} to ${newVersion}`);
-
 		// バージョンごとのマイグレーション処理
 		if (oldVersion === '0.9.0') {
 			// v0.9.0 → v1.0.0のマイグレーション

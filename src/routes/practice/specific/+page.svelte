@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { get } from 'svelte/store';
 	import CardSelector from '$lib/components/specific/CardSelector.svelte';
 	import FavoritesManager from '$lib/components/specific/FavoritesManager.svelte';
 	import {
 		specificCardsStore,
-		selectedCards,
 		canStartPractice
 	} from '$lib/stores/specific-cards-store';
 	import { practiceModeStore } from '$lib/stores/practice-mode';
@@ -21,10 +19,8 @@
 	onMount(async () => {
 		try {
 			cards = getKarutaCards();
-			console.log('Loaded cards:', cards.length);
 			isLoading = false;
 		} catch (error) {
-			console.error('Failed to load cards:', error);
 			isLoading = false;
 		}
 	});
@@ -48,25 +44,9 @@
 
 		// 選択された札で練習用リストを生成
 		const practiceCards = specificCardsStore.generatePracticeCards(cards);
-		console.log('=== SPECIFIC MODE START PRACTICE ===');
-		console.log('Selected cards count:', $selectedCards);
-		console.log('Generated practice cards:', practiceCards.length, 'cards');
-		console.log(
-			'Practice cards IDs:',
-			practiceCards.map((c) => c.id)
-		);
-		console.log('First practice card:', practiceCards[0]);
 
 		// 練習モードストアを初期化
 		practiceModeStore.initialize(practiceCards);
-
-		// ストアの状態を確認
-		const storeState = get(practiceModeStore);
-		console.log('Practice mode store after init:', {
-			cardsLength: storeState.cards.length,
-			firstCard: storeState.cards[0],
-			currentIndex: storeState.currentIndex
-		});
 
 		// ゲーム画面へ遷移（specific=trueフラグを追加）
 		await goto('/game?mode=practice&specific=true');

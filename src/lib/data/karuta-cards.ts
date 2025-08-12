@@ -25,8 +25,6 @@ export const karutaCardsByCategory = karutaCards.reduce(
 
 // カードを取得する関数
 export function getKarutaCards(): KarutaCard[] {
-	console.log('getKarutaCards called, returning', karutaCards.length, 'cards');
-	console.log('First card:', karutaCards[0]);
 	return [...karutaCards];
 }
 

@@ -360,7 +360,6 @@ const presenceChannel = supabase.channel('online_users');
 presenceChannel
 	.on('presence', { event: 'sync' }, () => {
 		const state = presenceChannel.presenceState();
-		console.log('Online users:', state);
 	})
 	.subscribe(async (status) => {
 		if (status === 'SUBSCRIBED') {

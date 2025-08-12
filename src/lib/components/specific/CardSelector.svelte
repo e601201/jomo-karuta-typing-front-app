@@ -26,9 +26,7 @@
 	});
 
 	function toggleCard(cardId: string) {
-		console.log('Toggling card:', cardId);
 		specificCardsStore.toggleCard(cardId);
-		console.log('After toggle, selectedCardIds:', selectedCardIds);
 	}
 
 	function selectAll() {

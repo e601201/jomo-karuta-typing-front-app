@@ -28,12 +28,9 @@ export const load: PageLoad = async ({ url }) => {
 				// 特定札練習モードから来た場合は、カードを空配列にする
 				// (practiceModeStoreに既に設定済みのため)
 				cards = [];
-				console.log('+page.ts: practice mode from specific, skipping card load');
 			} else {
 				// 通常の練習モード: 全札を順番に
 				cards = getKarutaCards();
-				console.log('+page.ts: practice mode, loaded', cards.length, 'cards');
-				console.log('+page.ts: first card:', cards[0]);
 			}
 			break;
 
