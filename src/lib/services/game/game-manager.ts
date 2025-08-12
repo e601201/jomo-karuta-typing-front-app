@@ -5,8 +5,8 @@
 
 import { gameStore } from '$lib/stores/game';
 import { InputValidator } from '$lib/services/typing/input-validator';
-import karutaCards from '$lib/data/karuta-cards.json';
-import type { GameMode } from '$lib/types';
+import { getKarutaCards } from '$lib/data/karuta-cards';
+import type { GameMode, KarutaCard } from '$lib/types';
 
 export interface GameConfig {
 	mode: GameMode;
@@ -35,7 +35,7 @@ export class GameManager {
 	 */
 	async initialize(config: GameConfig): Promise<void> {
 		// カードを準備
-		this.cards = config.cards || [...karutaCards];
+		this.cards = config.cards ?? getKarutaCards();
 
 		// ランダムモードの場合はシャッフル（gameStore側でもシャッフルするが、一貫性のためここでも行う）
 		if (config.mode === 'random') {

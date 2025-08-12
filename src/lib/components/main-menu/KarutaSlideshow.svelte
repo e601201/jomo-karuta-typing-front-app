@@ -200,25 +200,6 @@
 		object-fit: contain; /* coverからcontainに戻して見切れを防ぐ */
 	}
 
-	.karuta-overlay {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-		padding: 0.5rem;
-		display: flex;
-		justify-content: center;
-		align-items: flex-end;
-	}
-
-	.karuta-id {
-		color: white;
-		font-weight: bold;
-		font-size: 0.875rem;
-		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-	}
-
 	/* グラデーションマスク */
 	.gradient-mask {
 		position: absolute;
@@ -267,10 +248,6 @@
 		.torifuda-card {
 			width: 110px; /* 幅は110px */
 			height: 132px; /* 読み札と同じ縦横比（110 * 1.2 = 132）に修正 */
-		}
-
-		.karuta-id {
-			font-size: 0.875rem; /* 少し大きく */
 		}
 
 		.gradient-mask {

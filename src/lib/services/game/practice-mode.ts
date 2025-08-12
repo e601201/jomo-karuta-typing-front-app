@@ -4,7 +4,7 @@
  */
 
 import type { KarutaCard } from '$lib/types';
-import { LocalStorageService } from '$lib/services/storage/local-storage';
+import { LocalStorageService, type SavedSession } from '$lib/services/storage/local-storage';
 import { getKarutaCards } from '$lib/data/karuta-cards';
 import { InputValidator } from '$lib/services/typing/input-validator';
 
