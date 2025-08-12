@@ -491,7 +491,7 @@ describe('Game Page', () => {
 			render(Page);
 
 			await waitFor(() => {
-				expect(screen.getByText('ゲーム完了！')).toBeInTheDocument();
+				expect(screen.getByText('ゲーム終了！')).toBeInTheDocument();
 				expect(screen.getByTestId('final-score')).toBeInTheDocument();
 			});
 		});

@@ -209,7 +209,6 @@
 			{#if showExitConfirm}
 				<div class="text-center">
 					<h3 class="mb-4 text-xl font-bold">本当に終了しますか？</h3>
-					<p class="mb-6 text-gray-600">進捗は保存されます</p>
 					<div class="flex justify-center gap-4">
 						<button
 							onclick={confirmExit}

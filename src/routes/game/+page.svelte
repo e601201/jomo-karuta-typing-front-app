@@ -1014,7 +1014,7 @@
 		{:else if isGameComplete}
 			<!-- ゲーム完了 -->
 			<div class="rounded-lg border border-green-200 bg-green-50 p-8 text-center">
-				<h2 class="mb-4 text-3xl font-bold text-green-800">ゲーム完了！</h2>
+				<h2 class="mb-4 text-3xl font-bold text-green-800">ゲーム終了！</h2>
 				<div data-testid="final-score" class="mb-6">
 					<p class="text-xl">スコア: {score.total}</p>
 					<p>正確率: {score.accuracy.toFixed(2)}%</p>
@@ -1068,7 +1068,6 @@
 				<div class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
 					<div class="rounded-lg bg-white p-8 text-center">
 						<h2 class="mb-4 text-xl font-bold">本当に終了しますか？</h2>
-						<p class="mb-6">進捗は保存されます</p>
 						<div class="flex justify-center gap-4">
 							<button
 								onclick={confirmExit}
