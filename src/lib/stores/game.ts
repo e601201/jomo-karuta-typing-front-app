@@ -40,6 +40,8 @@ export interface GameTimer {
 	pauseStartTime: Date | null;
 	pauseCount: number;
 	totalPauseTime: number;
+	timeLimit: number | null; // 制限時間（ミリ秒）
+	remainingTime: number; // 残り時間（ミリ秒）
 }
 
 export interface GameState {
@@ -97,7 +99,9 @@ const initialState: GameState = {
 		pausedDuration: 0,
 		pauseStartTime: null,
 		pauseCount: 0,
-		totalPauseTime: 0
+		totalPauseTime: 0,
+		timeLimit: null,
+		remainingTime: 0
 	}
 };
 
@@ -143,6 +147,9 @@ export function createGameStore() {
 
 		const sessionId = generateSessionId();
 		const startTime = new Date();
+		
+		// プラクティスモード以外は60秒の制限時間を設定
+		const timeLimit = mode === 'practice' ? null : 60000;
 
 		gameStore.update((state) => ({
 			...state,
@@ -181,7 +188,9 @@ export function createGameStore() {
 				pausedDuration: 0,
 				pauseStartTime: null,
 				pauseCount: 0,
-				totalPauseTime: 0
+				totalPauseTime: 0,
+				timeLimit,
+				remainingTime: timeLimit || 0
 			}
 		}));
 
@@ -192,8 +201,7 @@ export function createGameStore() {
 			state.input.validator.setTarget(targetText);
 		}
 
-		// タイマー開始
-		startTimer();
+		// タイマーはカウントダウン後に開始されるため、ここでは開始しない
 	}
 
 	// 次のカードへ
@@ -475,13 +483,27 @@ export function createGameStore() {
 		const now = Date.now();
 		const startTime = state.timer.startTime?.getTime() || now;
 		const cardStartTime = state.timer.cardStartTime?.getTime() || now;
+		const elapsedTime = now - startTime - state.timer.pausedDuration;
+
+		// 制限時間がある場合は残り時間を計算
+		let remainingTime = 0;
+		if (state.timer.timeLimit !== null) {
+			remainingTime = Math.max(0, state.timer.timeLimit - elapsedTime);
+			
+			// 時間切れの場合はゲーム終了
+			if (remainingTime === 0 && state.session.isActive) {
+				endSession();
+				return;
+			}
+		}
 
 		gameStore.update((s) => ({
 			...s,
 			timer: {
 				...s.timer,
-				elapsedTime: now - startTime - s.timer.pausedDuration,
-				cardElapsedTime: now - cardStartTime
+				elapsedTime: elapsedTime,
+				cardElapsedTime: now - cardStartTime,
+				remainingTime: remainingTime
 			}
 		}));
 	}
@@ -495,6 +517,31 @@ export function createGameStore() {
 		timerInterval = setInterval(() => {
 			updateTimer();
 		}, 100);
+	}
+
+	// ゲーム実際の開始（カウントダウン後）
+	function startGameAfterCountdown() {
+		const state = get(gameStore);
+		
+		if (!state.session?.isActive) {
+			return;
+		}
+
+		// 開始時刻をリセット（カウントダウン後の現在時刻に）
+		const now = new Date();
+		gameStore.update((s) => ({
+			...s,
+			timer: {
+				...s.timer,
+				startTime: now,
+				cardStartTime: now,
+				elapsedTime: 0,
+				cardElapsedTime: 0
+			}
+		}));
+
+		// タイマー開始
+		startTimer();
 	}
 
 	// ユーティリティ関数
@@ -539,6 +586,7 @@ export function createGameStore() {
 		endSession,
 		resetSession,
 		updateTimer,
+		startGameAfterCountdown,
 		destroy
 	};
 }

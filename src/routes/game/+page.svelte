@@ -48,6 +48,8 @@
 	let elapsedTime = $state(0);
 	let pauseCount = $state(0);
 	let totalPauseTime = $state(0);
+	let remainingTime = $state<number | null>(null);
+	let hasTimeLimit = $state(false);
 
 	// カード変更を検出するための前回のカードインデックスを追跡
 	let previousCardIndex = -1;
@@ -104,6 +106,8 @@
 					pauseCount = state.timer.pauseCount || 0;
 					totalPauseTime = state.timer.totalPauseTime || 0;
 					currentInput = state.input.current;
+					remainingTime = state.timer.remainingTime;
+					hasTimeLimit = state.timer.timeLimit !== null;
 
 					// カードが変更された場合はバリデータを更新
 					if (currentCard && currentCard.id !== previousCardId) {
@@ -123,6 +127,10 @@
 
 					// ゲームが完了したかチェック
 					if (state.cards.completed.length === totalCards && state.session?.isActive) {
+						isGameComplete = true;
+					}
+					// 時間切れでゲームが終了したかチェック（セッションが非アクティブになった場合）
+					if (state.session && !state.session.isActive && state.session.endTime) {
 						isGameComplete = true;
 					}
 				});
@@ -974,11 +982,13 @@
 		showCountdown = false;
 		gameStarted = true;
 
-		// ゲームタイマーを開始
+		// カウントダウン後にゲームタイマーを開始
 		if (gameMode === 'practice') {
+			// 練習モードは独自のタイマー管理
 			practiceModeStore.resume();
 		} else {
-			gameStore.resumeGame();
+			// その他のモードはカウントダウン後にタイマー開始
+			gameStore.startGameAfterCountdown();
 		}
 	}
 </script>
@@ -1025,12 +1035,11 @@
 					<div class="text-sm text-gray-600">
 						進捗: <span class="font-bold">{cardIndex + 1} / {totalCards}</span>
 					</div>
-					<div class="text-sm text-gray-600">
-						時間: <span class="font-bold">{formatTime(elapsedTime)}</span>
-					</div>
-					<div data-testid="wpm-display" class="text-sm text-gray-600">
-						WPM: <span class="font-bold">{score.speed || 0}</span>
-					</div>
+					{#if hasTimeLimit && remainingTime !== null}
+						<div class="text-sm {remainingTime < 10000 ? 'text-red-600 font-bold' : 'text-gray-600'}">
+							残り時間: <span class="font-bold">{formatTime(remainingTime)}</span>
+						</div>
+					{/if}
 				</div>
 			</header>
 
