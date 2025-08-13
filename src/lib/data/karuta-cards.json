@@ -1,0 +1,574 @@
+[
+	{
+		"id": "a",
+		"hiragana": "あさまのいたずら おにのおしだし",
+		"romaji": "tsuru mau katachi no gunmaken",
+		"meaning": "浅間のいたずら 鬼の押出し",
+		"category": "geography",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/a.webp",
+			"yomifuda": "/images/karuta/yomifuda/a.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/a.webp"
+		}
+	},
+	{
+		"id": "i",
+		"hiragana": "いかほおんせん にほんのめいとう",
+		"romaji": "negi to konnyaku shimonita meibutsu",
+		"meaning": "伊香保温泉 日本の名湯",
+		"category": "industry",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/i.webp",
+			"yomifuda": "/images/karuta/yomifuda/i.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/i.webp"
+		}
+	},
+	{
+		"id": "u",
+		"hiragana": "うすいとうげのせきしょあと",
+		"romaji": "chikara awaseru nihyakumannin",
+		"meaning": "碓氷峠の関所跡",
+		"category": "culture",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/u.webp",
+			"yomifuda": "/images/karuta/yomifuda/u.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/u.webp"
+		}
+	},
+	{
+		"id": "e",
+		"hiragana": "えんぎだるまの しょうりんざん",
+		"romaji": "isesaki meisen nihonichi",
+		"meaning": "縁起だるまの少林山",
+		"category": "industry",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/e.webp",
+			"yomifuda": "/images/karuta/yomifuda/e.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/e.webp"
+		}
+	},
+	{
+		"id": "o",
+		"hiragana": "おおたかなやま こそだてどんりゅう",
+		"romaji": "e hi mo sesu iroha karuta",
+		"meaning": "太田金山子育呑龍",
+		"category": "culture",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/o.webp",
+			"yomifuda": "/images/karuta/yomifuda/o.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/o.webp"
+		}
+	},
+	{
+		"id": "ka",
+		"hiragana": "かんとうと しんえつつなぐ たかさきし",
+		"romaji": "rouno karamatsu tengen",
+		"meaning": "関東と信越つなぐ高崎市",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ka.webp",
+			"yomifuda": "/images/karuta/yomifuda/ka.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ka.webp"
+		}
+	},
+	{
+		"id": "ki",
+		"hiragana": "きりゅうはにほんのはたどころ",
+		"romaji": "hanayama kouen tsutsuji no meisho",
+		"meaning": "桐生は日本の機どころ",
+		"category": "nature",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ki.webp",
+			"yomifuda": "/images/karuta/yomifuda/ki.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ki.webp"
+		}
+	},
+	{
+		"id": "ku",
+		"hiragana": "くさづよいとこ くすりのいでゆ",
+		"romaji": "nihon de saisho no fujioka seishi",
+		"meaning": "草津よいとこ薬の温泉",
+		"category": "history",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ku.webp",
+			"yomifuda": "/images/karuta/yomifuda/ku.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ku.webp"
+		}
+	},
+	{
+		"id": "ke",
+		"hiragana": "けんとまえばし いとのまち",
+		"romaji": "hokoru bungou tamura toshiko",
+		"meaning": "県都前橋 生糸の市",
+		"category": "culture",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ke.webp",
+			"yomifuda": "/images/karuta/yomifuda/ke.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ke.webp"
+		}
+	},
+	{
+		"id": "ko",
+		"hiragana": "こころのとうだい うちむらかんぞう",
+		"romaji": "heiwa no tsukai niijima jou",
+		"meaning": "心の燈台 内村鑑三",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ko.webp",
+			"yomifuda": "/images/karuta/yomifuda/ko.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ko.webp"
+		}
+	},
+	{
+		"id": "sa",
+		"hiragana": "さんばせきとともに なだかいふゆざくら",
+		"romaji": "tone wa sakazuki no nagare",
+		"meaning": "三波石と共に 名高い冬桜",
+		"category": "geography",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/sa.webp",
+			"yomifuda": "/images/karuta/yomifuda/sa.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/sa.webp"
+		}
+	},
+	{
+		"id": "shi",
+		"hiragana": "しのぶけのくに ふたごづか",
+		"romaji": "numata shiro shita shintou sengoku",
+		"meaning": "しのぶ毛の国 二子塚",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/shi.webp",
+			"yomifuda": "/images/karuta/yomifuda/shi.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/shi.webp"
+		}
+	},
+	{
+		"id": "su",
+		"hiragana": "すそのはながし あかぎやま",
+		"romaji": "rui wo minai enkaku no reijou",
+		"meaning": "裾野は長し赤城山",
+		"category": "culture",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/su.webp",
+			"yomifuda": "/images/karuta/yomifuda/su.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/su.webp"
+		}
+	},
+	{
+		"id": "se",
+		"hiragana": "せんきょうおぜぬま はなのはら",
+		"romaji": "wo noboru ayu mo kenkou onsen",
+		"meaning": "仙境尾瀬沼花の原",
+		"category": "nature",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/se.webp",
+			"yomifuda": "/images/karuta/yomifuda/se.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/se.webp"
+		}
+	},
+	{
+		"id": "so",
+		"hiragana": "そろいのしたくで やぎぶしおんど",
+		"romaji": "wakan no sanpou akima",
+		"meaning": "そろいの仕度で八木節音頭",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/so.webp",
+			"yomifuda": "/images/karuta/yomifuda/so.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/so.webp"
+		}
+	},
+	{
+		"id": "ta",
+		"hiragana": "たきはふきわれ かたしなけいこく",
+		"romaji": "kakine oi tate no tetsudou",
+		"meaning": "滝は吹割 片品渓谷",
+		"category": "geography",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ta.webp",
+			"yomifuda": "/images/karuta/yomifuda/ta.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ta.webp"
+		}
+	},
+	{
+		"id": "chi",
+		"hiragana": "ちからあわせる にひゃくまん",
+		"romaji": "yo no chiri arau kawayu no yu",
+		"meaning": "力あわせる二百万",
+		"category": "nature",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/chi.webp",
+			"yomifuda": "/images/karuta/yomifuda/chi.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/chi.webp"
+		}
+	},
+	{
+		"id": "tsu",
+		"hiragana": "つるまうかたちの ぐんまけん",
+		"romaji": "taki wa kichisui shiraito no taki",
+		"meaning": "つる舞う形の群馬県",
+		"category": "nature",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/tsu.webp",
+			"yomifuda": "/images/karuta/yomifuda/tsu.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/tsu.webp"
+		}
+	},
+	{
+		"id": "te",
+		"hiragana": "てんかのぎじん もざえもん",
+		"romaji": "rekishi ni nokoru nitta yoshisada",
+		"meaning": "天下の義人 茂左衛門",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/te.webp",
+			"yomifuda": "/images/karuta/yomifuda/te.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/te.webp"
+		}
+	},
+	{
+		"id": "to",
+		"hiragana": "とねは ばんどういちのかわ",
+		"romaji": "sora no kuon seiseki teijou",
+		"meaning": "利根は坂東一の川",
+		"category": "geography",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/to.webp",
+			"yomifuda": "/images/karuta/yomifuda/to.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/to.webp"
+		}
+	},
+	{
+		"id": "na",
+		"hiragana": "なかせんどうしのぶ あんなかすぎなみき",
+		"romaji": "tsuta ni haeru kouzuke sanpi",
+		"meaning": "中仙道しのぶ安中杉並木",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/na.webp",
+			"yomifuda": "/images/karuta/yomifuda/na.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/na.webp"
+		}
+	},
+	{
+		"id": "ni",
+		"hiragana": "にほんでさいしょの とみおかせいし",
+		"romaji": "ne no kuni no ichiban asama no yama",
+		"meaning": "日本で最初の富岡製糸",
+		"category": "geography",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ni.webp",
+			"yomifuda": "/images/karuta/yomifuda/ni.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ni.webp"
+		}
+	},
+	{
+		"id": "nu",
+		"hiragana": "ぬまたじょうかの しおばらたすけ",
+		"romaji": "nakasendou shinano no kuni",
+		"meaning": "沼田城下の塩原太助",
+		"category": "history",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/nu.webp",
+			"yomifuda": "/images/karuta/yomifuda/nu.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/nu.webp"
+		}
+	},
+	{
+		"id": "ne",
+		"hiragana": "ねぎとこんにゃく しもにためいさん",
+		"romaji": "raichou mo horeta harunako",
+		"meaning": "ねぎとこんにゃく下仁田名産",
+		"category": "nature",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ne.webp",
+			"yomifuda": "/images/karuta/yomifuda/ne.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ne.webp"
+		}
+	},
+	{
+		"id": "no",
+		"hiragana": "のぼるはるなの きゃんぷむら",
+		"romaji": "mukashi wo kataru tagui naki bushi",
+		"meaning": "登る榛名のキャンプ村",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/no.webp",
+			"yomifuda": "/images/karuta/yomifuda/no.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/no.webp"
+		}
+	},
+	{
+		"id": "ha",
+		"hiragana": "はなやまこうえん つつじのめいしょ",
+		"romaji": "usui touge no tetsudou bunka",
+		"meaning": "花山公園 つつじの名所",
+		"category": "history",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ha.webp",
+			"yomifuda": "/images/karuta/yomifuda/ha.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ha.webp"
+		}
+	},
+	{
+		"id": "hi",
+		"hiragana": "びゃくいかんのん じひのみて",
+		"romaji": "in nchuu negoro ni yamada kaoru",
+		"meaning": "白衣観音 慈悲の御手",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/hi.webp",
+			"yomifuda": "/images/karuta/yomifuda/hi.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/hi.webp"
+		}
+	},
+	{
+		"id": "hu",
+		"hiragana": "ぶんぶくちゃがまの もりんじ",
+		"romaji": "noboru enen daisanji",
+		"meaning": "分福茶釜の茂林寺",
+		"category": "nature",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/hu.webp",
+			"yomifuda": "/images/karuta/yomifuda/hu.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/hu.webp"
+		}
+	},
+	{
+		"id": "he",
+		"hiragana": "へいわのつかい にいじまじょう",
+		"romaji": "ongaku no sato takasaki shi",
+		"meaning": "平和の使徒 新島襄",
+		"category": "culture",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/he.webp",
+			"yomifuda": "/images/karuta/yomifuda/he.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/he.webp"
+		}
+	},
+	{
+		"id": "ho",
+		"hiragana": "ほこるぶんごう たやまかたい",
+		"romaji": "kusatsu yoitoko ichido wa oide",
+		"meaning": "誇る文豪 田山花袋",
+		"category": "nature",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ho.webp",
+			"yomifuda": "/images/karuta/yomifuda/ho.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ho.webp"
+		}
+	},
+	{
+		"id": "ma",
+		"hiragana": "まゆときいとは にほんいち",
+		"romaji": "yamato takeru no mikoto mo tachiyori",
+		"meaning": "繭と生糸は日本一",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ma.webp",
+			"yomifuda": "/images/karuta/yomifuda/ma.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ma.webp"
+		}
+	},
+	{
+		"id": "mi",
+		"hiragana": "みなかみ たにがわ すきーととざん",
+		"romaji": "maebashi shi kinu no shi kouchi",
+		"meaning": "水上 谷川 スキーと登山",
+		"category": "industry",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/mi.webp",
+			"yomifuda": "/images/karuta/yomifuda/mi.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/mi.webp"
+		}
+	},
+	{
+		"id": "mu",
+		"hiragana": "むかしをかたる たごのこひ",
+		"romaji": "ken to hissuru joumou sanchi",
+		"meaning": "昔を語る多胡の古碑",
+		"category": "industry",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/mu.webp",
+			"yomifuda": "/images/karuta/yomifuda/mu.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/mu.webp"
+		}
+	},
+	{
+		"id": "me",
+		"hiragana": "めいせんおりだす いせさきし",
+		"romaji": "fuji no kemuri karuizawa",
+		"meaning": "銘仙織出す伊勢崎市",
+		"category": "geography",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/me.webp",
+			"yomifuda": "/images/karuta/yomifuda/me.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/me.webp"
+		}
+	},
+	{
+		"id": "mo",
+		"hiragana": "もみじにはえる みょうぎさん",
+		"romaji": "kokoro no e koso nihonichi",
+		"meaning": "紅葉に映える妙義山",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/mo.webp",
+			"yomifuda": "/images/karuta/yomifuda/mo.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/mo.webp"
+		}
+	},
+	{
+		"id": "ya",
+		"hiragana": "やばけいしのぐ あがつまきょう",
+		"romaji": "echigo e kayou shinshuu kaidou",
+		"meaning": "耶馬渓しのぐ吾妻峡",
+		"category": "geography",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ya.webp",
+			"yomifuda": "/images/karuta/yomifuda/ya.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ya.webp"
+		}
+	},
+	{
+		"id": "yu",
+		"hiragana": "ゆかりはふるし ぬきさきじんじゃ",
+		"romaji": "tenka no meitou suishinsen",
+		"meaning": "ゆかりは古し貫前神社",
+		"category": "nature",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/yu.webp",
+			"yomifuda": "/images/karuta/yomifuda/yu.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/yu.webp"
+		}
+	},
+	{
+		"id": "yo",
+		"hiragana": "よのちりあらう しまおんせん",
+		"romaji": "asama no itazura oni no oshidashi",
+		"meaning": "世のちり洗う四万温泉",
+		"category": "nature",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/yo.webp",
+			"yomifuda": "/images/karuta/yomifuda/yo.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/yo.webp"
+		}
+	},
+	{
+		"id": "ra",
+		"hiragana": "らいとからっかぜ ぎりにんじょう",
+		"romaji": "sanchi fukaku kiryuu ni",
+		"meaning": "雷と空風 義理人情",
+		"category": "nature",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ra.webp",
+			"yomifuda": "/images/karuta/yomifuda/ra.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ra.webp"
+		}
+	},
+	{
+		"id": "ri",
+		"hiragana": "りそうのでんかに でんげんぐんま",
+		"romaji": "kinu wa nippon kiryuu wa sekai",
+		"meaning": "理想の電化に電源群馬",
+		"category": "industry",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ri.webp",
+			"yomifuda": "/images/karuta/yomifuda/ri.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ri.webp"
+		}
+	},
+	{
+		"id": "ru",
+		"hiragana": "るーぷでなだかい しみずとんねる",
+		"romaji": "yuki ga furu nihon no yane",
+		"meaning": "ループで名高い清水トンネル",
+		"category": "geography",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ru.webp",
+			"yomifuda": "/images/karuta/yomifuda/ru.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ru.webp"
+		}
+	},
+	{
+		"id": "re",
+		"hiragana": "れきしになだかい にったよしさだ",
+		"romaji": "meiji no tetsudou eikou no ato",
+		"meaning": "歴史に名高い新田義貞",
+		"category": "history",
+		"difficulty": "medium",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/re.webp",
+			"yomifuda": "/images/karuta/yomifuda/re.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/re.webp"
+		}
+	},
+	{
+		"id": "ro",
+		"hiragana": "ろうのう ふなつでんじべい",
+		"romaji": "minna de asobou tsukiyo no ban",
+		"meaning": "老農 船津傳次平",
+		"category": "culture",
+		"difficulty": "easy",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/ro.webp",
+			"yomifuda": "/images/karuta/yomifuda/ro.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/ro.webp"
+		}
+	},
+	{
+		"id": "wa",
+		"hiragana": "わさんのたいか せきこうわ",
+		"romaji": "shinobi no kuni otasuke mairu",
+		"meaning": "和算の大家 関孝和",
+		"category": "history",
+		"difficulty": "hard",
+		"images": {
+			"torifuda": "/images/karuta/torifuda/wa.webp",
+			"yomifuda": "/images/karuta/yomifuda/wa.webp",
+			"kaisetsu": "/images/karuta/kaisetsu/wa.webp"
+		}
+	}
+]
