@@ -31,6 +31,7 @@
 	// 状態
 	let gameMode: GameMode | null = $state(null);
 	let shouldContinue = $state(false);
+	let isFromSpecificMode = $state(false);
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
 	let showExitConfirm = $state(false);
@@ -42,6 +43,7 @@
 	let currentCard = $state<KarutaCard | null>(null);
 	let cardIndex = $state(0);
 	let totalCards = $state(44);
+	let completedCardsCount = $state(0);
 	let inputPosition = $state(0);
 	let mistakes = $state(0);
 	let score = $state<any>({});
@@ -82,7 +84,7 @@
 			shouldContinue = data.resume;
 
 			// 特定モード選択から来たかどうかをチェック
-			const isFromSpecificMode = data.isFromSpecific || false;
+			isFromSpecificMode = data.isFromSpecific || false;
 
 			// 特定モードから来た場合はdata.cardsからtotalCardsを設定しない
 			if (!isFromSpecificMode) {
@@ -99,6 +101,7 @@
 				unsubscribe = gameStore.gameStore.subscribe((state) => {
 					currentCard = state.cards.current;
 					cardIndex = state.cards.currentIndex;
+					completedCardsCount = state.cards.completed.length;
 					inputPosition = state.input.position;
 					mistakes = state.input.mistakes;
 					score = state.score;
@@ -248,6 +251,7 @@
 						: 1;
 				const wpm = practiceModeStore.calculateWPM();
 				const Q = state.completedCards.size;
+				completedCardsCount = Q;
 				const totalScore = calcTypingScore({
 					Q,
 					accuracy,
@@ -487,12 +491,11 @@
 			// モードに基づいてストアを更新
 			if (gameMode === 'practice') {
 				practiceModeStore.processKeystroke(true);
+				if (result.isComplete) {
+					handleCardComplete();
+				}
 			} else {
 				gameStore.updateInput(newInput);
-			}
-
-			if (result.isComplete) {
-				handleCardComplete();
 			}
 
 			showError = false;
@@ -685,18 +688,8 @@
 		}
 
 		if (gameMode === 'practice') {
-			// 練習モードで次のカードに移動
 			practiceModeStore.nextCard(true);
-			// 注：バリデータはサブスクリプションコールバックで更新される
-		} else {
-			gameStore.completeCard();
-			// 次のカードに移動
-			if (cardIndex < totalCards - 1) {
-				gameStore.nextCard();
-			}
 		}
-
-		// ここでバリデータをリセットしない - サブスクリプションに任せる
 	}
 
 	function updateRomajiGuide() {
@@ -1018,21 +1011,98 @@
 				<a href="/" class="text-blue-600 hover:underline">メインメニューに戻る</a>
 			</div>
 		{:else if isGameComplete}
-			<!-- ゲーム完了 -->
-			<div class="rounded-lg border border-green-200 bg-green-50 p-8 text-center">
-				<h2 class="mb-4 text-3xl font-bold text-green-800">ゲーム終了！</h2>
-				<div data-testid="final-score" class="mb-6">
-					<p class="text-xl">スコア: {score.total}</p>
-					<p>正確率: {score.accuracy.toFixed(2)}%</p>
-					<p>WPM: {score.speed}</p>
-					<p>最大コンボ: {score.maxCombo}</p>
+			<!-- 
+		 -->
+			<div class="rounded-lg bg-white p-8 shadow-lg">
+				<h2 class="mb-6 text-center text-3xl font-bold text-gray-800">ゲーム終了！</h2>
+				
+				<!-- モード表示 -->
+				<div class="mb-4 text-center">
+					<span class="inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-800">
+						{#if isFromSpecificMode}
+							特定札練習
+						{:else if gameMode === 'practice'}
+							練習モード
+						{:else if gameMode === 'random'}
+							ランダムモード
+						{:else}
+							{gameMode}
+						{/if}
+					</span>
 				</div>
-				<button
-					onclick={() => goto('/')}
-					class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
+
+				<!-- スコア（中段・目立つように） -->
+				<div class="mb-8 border border-gray-300 p-6 text-center text-gray-600">
+					<p class="mb-2 text-lg font-medium">スコア</p>
+					<p class="text-5xl font-bold">{score.total.toLocaleString()}</p>
+				</div>
+
+				<!-- 詳細統計 -->
+				<div data-testid="final-score" class="mb-8 grid grid-cols-2 gap-4 text-center">
+					<div class="rounded-lg p-4">
+						<p class="text-sm text-gray-600">正解した札</p>
+						<p class="text-2xl font-bold text-gray-800"> {completedCardsCount} 枚</p>
+					</div>
+					<div class="rounded-lg p-4">
+						<p class="text-sm text-gray-600">正確率</p>
+						<p class="text-2xl font-bold text-gray-800">{score.accuracy.toFixed(2)}%</p>
+					</div>
+					<div class="rounded-lg p-4">
+						<p class="text-sm text-gray-600">WPM(単語数/分)</p>
+						<p class="text-2xl font-bold text-gray-800">{score.speed}</p>
+					</div>
+					<div class="rounded-lg p-4">
+						<p class="text-sm text-gray-600">最大コンボ</p>
+						<p class="text-2xl font-bold text-gray-800">{score.maxCombo}</p>
+					</div>
+				</div>
+
+				<!-- ボタン群 -->
+				<div class="flex flex-col gap-3">
+					<div class="grid grid-cols-2 gap-3">
+						<button
+							onclick={() => {
+								// ランキング機能（未実装）
+								alert('ランキング機能は準備中です');
+							}}
+							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+						>
+							🏆 ランキングを表示
+						</button>
+						<button
+							onclick={() => {
+								// SNSシェア機能（未実装）
+								alert('SNSシェア機能は準備中です');
+							}}
+							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+						>
+							結果をSNSでシェア
+						</button>
+					</div>
+					<button
+					onclick={() => {
+						// 特定札練習モードの場合は特定札選択画面に戻る
+						if (isFromSpecificMode) {
+							goto('/practice/specific');
+						} else {
+							// その他のモードは同じモードで再プレイ
+							const url = new URL(window.location.href);
+							url.searchParams.delete('continue'); // continueパラメータを削除
+							url.searchParams.delete('specific'); // specificパラメータも削除
+							window.location.href = url.toString();
+						}
+					}}
+					class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 transition-colors"
 				>
-					メインメニューに戻る
+					{isFromSpecificMode ? '札を選び直す' : 'もう一度遊ぶ'}
 				</button>
+					<button
+						onclick={() => goto('/')}
+						class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+					>
+						メインメニューに戻る
+					</button>
+				</div>
 			</div>
 		{:else}
 			<!-- ゲームヘッダー -->
