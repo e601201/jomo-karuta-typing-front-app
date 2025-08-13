@@ -1015,10 +1015,12 @@
 		 -->
 			<div class="rounded-lg bg-white p-8 shadow-lg">
 				<h2 class="mb-6 text-center text-3xl font-bold text-gray-800">ゲーム終了！</h2>
-				
+
 				<!-- モード表示 -->
 				<div class="mb-4 text-center">
-					<span class="inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-800">
+					<span
+						class="inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-800"
+					>
 						{#if isFromSpecificMode}
 							特定札練習
 						{:else if gameMode === 'practice'}
@@ -1041,7 +1043,7 @@
 				<div data-testid="final-score" class="mb-8 grid grid-cols-2 gap-4 text-center">
 					<div class="rounded-lg p-4">
 						<p class="text-sm text-gray-600">正解した札</p>
-						<p class="text-2xl font-bold text-gray-800"> {completedCardsCount} 枚</p>
+						<p class="text-2xl font-bold text-gray-800">{completedCardsCount} 枚</p>
 					</div>
 					<div class="rounded-lg p-4">
 						<p class="text-sm text-gray-600">正確率</p>
@@ -1065,7 +1067,7 @@
 								// ランキング機能（未実装）
 								alert('ランキング機能は準備中です');
 							}}
-							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
 						>
 							🏆 ランキングを表示
 						</button>
@@ -1074,31 +1076,31 @@
 								// SNSシェア機能（未実装）
 								alert('SNSシェア機能は準備中です');
 							}}
-							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
 						>
 							結果をSNSでシェア
 						</button>
 					</div>
 					<button
-					onclick={() => {
-						// 特定札練習モードの場合は特定札選択画面に戻る
-						if (isFromSpecificMode) {
-							goto('/practice/specific');
-						} else {
-							// その他のモードは同じモードで再プレイ
-							const url = new URL(window.location.href);
-							url.searchParams.delete('continue'); // continueパラメータを削除
-							url.searchParams.delete('specific'); // specificパラメータも削除
-							window.location.href = url.toString();
-						}
-					}}
-					class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 transition-colors"
-				>
-					{isFromSpecificMode ? '札を選び直す' : 'もう一度遊ぶ'}
-				</button>
+						onclick={() => {
+							// 特定札練習モードの場合は特定札選択画面に戻る
+							if (isFromSpecificMode) {
+								goto('/practice/specific');
+							} else {
+								// その他のモードは同じモードで再プレイ
+								const url = new URL(window.location.href);
+								url.searchParams.delete('continue'); // continueパラメータを削除
+								url.searchParams.delete('specific'); // specificパラメータも削除
+								window.location.href = url.toString();
+							}
+						}}
+						class="rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
+					>
+						{isFromSpecificMode ? '札を選び直す' : 'もう一度遊ぶ'}
+					</button>
 					<button
 						onclick={() => goto('/')}
-						class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+						class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
 					>
 						メインメニューに戻る
 					</button>

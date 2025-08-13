@@ -194,6 +194,8 @@
 				</a>
 			</nav>
 		{/if}
+		<!-- 著作権表示 -->
+		<div class="mt-8 text-center text-sm text-gray-500">© 2025 株式会社Vitalize</div>
 	</div>
 
 	<!-- 練習モード選択モーダル -->
