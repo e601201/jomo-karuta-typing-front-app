@@ -7,6 +7,7 @@
 	import { InputValidator } from '$lib/services/typing/input-validator';
 	import { LocalStorageService } from '$lib/services/storage/local-storage';
 	import type { GameMode, KarutaCard } from '$lib/types';
+	import { calcTypingScore } from '$lib/services/game/score';
 
 	// +page.tsからのページデータ
 	interface Props {
@@ -240,17 +241,23 @@
 					totalCards = state.cards.length;
 				}
 				mistakes = state.statistics?.mistakes || 0;
+				// calcTypingScore を用いたスコア算出（練習モード表示用）
+				const accuracy =
+					state.statistics.totalKeystrokes > 0
+						? state.statistics.correctKeystrokes / state.statistics.totalKeystrokes
+						: 1;
+				const wpm = practiceModeStore.calculateWPM();
+				const Q = state.completedCards.size;
+				const totalScore = calcTypingScore({
+					Q,
+					accuracy,
+					wpm,
+					maxCombo: state.statistics.maxCombo
+				});
 				score = {
-					total: state.statistics.totalKeystrokes,
-					accuracy:
-						state.statistics.totalKeystrokes > 0
-							? Math.round(
-									(state.statistics.correctKeystrokes / state.statistics.totalKeystrokes) *
-										100 *
-										100
-								) / 100
-							: 100,
-					speed: practiceModeStore.calculateWPM(),
+					total: totalScore,
+					accuracy: Math.round(accuracy * 100 * 100) / 100,
+					speed: wpm,
 					combo: state.statistics.currentCombo,
 					maxCombo: state.statistics.maxCombo
 				};

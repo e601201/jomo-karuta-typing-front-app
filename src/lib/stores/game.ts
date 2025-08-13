@@ -6,6 +6,7 @@ import { writable, derived, get, type Writable, type Readable } from 'svelte/sto
 import { InputValidator } from '../services/typing/input-validator';
 import type { KarutaCard, GameMode } from '$lib/types';
 import { LocalStorageService } from '$lib/services/storage/local-storage';
+import { calcTypingScore } from '$lib/services/game/score';
 
 export interface GameSession {
 	id: string;
@@ -192,8 +193,9 @@ export function createGameStore() {
 		const sessionId = generateSessionId();
 		const startTime = new Date();
 
-		// プラクティスモード以外は60秒の制限時間を設定
-		const timeLimit = mode === 'practice' ? null : 10000;
+		// プラクティスモード以外は60秒の制限時間を設定 TODO: 今後の方針として、制限時間をゲーム難易度によって動的に設定する
+		const timeLimitTime = 60000;
+		const timeLimit = mode === 'practice' ? null : timeLimitTime;
 
 		gameStore.update((state) => ({
 			...state,
@@ -375,7 +377,7 @@ export function createGameStore() {
 			const newState = { ...state };
 			newState.statistics = { ...state.statistics };
 			newState.score = { ...state.score };
-			
+
 			newState.statistics.totalKeystrokes++;
 
 			if (isCorrect) {
@@ -460,24 +462,34 @@ export function createGameStore() {
 	// スコア更新（WPM計算に変更）
 	function updateScore() {
 		gameStore.update((state) => {
-			// 正確率の計算（キーストロークベース）
+			// 精度（0..1）
 			const accuracy =
 				state.statistics.totalKeystrokes > 0
-					? (state.statistics.correctKeystrokes / state.statistics.totalKeystrokes) * 100
-					: 100;
+					? state.statistics.correctKeystrokes / state.statistics.totalKeystrokes
+					: 1;
 
-			// WPMの計算（5文字を1単語と仮定）
+			// WPM（5文字=1語）
 			const elapsedMinutes = state.timer.elapsedTime / 60000;
 			const words = state.statistics.correctKeystrokes / 5;
-			const speed = elapsedMinutes > 0 ? Math.round(words / elapsedMinutes) : 0;
+			const wpm = elapsedMinutes > 0 ? Math.round(words / elapsedMinutes) : 0;
+
+			// Q: 解いた（完了した）札数
+			const Q = state.cards.completed.length;
+
+			const total = calcTypingScore({
+				Q,
+				accuracy,
+				wpm,
+				maxCombo: state.statistics.maxCombo
+			});
 
 			return {
 				...state,
 				score: {
 					...state.score,
-					total: state.statistics.totalKeystrokes,
-					accuracy: accuracy,
-					speed,
+					total,
+					accuracy: accuracy * 100,
+					speed: wpm,
 					combo: state.statistics.currentCombo,
 					maxCombo: state.statistics.maxCombo
 				}
@@ -493,13 +505,20 @@ export function createGameStore() {
 		const elapsedTime = state.timer.elapsedTime;
 		const accuracy =
 			state.statistics.totalKeystrokes > 0
-				? (state.statistics.correctKeystrokes / state.statistics.totalKeystrokes) * 100
-				: 100;
+				? state.statistics.correctKeystrokes / state.statistics.totalKeystrokes
+				: 1;
 
 		// WPM計算
 		const elapsedMinutes = elapsedTime / 60000;
 		const words = state.statistics.correctKeystrokes / 5;
 		const wpm = elapsedMinutes > 0 ? Math.round(words / elapsedMinutes) : 0;
+
+		const total = calcTypingScore({
+			Q: state.cards.completed.length,
+			accuracy,
+			wpm,
+			maxCombo: state.statistics.maxCombo
+		});
 
 		const session = {
 			id: state.session.id,
@@ -512,8 +531,8 @@ export function createGameStore() {
 				completed: state.cards.completed
 			},
 			score: {
-				total: state.statistics.totalKeystrokes,
-				accuracy,
+				total,
+				accuracy: accuracy * 100,
 				speed: wpm,
 				combo: state.statistics.currentCombo,
 				maxCombo: state.statistics.maxCombo
