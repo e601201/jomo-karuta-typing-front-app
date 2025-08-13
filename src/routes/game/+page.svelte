@@ -164,7 +164,6 @@
 	});
 
 	async function initializeGame() {
-
 		// 特定モード選択から来たかどうかをチェック
 		const isFromSpecificMode = data.isFromSpecific || false;
 
@@ -216,7 +215,6 @@
 
 			// 練習モードストアにサブスクライブ
 			unsubscribe = practiceModeStore.subscribe((state) => {
-
 				// ゲームが完了したかチェック（全カードが処理された）
 				if (state.currentIndex >= state.cards.length && state.cards.length > 0) {
 					isGameComplete = true;
@@ -360,7 +358,6 @@
 
 		const newInput = currentInput + char;
 		const targetText = currentCard.hiragana.replace(/\s/g, '');
-
 
 		// 入力文字列全体を検証
 		const result = validator.validateInput(targetText, newInput);
@@ -530,7 +527,9 @@
 			if (gameMode === 'practice') {
 				practiceModeStore.processKeystroke(false);
 			} else {
-				gameStore.updateInput(currentInput); // 前の入力を保持
+				// 誤入力をシミュレートするために一時的に文字を追加してから元に戻す
+				const tempInput = currentInput + char;
+				gameStore.updateInput(tempInput);
 			}
 
 			// 500ms後にエラーインジケータをリセット
@@ -656,6 +655,7 @@
 			if (gameMode === 'practice') {
 				// バックスペースのために練習モードストアを更新する必要はない
 			} else {
+				// バックスペース後の入力を更新
 				gameStore.updateInput(currentInput);
 			}
 			updateInputProgress();
@@ -663,7 +663,6 @@
 	}
 
 	function handleCardComplete() {
-
 		// 次のカードに移る前に入力状態をリセット
 		inputPosition = 0;
 		currentInput = '';
@@ -1036,7 +1035,9 @@
 						進捗: <span class="font-bold">{cardIndex + 1} / {totalCards}</span>
 					</div>
 					{#if hasTimeLimit && remainingTime !== null}
-						<div class="text-sm {remainingTime < 10000 ? 'text-red-600 font-bold' : 'text-gray-600'}">
+						<div
+							class="text-sm {remainingTime < 10000 ? 'font-bold text-red-600' : 'text-gray-600'}"
+						>
 							残り時間: <span class="font-bold">{formatTime(remainingTime)}</span>
 						</div>
 					{/if}
@@ -1128,7 +1129,7 @@
 					<div>
 						<p class="text-sm text-gray-600">正確率</p>
 						<p data-testid="accuracy-display" class="text-xl font-bold">
-							{score.accuracy || 100}%
+							{(score.accuracy || 100).toFixed(2)}%
 						</p>
 					</div>
 					<div>

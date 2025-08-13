@@ -3,10 +3,7 @@
 	import { onMount } from 'svelte';
 	import CardSelector from '$lib/components/specific/CardSelector.svelte';
 	import FavoritesManager from '$lib/components/specific/FavoritesManager.svelte';
-	import {
-		specificCardsStore,
-		canStartPractice
-	} from '$lib/stores/specific-cards-store';
+	import { specificCardsStore, canStartPractice } from '$lib/stores/specific-cards-store';
 	import { practiceModeStore } from '$lib/stores/practice-mode';
 	import { getKarutaCards } from '$lib/data/karuta-cards';
 	import type { KarutaCard } from '$lib/types';
