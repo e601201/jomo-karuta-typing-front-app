@@ -131,7 +131,7 @@
 	<meta property="og:description" content="群馬の郷土カルタでタイピング練習。楽しみながら上毛カルタを覚えよう！" />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://jomo-karuta-typing.vercel.app" />
-	<meta property="og:image" content="https://jomo-karuta-typing.vercel.app/images/ogp/og-image.png" />
+	<meta property="og:image" content="https://jomo-karuta-typing.vercel.app/images/ogp/og-image-optimized.jpg" />
 	<meta property="og:site_name" content="上毛カルタタイピング" />
 	<meta property="og:locale" content="ja_JP" />
 	
@@ -139,7 +139,7 @@
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="上毛カルタタイピング" />
 	<meta name="twitter:description" content="群馬の郷土カルタでタイピング練習。楽しみながら上毛カルタを覚えよう！" />
-	<meta name="twitter:image" content="https://jomo-karuta-typing.vercel.app/images/ogp/og-image.png" />
+	<meta name="twitter:image" content="https://jomo-karuta-typing.vercel.app/images/ogp/og-image-optimized.jpg" />
 </svelte:head>
 
 <main class="min-h-screen bg-gradient-to-b from-green-50 to-white">
