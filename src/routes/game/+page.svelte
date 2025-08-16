@@ -142,11 +142,11 @@
 					}
 					// 時間切れでゲームが終了したかチェック（セッションが非アクティブになった場合）
 					if (state.session && !state.session.isActive && state.session.endTime) {
-						console.log("終了")
+						console.log('終了');
 						isGameComplete = true;
 						// 手動終了の場合は音を再生しない
 						if (!state.session.isManualExit) {
-							console.log("音を再生")
+							console.log('音を再生');
 							soundManager?.playGameEnd();
 						}
 					}
@@ -1160,7 +1160,7 @@
 
 			<!-- カウントダウンオーバーレイ -->
 			{#if showCountdown}
-				<Countdown onComplete={handleCountdownComplete} duration={3}/>
+				<Countdown onComplete={handleCountdownComplete} duration={3} />
 			{/if}
 
 			<!-- 終了確認 -->

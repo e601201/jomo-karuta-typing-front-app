@@ -25,18 +25,18 @@ export class ImagePreloader {
 		// 新規読み込み
 		const loadPromise = new Promise<HTMLImageElement>((resolve, reject) => {
 			const img = new Image();
-			
+
 			img.onload = () => {
 				this.loadedImages.set(url, img);
 				this.loadPromises.delete(url);
 				resolve(img);
 			};
-			
+
 			img.onerror = () => {
 				this.loadPromises.delete(url);
 				reject(new Error(`Failed to load image: ${url}`));
 			};
-			
+
 			// クロスオリジン対応
 			img.crossOrigin = 'anonymous';
 			img.src = url;
@@ -71,7 +71,7 @@ export class ImagePreloader {
 	 * 複数のカード画像を並列でプリロード
 	 */
 	static async preloadMultipleCards(
-		cards: KarutaCard[], 
+		cards: KarutaCard[],
 		options?: {
 			maxConcurrent?: number;
 			onProgress?: (loaded: number, total: number) => void;
@@ -79,14 +79,14 @@ export class ImagePreloader {
 	): Promise<void> {
 		const maxConcurrent = options?.maxConcurrent || 6;
 		const onProgress = options?.onProgress;
-		
+
 		let loadedCount = 0;
 		const totalCards = cards.length;
 
 		// バッチ処理で並列数を制限
 		for (let i = 0; i < cards.length; i += maxConcurrent) {
 			const batch = cards.slice(i, i + maxConcurrent);
-			
+
 			await Promise.all(
 				batch.map(async (card) => {
 					await this.preloadCardImages(card);
@@ -101,10 +101,7 @@ export class ImagePreloader {
 	 * 優先度付きプリロード
 	 * 最初の数枚を優先的に読み込み、残りは非同期で
 	 */
-	static async preloadWithPriority(
-		cards: KarutaCard[],
-		priorityCount = 3
-	): Promise<void> {
+	static async preloadWithPriority(cards: KarutaCard[], priorityCount = 3): Promise<void> {
 		if (cards.length === 0) return;
 
 		// 優先カードを同期的にプリロード
