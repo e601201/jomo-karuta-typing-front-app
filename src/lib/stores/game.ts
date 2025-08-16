@@ -15,6 +15,7 @@ export interface GameSession {
 	endTime?: Date;
 	isActive: boolean;
 	totalCards: number;
+	isManualExit?: boolean;
 }
 
 export interface CompletedCard {
@@ -617,7 +618,7 @@ export function createGameStore() {
 	}
 
 	// セッション終了
-	function endSession() {
+	function endSession(isManualExit = false) {
 		const state = get(gameStore);
 
 		if (!state.session) return;
@@ -631,7 +632,8 @@ export function createGameStore() {
 				? {
 						...s.session,
 						endTime: new Date(),
-						isActive: false
+						isActive: false,
+						isManualExit
 					}
 				: null,
 			timer: {
