@@ -6,6 +6,7 @@
 	import { practiceModeStore } from '$lib/stores/practice-mode';
 	import { InputValidator } from '$lib/services/typing/input-validator';
 	import { LocalStorageService } from '$lib/services/storage/local-storage';
+	import { TypingSoundManager } from '$lib/services/audio/typing-sounds';
 	import type { GameMode, KarutaCard } from '$lib/types';
 	import { calcTypingScore } from '$lib/services/game/score';
 
@@ -70,8 +71,13 @@
 	// ストアのサブスクリプション
 	let unsubscribe: (() => void) | null = null;
 
+	// 音声マネージャー
+	let soundManager: TypingSoundManager | null = null;
+
 	onMount(async () => {
 		try {
+			// 音声マネージャーを初期化
+			soundManager = new TypingSoundManager();
 			// ページデータのエラーをチェック
 			if (data.error) {
 				error = data.error;
@@ -132,10 +138,17 @@
 					// ゲームが完了したかチェック
 					if (state.cards.completed.length === totalCards && state.session?.isActive) {
 						isGameComplete = true;
+						soundManager?.playGameEnd();
 					}
 					// 時間切れでゲームが終了したかチェック（セッションが非アクティブになった場合）
 					if (state.session && !state.session.isActive && state.session.endTime) {
+						console.log("終了")
 						isGameComplete = true;
+						// 手動終了の場合は音を再生しない
+						if (!state.session.isManualExit) {
+							console.log("音を再生")
+							soundManager?.playGameEnd();
+						}
 					}
 				});
 			}
@@ -222,6 +235,7 @@
 				// ゲームが完了したかチェック（全カードが処理された）
 				if (state.currentIndex >= state.cards.length && state.cards.length > 0) {
 					isGameComplete = true;
+					soundManager?.playGameEnd();
 					practiceModeStore.complete();
 					return;
 				}
@@ -295,8 +309,8 @@
 				}
 			});
 		} else {
-			// 他のモードでは通常のゲームストアを使用
-			gameStore.startSession(gameMode!, cards);
+			// 他のモードでは通常のゲームストアを使用（async関数なのでawait）
+			await gameStore.startSession(gameMode!, cards);
 		}
 	}
 
@@ -498,6 +512,9 @@
 				gameStore.updateInput(newInput);
 			}
 
+			// 正しい入力の音を再生
+			soundManager?.playCorrect();
+
 			showError = false;
 		} else {
 			// エラーを表示
@@ -532,6 +549,9 @@
 			}
 
 			mistakes++;
+
+			// 間違った入力の音を再生
+			soundManager?.playIncorrect();
 
 			// モードに基づいてストアを更新
 			if (gameMode === 'practice') {
@@ -954,7 +974,7 @@
 	}
 
 	function confirmExit() {
-		gameStore.endSession();
+		gameStore.endSession(true);
 		goto('/');
 	}
 
@@ -1140,7 +1160,7 @@
 
 			<!-- カウントダウンオーバーレイ -->
 			{#if showCountdown}
-				<Countdown onComplete={handleCountdownComplete} />
+				<Countdown onComplete={handleCountdownComplete} duration={3}/>
 			{/if}
 
 			<!-- 終了確認 -->

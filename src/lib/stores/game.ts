@@ -7,6 +7,7 @@ import { InputValidator } from '../services/typing/input-validator';
 import type { KarutaCard, GameMode } from '$lib/types';
 import { LocalStorageService } from '$lib/services/storage/local-storage';
 import { calcTypingScore } from '$lib/services/game/score';
+import { ImagePreloader } from '$lib/utils/image-preloader';
 
 export interface GameSession {
 	id: string;
@@ -15,6 +16,7 @@ export interface GameSession {
 	endTime?: Date;
 	isActive: boolean;
 	totalCards: number;
+	isManualExit?: boolean;
 }
 
 export interface CompletedCard {
@@ -181,7 +183,7 @@ export function createGameStore() {
 	});
 
 	// セッション開始
-	function startSession(mode: GameMode, cards: KarutaCard[]) {
+	async function startSession(mode: GameMode, cards: KarutaCard[]) {
 		if (cards.length === 0) return;
 
 		// ランダムモードの場合はカードをシャッフル
@@ -189,6 +191,9 @@ export function createGameStore() {
 		if (mode === 'random') {
 			gameCards = shuffleArray(gameCards);
 		}
+
+		// 画像を優先度付きでプリロード（最初の5枚を優先）
+		await ImagePreloader.preloadWithPriority(gameCards, 5);
 
 		const sessionId = generateSessionId();
 		const startTime = new Date();
@@ -617,7 +622,7 @@ export function createGameStore() {
 	}
 
 	// セッション終了
-	function endSession() {
+	function endSession(isManualExit = false) {
 		const state = get(gameStore);
 
 		if (!state.session) return;
@@ -631,7 +636,8 @@ export function createGameStore() {
 				? {
 						...s.session,
 						endTime: new Date(),
-						isActive: false
+						isActive: false,
+						isManualExit
 					}
 				: null,
 			timer: {
