@@ -206,7 +206,7 @@
 					class="flex items-center gap-2 text-gray-600 transition-colors hover:text-green-600"
 				>
 					<span class="text-xl">⚙️</span>
-					<span>設定（工事中🙇）</span>
+					<span>設定</span>
 				</a>
 				<a
 					href="/statistics"

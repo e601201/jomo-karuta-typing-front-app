@@ -142,11 +142,9 @@
 					}
 					// 時間切れでゲームが終了したかチェック（セッションが非アクティブになった場合）
 					if (state.session && !state.session.isActive && state.session.endTime) {
-						console.log('終了');
 						isGameComplete = true;
 						// 手動終了の場合は音を再生しない
 						if (!state.session.isManualExit) {
-							console.log('音を再生');
 							soundManager?.playGameEnd();
 						}
 					}
@@ -172,6 +170,12 @@
 		if (unsubscribe) unsubscribe();
 		if (typeof window !== 'undefined') {
 			document.removeEventListener('keydown', handleKeydown);
+		}
+
+		// 音声マネージャーのクリーンアップ
+		if (soundManager) {
+			soundManager.destroy();
+			soundManager = null;
 		}
 
 		// 離れる前に進捗を保存

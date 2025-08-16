@@ -301,6 +301,26 @@
 					<h2>サウンド設定</h2>
 
 					<SettingItem
+						label="BGM（準備中）"
+						type="toggle"
+						value={settings.sound.bgmEnabled}
+						onChange={(value) => settingsStore.updateSetting('sound.bgmEnabled', value)}
+					/>
+
+					{#if settings.sound.bgmEnabled}
+						<SettingItem
+							label="BGM音量"
+							type="slider"
+							value={settings.sound.bgmVolume}
+							min={0}
+							max={100}
+							step={5}
+							unit="%"
+							onChange={(value) => settingsStore.updateSetting('sound.bgmVolume', value)}
+						/>
+					{/if}
+
+					<SettingItem
 						label="効果音"
 						type="toggle"
 						value={settings.sound.effectsEnabled}
@@ -317,26 +337,6 @@
 							step={5}
 							unit="%"
 							onChange={(value) => settingsStore.updateSetting('sound.effectsVolume', value)}
-						/>
-					{/if}
-
-					<SettingItem
-						label="BGM"
-						type="toggle"
-						value={settings.sound.bgmEnabled}
-						onChange={(value) => settingsStore.updateSetting('sound.bgmEnabled', value)}
-					/>
-
-					{#if settings.sound.bgmEnabled}
-						<SettingItem
-							label="BGM音量"
-							type="slider"
-							value={settings.sound.bgmVolume}
-							min={0}
-							max={100}
-							step={5}
-							unit="%"
-							onChange={(value) => settingsStore.updateSetting('sound.bgmVolume', value)}
 						/>
 					{/if}
 
@@ -361,7 +361,7 @@
 					{/if}
 
 					<SettingItem
-						label="読み上げ音声"
+						label="読み上げ音声（準備中）"
 						type="toggle"
 						value={settings.sound.voiceEnabled}
 						onChange={(value) => settingsStore.updateSetting('sound.voiceEnabled', value)}
