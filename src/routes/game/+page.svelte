@@ -309,8 +309,8 @@
 				}
 			});
 		} else {
-			// 他のモードでは通常のゲームストアを使用
-			gameStore.startSession(gameMode!, cards);
+			// 他のモードでは通常のゲームストアを使用（async関数なのでawait）
+			await gameStore.startSession(gameMode!, cards);
 		}
 	}
 
