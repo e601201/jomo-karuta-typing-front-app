@@ -28,6 +28,7 @@
 	import InputHighlight from '$lib/components/game/InputHighlight.svelte';
 	import PauseOverlay from '$lib/components/game/PauseOverlay.svelte';
 	import Countdown from '$lib/components/game/Countdown.svelte';
+	import RankingRegistrationModal from '$lib/components/ranking/RankingRegistrationModal.svelte';
 
 	// 状態
 	let gameMode: GameMode | null = $state(null);
@@ -39,6 +40,8 @@
 	let isGameComplete = $state(false);
 	let showCountdown = $state(false);
 	let gameStarted = $state(false);
+	let showRankingModal = $state(false);
+	let isRankingRegistered = $state(false);
 
 	// ストアからのゲーム状態
 	let currentCard = $state<KarutaCard | null>(null);
@@ -1085,15 +1088,22 @@
 
 				<!-- ボタン群 -->
 				<div class="flex flex-col gap-3">
-					<div class="grid grid-cols-2 gap-3">
+					{#if gameMode === 'random' && !isRankingRegistered}
 						<button
 							onclick={() => {
-								// ランキング機能（未実装）
-								alert('ランキング機能は準備中です');
+								showRankingModal = true;
 							}}
+							class="rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4 text-white font-bold text-lg transition-all hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105"
+						>
+							🏆 ランキングに登録する
+						</button>
+					{/if}
+					<div class="grid grid-cols-2 gap-3">
+						<button
+							onclick={() => goto('/ranking')}
 							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
 						>
-							🏆 ランキングを表示
+							🏆 ランキングを見る
 						</button>
 						<button
 							onclick={() => {
@@ -1282,3 +1292,16 @@
 		{/if}
 	</div>
 </main>
+
+<!-- ランキング登録モーダル -->
+<RankingRegistrationModal
+	isOpen={showRankingModal}
+	score={score.total || 0}
+	onClose={() => {
+		showRankingModal = false;
+	}}
+	onSuccess={() => {
+		isRankingRegistered = true;
+		showRankingModal = false;
+	}}
+/>
