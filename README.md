@@ -7,11 +7,13 @@
 ### 環境変数の設定
 
 1. `.env.example` を `.env` にコピー
+
 ```sh
 cp .env.example .env
 ```
 
 2. `.env` ファイルに Supabase の認証情報を設定
+
 ```
 PUBLIC_SUPABASE_URL=your_supabase_project_url
 PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -43,6 +45,7 @@ bun --bun run build
 ```
 
 ビルドのプレビュー:
+
 ```sh
 bun --bun run preview
 ```

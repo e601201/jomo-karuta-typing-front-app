@@ -1093,7 +1093,7 @@
 							onclick={() => {
 								showRankingModal = true;
 							}}
-							class="rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4 text-white font-bold text-lg transition-all hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105"
+							class="transform rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4 text-lg font-bold text-white transition-all hover:scale-105 hover:from-yellow-600 hover:to-orange-600"
 						>
 							🏆 ランキングに登録する
 						</button>

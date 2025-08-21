@@ -30,7 +30,7 @@
 		displayTorifuda = [...shuffledTorifuda, ...shuffledTorifuda];
 		YOMIFUDA_TOTAL_WIDTH = shuffledYomifuda.length * YOMIFUDA_CARD_WIDTH;
 		TORIFUDA_TOTAL_WIDTH = shuffledTorifuda.length * TORIFUDA_CARD_WIDTH;
-		
+
 		startAnimation();
 	});
 
