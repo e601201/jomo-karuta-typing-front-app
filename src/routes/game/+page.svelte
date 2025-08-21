@@ -1107,12 +1107,24 @@
 						</button>
 						<button
 							onclick={() => {
-								// SNSシェア機能（未実装）
-								alert('SNSシェア機能は準備中です');
+								const shareText = `【上毛かるたタイピング】
+${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モード' : 'ランダムモード'}で${score.total.toLocaleString()}点獲得！
+
+📊 ゲーム結果
+・正解した札: ${completedCardsCount}枚
+・正確率: ${score.accuracy.toFixed(2)}%
+・WPM: ${score.speed}
+・最大コンボ: ${score.maxCombo}
+
+#上毛かるた #タイピングゲーム`;
+
+								const shareUrl = window.location.origin;
+								const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+								window.open(twitterUrl, '_blank', 'width=550,height=420');
 							}}
 							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
 						>
-							結果をSNSでシェア
+							📢 結果をX(Twitter)でシェア
 						</button>
 					</div>
 					<button
