@@ -2,12 +2,11 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { karutaCards } from '$lib/data/karuta-cards';
 
-	// カルタカードをランダムに並べ替えて重複させる（スムーズなループのため）
-	const shuffledYomifuda = [...karutaCards].sort(() => Math.random() - 0.5);
-	const shuffledTorifuda = [...karutaCards].sort(() => Math.random() - 0.5);
-	// 2セット用意してシームレスなループを実現
-	const displayYomifuda = [...shuffledYomifuda, ...shuffledYomifuda];
-	const displayTorifuda = [...shuffledTorifuda, ...shuffledTorifuda];
+	// 初期状態では順序を固定（SSRとクライアントで同じ順序を保証）
+	let shuffledYomifuda = [...karutaCards];
+	let shuffledTorifuda = [...karutaCards];
+	let displayYomifuda = [...shuffledYomifuda, ...shuffledYomifuda];
+	let displayTorifuda = [...shuffledTorifuda, ...shuffledTorifuda];
 
 	let yomifudaRef: HTMLDivElement;
 	let torifudaRef: HTMLDivElement;
@@ -18,12 +17,20 @@
 
 	// アニメーション設定
 	const SCROLL_SPEED = 0.5; // ピクセル/フレーム
-	const YOMIFUDA_CARD_WIDTH = 170; // 読み札の幅 + 間隔（120→170に拡大）
-	const TORIFUDA_CARD_WIDTH = 160; // 取り札の幅 + 間隔（120→160に拡大）
-	const YOMIFUDA_TOTAL_WIDTH = shuffledYomifuda.length * YOMIFUDA_CARD_WIDTH;
-	const TORIFUDA_TOTAL_WIDTH = shuffledTorifuda.length * TORIFUDA_CARD_WIDTH;
+	let YOMIFUDA_CARD_WIDTH = 170; // 読み札の幅 + 間隔（120→170に拡大）
+	let TORIFUDA_CARD_WIDTH = 160; // 取り札の幅 + 間隔（120→160に拡大）
+	let YOMIFUDA_TOTAL_WIDTH = shuffledYomifuda.length * YOMIFUDA_CARD_WIDTH;
+	let TORIFUDA_TOTAL_WIDTH = shuffledTorifuda.length * TORIFUDA_CARD_WIDTH;
 
 	onMount(() => {
+		// クライアント側でのみランダム化を実行
+		shuffledYomifuda = [...karutaCards].sort(() => Math.random() - 0.5);
+		shuffledTorifuda = [...karutaCards].sort(() => Math.random() - 0.5);
+		displayYomifuda = [...shuffledYomifuda, ...shuffledYomifuda];
+		displayTorifuda = [...shuffledTorifuda, ...shuffledTorifuda];
+		YOMIFUDA_TOTAL_WIDTH = shuffledYomifuda.length * YOMIFUDA_CARD_WIDTH;
+		TORIFUDA_TOTAL_WIDTH = shuffledTorifuda.length * TORIFUDA_CARD_WIDTH;
+		
 		startAnimation();
 	});
 
