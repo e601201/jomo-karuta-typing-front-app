@@ -198,6 +198,17 @@
 			<!-- Navigation Links -->
 			<nav class="flex justify-center gap-8">
 				<a
+					href="/ranking"
+					onclick={(e) => {
+						e.preventDefault();
+						handleNavigation('/ranking');
+					}}
+					class="flex items-center gap-2 text-gray-600 transition-colors hover:text-green-600"
+				>
+					<span class="text-xl">🏆</span>
+					<span>ランキング</span>
+				</a>
+				<a
 					href="/settings"
 					onclick={(e) => {
 						e.preventDefault();

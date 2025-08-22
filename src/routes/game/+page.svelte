@@ -28,6 +28,7 @@
 	import InputHighlight from '$lib/components/game/InputHighlight.svelte';
 	import PauseOverlay from '$lib/components/game/PauseOverlay.svelte';
 	import Countdown from '$lib/components/game/Countdown.svelte';
+	import RankingRegistrationModal from '$lib/components/ranking/RankingRegistrationModal.svelte';
 
 	// 状態
 	let gameMode: GameMode | null = $state(null);
@@ -39,6 +40,8 @@
 	let isGameComplete = $state(false);
 	let showCountdown = $state(false);
 	let gameStarted = $state(false);
+	let showRankingModal = $state(false);
+	let isRankingRegistered = $state(false);
 
 	// ストアからのゲーム状態
 	let currentCard = $state<KarutaCard | null>(null);
@@ -966,10 +969,11 @@
 		}
 
 		if (gameMode === 'practice') {
-			// 練習モードでカードをスキップ
+			// 練習モードでカードをスキップ（falseを渡すことで完了扱いにしない）
 			practiceModeStore.nextCard(false);
 		} else if (cardIndex < totalCards - 1) {
-			gameStore.nextCard();
+			// 通常モードではskipCard関数を使用（完了扱いにしない）
+			gameStore.skipCard();
 		}
 	}
 
@@ -1085,24 +1089,43 @@
 
 				<!-- ボタン群 -->
 				<div class="flex flex-col gap-3">
-					<div class="grid grid-cols-2 gap-3">
+					{#if gameMode === 'random' && !isRankingRegistered}
 						<button
 							onclick={() => {
-								// ランキング機能（未実装）
-								alert('ランキング機能は準備中です');
+								showRankingModal = true;
 							}}
+							class="transform rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4 text-lg font-bold text-white transition-all hover:scale-105 hover:from-yellow-600 hover:to-orange-600"
+						>
+							🏆 ランキングに登録する
+						</button>
+					{/if}
+					<div class="grid grid-cols-2 gap-3">
+						<button
+							onclick={() => goto('/ranking')}
 							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
 						>
-							🏆 ランキングを表示
+							🏆 ランキングを見る
 						</button>
 						<button
 							onclick={() => {
-								// SNSシェア機能（未実装）
-								alert('SNSシェア機能は準備中です');
+								const shareText = `【上毛かるたタイピング】
+${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モード' : 'ランダムモード'}で${score.total.toLocaleString()}点獲得！
+
+📊 ゲーム結果
+・正解した札: ${completedCardsCount}枚
+・正確率: ${score.accuracy.toFixed(2)}%
+・WPM: ${score.speed}
+・最大コンボ: ${score.maxCombo}
+
+#上毛かるた #タイピングゲーム`;
+
+								const shareUrl = window.location.origin;
+								const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+								window.open(twitterUrl, '_blank', 'width=550,height=420');
 							}}
 							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
 						>
-							結果をSNSでシェア
+							📢 結果をX(Twitter)でシェア
 						</button>
 					</div>
 					<button
@@ -1282,3 +1305,16 @@
 		{/if}
 	</div>
 </main>
+
+<!-- ランキング登録モーダル -->
+<RankingRegistrationModal
+	isOpen={showRankingModal}
+	score={score.total || 0}
+	onClose={() => {
+		showRankingModal = false;
+	}}
+	onSuccess={() => {
+		isRankingRegistered = true;
+		showRankingModal = false;
+	}}
+/>

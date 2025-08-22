@@ -268,6 +268,71 @@ export function createGameStore() {
 		startAutoSave();
 	}
 
+	// スキップ（完了扱いにしない）
+	function skipCard() {
+		const state = get(gameStore);
+
+		// セッション未開始またはカードがない場合は何もしない
+		if (!state.session?.isActive || !state.cards.current) {
+			return;
+		}
+
+		// データ不整合の検出と修正
+		if (state.cards.currentIndex >= state.session.totalCards) {
+			// インデックスが範囲外の場合は修正
+			console.warn(
+				`Data inconsistency detected: currentIndex (${state.cards.currentIndex}) >= totalCards (${state.session.totalCards})`
+			);
+			endSession();
+			return;
+		}
+
+		gameStore.update((s) => {
+			// 全てのカードが処理された場合
+			if (s.cards.remaining.length === 0) {
+				console.log('All cards processed. Ending session.');
+				return {
+					...s,
+					session: {
+						...s.session!,
+						isActive: false,
+						endTime: new Date()
+					}
+				};
+			}
+
+			const nextCard = s.cards.remaining[0];
+			const newIndex = s.cards.currentIndex + 1;
+
+			// InputValidatorに新しいターゲットを設定（スペースを除去）
+			if (s.input.validator && nextCard) {
+				const targetText = nextCard.hiragana.replace(/\s/g, '');
+				s.input.validator.setTarget(targetText);
+			}
+
+			// スキップした場合はcompleted配列に追加しない
+			return {
+				...s,
+				cards: {
+					current: nextCard,
+					currentIndex: newIndex,
+					remaining: s.cards.remaining.slice(1),
+					completed: s.cards.completed // そのまま維持
+				},
+				input: {
+					...s.input,
+					current: '',
+					position: 0,
+					mistakes: 0
+				},
+				timer: {
+					...s.timer,
+					cardStartTime: new Date()
+				}
+			};
+		});
+	}
+
 	// 次のカードへ
 	function nextCard() {
 		const state = get(gameStore);
@@ -811,6 +876,7 @@ export function createGameStore() {
 		statisticsStore,
 		startSession,
 		nextCard,
+		skipCard,
 		completeCard,
 		updateInput,
 		processKeystroke,
