@@ -11,6 +11,7 @@
 	let showNewDialog = $state(false);
 	let newFavoriteName = $state('');
 	let errorMessage = $state('');
+	let isComposing = $state(false);
 
 	onMount(async () => {
 		await loadFavorites();
@@ -74,6 +75,21 @@
 			await loadFavorites();
 		}
 	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		// IMEで変換中の場合はEnterキーで保存しない
+		if (e.key === 'Enter' && !isComposing) {
+			saveFavorite();
+		}
+	}
+
+	function handleCompositionStart() {
+		isComposing = true;
+	}
+
+	function handleCompositionEnd() {
+		isComposing = false;
+	}
 </script>
 
 <div class="favorites-manager">
@@ -127,7 +143,9 @@
 					bind:value={newFavoriteName}
 					placeholder="名前を入力"
 					class="mb-2 w-full rounded border px-3 py-2"
-					onkeydown={(e) => e.key === 'Enter' && saveFavorite()}
+					onkeydown={handleKeydown}
+					oncompositionstart={handleCompositionStart}
+					oncompositionend={handleCompositionEnd}
 				/>
 				{#if errorMessage}
 					<p class="mb-2 text-sm text-red-500">{errorMessage}</p>

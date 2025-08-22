@@ -15,6 +15,7 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let success = $state(false);
+	let isComposing = $state(false);
 
 	// LocalStorageから前回の名前を取得
 	$effect(() => {
@@ -66,12 +67,21 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && !loading) {
+		// IMEで変換中の場合はEnterキーで送信しない
+		if (e.key === 'Enter' && !loading && !isComposing) {
 			handleSubmit();
 		}
 		if (e.key === 'Escape') {
 			onClose();
 		}
+	}
+
+	function handleCompositionStart() {
+		isComposing = true;
+	}
+
+	function handleCompositionEnd() {
+		isComposing = false;
 	}
 </script>
 
@@ -82,7 +92,6 @@
 		onclick={(e) => {
 			if (e.target === e.currentTarget) onClose();
 		}}
-		onkeydown={handleKeydown}
 		tabindex="-1"
 		role="dialog"
 		aria-modal="true"
@@ -145,6 +154,9 @@
 							placeholder="名無しの挑戦者"
 							maxlength="20"
 							disabled={loading}
+							oncompositionstart={handleCompositionStart}
+							oncompositionend={handleCompositionEnd}
+							onkeydown={handleKeydown}
 							class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 placeholder-gray-400 transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none disabled:bg-gray-100 disabled:opacity-50"
 						/>
 						<p class="mt-1 text-xs text-gray-500">
