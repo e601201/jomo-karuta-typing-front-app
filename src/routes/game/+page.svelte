@@ -969,10 +969,11 @@
 		}
 
 		if (gameMode === 'practice') {
-			// 練習モードでカードをスキップ
+			// 練習モードでカードをスキップ（falseを渡すことで完了扱いにしない）
 			practiceModeStore.nextCard(false);
 		} else if (cardIndex < totalCards - 1) {
-			gameStore.nextCard();
+			// 通常モードではskipCard関数を使用（完了扱いにしない）
+			gameStore.skipCard();
 		}
 	}
 
