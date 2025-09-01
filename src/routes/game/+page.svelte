@@ -1271,9 +1271,6 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モ�
 					<p class="text-gray-800">読み込み中...</p>
 				</div>
 			{:else if currentCard && currentCard.hiragana}
-				<div class="mb-2 text-xs text-gray-500">
-					デバッグ: カードID = {currentCard.id}, ひらがな = {currentCard.hiragana}
-				</div>
 				<CardDisplay card={currentCard} shake={showError} />
 			{:else}
 				<div class="mb-6 rounded-lg bg-yellow-100 p-8 text-center">
