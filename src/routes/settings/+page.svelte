@@ -139,7 +139,7 @@
 					hasUnsavedChanges = false;
 					alert('設定をインポートしました');
 				} catch (error) {
-					alert('設定のインポートに失敗しました');
+					alert('設定のインポートに失敗しました' + error);
 				}
 			};
 			reader.readAsText(file);
@@ -301,7 +301,7 @@
 					<h2>サウンド設定</h2>
 
 					<SettingItem
-						label="BGM（準備中）"
+						label="BGM"
 						type="toggle"
 						value={settings.sound.bgmEnabled}
 						onChange={(value) => settingsStore.updateSetting('sound.bgmEnabled', value)}

@@ -19,6 +19,7 @@
 			isLoading = false;
 		} catch (error) {
 			isLoading = false;
+			alert('札の読み込みに失敗しました' + error);
 		}
 	});
 

@@ -57,6 +57,7 @@
 	let totalPauseTime = $state(0);
 	let remainingTime = $state<number | null>(null);
 	let hasTimeLimit = $state(false);
+	let wasSkipped = $state(false);
 
 	// カード変更を検出するための前回のカードインデックスを追跡
 	let previousCardIndex = -1;
@@ -121,9 +122,25 @@
 					currentInput = state.input.current;
 					remainingTime = state.timer.remainingTime;
 					hasTimeLimit = state.timer.timeLimit !== null;
+					wasSkipped = state.cards.wasSkipped || false;
 
 					// カードが変更された場合はバリデータを更新
 					if (currentCard && currentCard.id !== previousCardId) {
+						// 前のカードがあった場合（初回以外）、かつスキップでない場合のみ正解音を再生
+						if (previousCardId && soundManager && !wasSkipped) {
+							soundManager.playComplete();
+						}
+						// wasSkippedフラグをリセット（次のカード用）
+						if (wasSkipped) {
+							gameStore.update((s) => ({
+								...s,
+								cards: {
+									...s.cards,
+									wasSkipped: false
+								}
+							}));
+						}
+
 						previousCardId = currentCard.id;
 						validator = new InputValidator();
 						// タイピング検証用にひらがなテキストからスペースを削除
@@ -142,6 +159,7 @@
 					if (state.cards.completed.length === totalCards && state.session?.isActive) {
 						isGameComplete = true;
 						soundManager?.playGameEnd();
+						soundManager?.stopBGM();
 					}
 					// 時間切れでゲームが終了したかチェック（セッションが非アクティブになった場合）
 					if (state.session && !state.session.isActive && state.session.endTime) {
@@ -150,6 +168,7 @@
 						if (!state.session.isManualExit) {
 							soundManager?.playGameEnd();
 						}
+						soundManager?.stopBGM();
 					}
 				});
 			}
@@ -243,6 +262,7 @@
 				if (state.currentIndex >= state.cards.length && state.cards.length > 0) {
 					isGameComplete = true;
 					soundManager?.playGameEnd();
+					soundManager?.stopBGM();
 					practiceModeStore.complete();
 					return;
 				}
@@ -714,6 +734,11 @@
 			romajiStates = new Array(romajiGuide.length).fill('pending');
 		}
 
+		// タイピング完了後、次の札表示前に正解音を再生
+		if (soundManager) {
+			soundManager.playComplete();
+		}
+
 		if (gameMode === 'practice') {
 			practiceModeStore.nextCard(true);
 		}
@@ -944,13 +969,25 @@
 	function handlePause() {
 		if (isPaused) {
 			gameStore.resumeGame();
+			// BGMを再開
+			if (soundManager) {
+				soundManager.resumeBGM();
+			}
 		} else {
 			gameStore.pauseGame();
+			// BGMを一時停止
+			if (soundManager) {
+				soundManager.pauseBGM();
+			}
 		}
 	}
 
 	function handleResumeFromOverlay(options?: { skipCountdown?: boolean }) {
 		gameStore.resumeGame();
+		// BGMを再開
+		if (soundManager) {
+			soundManager.resumeBGM();
+		}
 	}
 
 	function handleSkip() {
@@ -968,6 +1005,11 @@
 			romajiStates = new Array(romajiGuide.length).fill('pending');
 		}
 
+		// スキップ時に札を弾く音を再生
+		if (soundManager) {
+			soundManager.playFlickCard();
+		}
+
 		if (gameMode === 'practice') {
 			// 練習モードでカードをスキップ（falseを渡すことで完了扱いにしない）
 			practiceModeStore.nextCard(false);
@@ -983,6 +1025,7 @@
 
 	function confirmExit() {
 		gameStore.endSession(true);
+		soundManager?.stopBGM();
 		goto('/');
 	}
 
@@ -1008,6 +1051,11 @@
 	function handleCountdownComplete() {
 		showCountdown = false;
 		gameStarted = true;
+
+		// BGMを開始
+		if (soundManager) {
+			soundManager.startBGM();
+		}
 
 		// カウントダウン後にゲームタイマーを開始
 		if (gameMode === 'practice') {
@@ -1138,6 +1186,10 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モ�
 								const url = new URL(window.location.href);
 								url.searchParams.delete('continue'); // continueパラメータを削除
 								url.searchParams.delete('specific'); // specificパラメータも削除
+								// modeパラメータを確実に設定
+								if (gameMode) {
+									url.searchParams.set('mode', gameMode);
+								}
 								window.location.href = url.toString();
 							}
 						}}
@@ -1219,9 +1271,6 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モ�
 					<p class="text-gray-800">読み込み中...</p>
 				</div>
 			{:else if currentCard && currentCard.hiragana}
-				<div class="mb-2 text-xs text-gray-500">
-					デバッグ: カードID = {currentCard.id}, ひらがな = {currentCard.hiragana}
-				</div>
 				<CardDisplay card={currentCard} shake={showError} />
 			{:else}
 				<div class="mb-6 rounded-lg bg-yellow-100 p-8 text-center">

@@ -6,6 +6,7 @@
 	} from '$lib/stores/specific-cards-store';
 	import { favoritesService } from '$lib/services/storage/favorites-service';
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 
 	let favorites = $state<Favorite[]>([]);
 	let showNewDialog = $state(false);
@@ -52,9 +53,7 @@
 		const success = specificCardsStore.saveFavorite(newFavoriteName);
 		if (success) {
 			// Get the current state properly
-			let currentState: SpecificCardsState;
-			const unsubscribe = specificCardsStore.subscribe((s) => (currentState = s));
-			unsubscribe();
+			const currentState: SpecificCardsState = get(specificCardsStore);
 
 			const latestFavorite = currentState.favorites[currentState.favorites.length - 1];
 
@@ -136,7 +135,12 @@
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<div class="dialog" onclick={(e) => e.stopPropagation()}>
+			<div
+				class="dialog"
+				onclick={(e) => e.stopPropagation()}
+				onkeydown={(e) => e.key === 'Enter' && e.stopPropagation()}
+				role="presentation"
+			>
 				<h4 class="mb-3 text-lg font-semibold">お気に入りを保存</h4>
 				<input
 					type="text"
