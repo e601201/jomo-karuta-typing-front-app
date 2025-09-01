@@ -173,12 +173,10 @@ export class TypingSoundManager {
 		this.effectsEnabled = effectsEnabled;
 	}
 
-	public setVolume(typingSoundVolume: number, effectsVolume: number, bgmVolume?: number) {
+	public setVolume(typingSoundVolume: number, effectsVolume: number, bgmVolume: number) {
 		this.typingSoundVolume = Math.max(0, Math.min(1, typingSoundVolume));
 		this.effectsVolume = Math.max(0, Math.min(1, effectsVolume));
-		if (bgmVolume !== undefined) {
-			this.bgmVolume = Math.max(0, Math.min(1, bgmVolume));
-		}
+		this.bgmVolume = Math.max(0, Math.min(1, bgmVolume));
 		if (this.correctSound) {
 			this.correctSound.volume = this.typingSoundVolume;
 		}
@@ -244,31 +242,18 @@ export class TypingSoundManager {
 			const newBGMEnabled = settings.sound.bgmEnabled;
 			const newBGMVolume = settings.sound.bgmVolume / 100;
 
-			if (this.typingSoundEnabled !== newTypingSoundEnabled) {
-				this.typingSoundEnabled = newTypingSoundEnabled;
-			}
+			// 有効フラグは単純に反映
+			this.typingSoundEnabled = newTypingSoundEnabled;
+			this.effectsEnabled = newEffectsEnabled;
+			this.bgmEnabled = newBGMEnabled;
 
-			if (this.typingSoundVolume !== newTypingSoundVolume) {
-				this.typingSoundVolume = newTypingSoundVolume;
-				this.setVolume(newTypingSoundVolume, this.effectsVolume);
-			}
+			// いずれかの音量が変わったときのみ一度だけ適用
+			const typingChanged = this.typingSoundVolume !== newTypingSoundVolume;
+			const effectsChanged = this.effectsVolume !== newEffectsVolume;
+			const bgmChanged = this.bgmVolume !== newBGMVolume;
 
-			if (this.effectsEnabled !== newEffectsEnabled) {
-				this.effectsEnabled = newEffectsEnabled;
-			}
-
-			if (this.effectsVolume !== newEffectsVolume) {
-				this.effectsVolume = newEffectsVolume;
-				this.setVolume(this.typingSoundVolume, newEffectsVolume);
-			}
-
-			if (this.bgmEnabled !== newBGMEnabled) {
-				this.bgmEnabled = newBGMEnabled;
-			}
-
-			if (this.bgmVolume !== newBGMVolume) {
-				this.bgmVolume = newBGMVolume;
-				this.setVolume(this.typingSoundVolume, this.effectsVolume, newBGMVolume);
+			if (typingChanged || effectsChanged || bgmChanged) {
+				this.setVolume(newTypingSoundVolume, newEffectsVolume, newBGMVolume);
 			}
 		});
 	}
