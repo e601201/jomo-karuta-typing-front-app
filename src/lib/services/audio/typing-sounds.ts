@@ -46,7 +46,7 @@ export class TypingSoundManager {
 			this.flickCardSound.preload = 'auto';
 			this.completeSound.preload = 'auto';
 			this.bgmTypingSound.preload = 'auto';
-			
+
 			// BGMをループ再生に設定
 			this.bgmTypingSound.loop = true;
 		} catch (error) {
@@ -261,7 +261,7 @@ export class TypingSoundManager {
 	public destroy() {
 		// BGMを停止
 		this.stopBGM();
-		
+
 		if (this.unsubscribe) {
 			this.unsubscribe();
 			this.unsubscribe = null;

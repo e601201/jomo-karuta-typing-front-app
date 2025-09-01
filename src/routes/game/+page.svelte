@@ -140,7 +140,7 @@
 								}
 							}));
 						}
-						
+
 						previousCardId = currentCard.id;
 						validator = new InputValidator();
 						// タイピング検証用にひらがなテキストからスペースを削除

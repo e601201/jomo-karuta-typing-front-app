@@ -139,7 +139,7 @@
 					hasUnsavedChanges = false;
 					alert('設定をインポートしました');
 				} catch (error) {
-					alert('設定のインポートに失敗しました');
+					alert('設定のインポートに失敗しました' + error);
 				}
 			};
 			reader.readAsText(file);
