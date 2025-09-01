@@ -301,7 +301,7 @@
 					<h2>サウンド設定</h2>
 
 					<SettingItem
-						label="BGM（準備中）"
+						label="BGM"
 						type="toggle"
 						value={settings.sound.bgmEnabled}
 						onChange={(value) => settingsStore.updateSetting('sound.bgmEnabled', value)}

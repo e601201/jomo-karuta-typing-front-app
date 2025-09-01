@@ -159,6 +159,7 @@
 					if (state.cards.completed.length === totalCards && state.session?.isActive) {
 						isGameComplete = true;
 						soundManager?.playGameEnd();
+						soundManager?.stopBGM();
 					}
 					// 時間切れでゲームが終了したかチェック（セッションが非アクティブになった場合）
 					if (state.session && !state.session.isActive && state.session.endTime) {
@@ -167,6 +168,7 @@
 						if (!state.session.isManualExit) {
 							soundManager?.playGameEnd();
 						}
+						soundManager?.stopBGM();
 					}
 				});
 			}
@@ -260,6 +262,7 @@
 				if (state.currentIndex >= state.cards.length && state.cards.length > 0) {
 					isGameComplete = true;
 					soundManager?.playGameEnd();
+					soundManager?.stopBGM();
 					practiceModeStore.complete();
 					return;
 				}
@@ -966,13 +969,25 @@
 	function handlePause() {
 		if (isPaused) {
 			gameStore.resumeGame();
+			// BGMを再開
+			if (soundManager) {
+				soundManager.resumeBGM();
+			}
 		} else {
 			gameStore.pauseGame();
+			// BGMを一時停止
+			if (soundManager) {
+				soundManager.pauseBGM();
+			}
 		}
 	}
 
 	function handleResumeFromOverlay(options?: { skipCountdown?: boolean }) {
 		gameStore.resumeGame();
+		// BGMを再開
+		if (soundManager) {
+			soundManager.resumeBGM();
+		}
 	}
 
 	function handleSkip() {
@@ -1010,6 +1025,7 @@
 
 	function confirmExit() {
 		gameStore.endSession(true);
+		soundManager?.stopBGM();
 		goto('/');
 	}
 
@@ -1035,6 +1051,11 @@
 	function handleCountdownComplete() {
 		showCountdown = false;
 		gameStarted = true;
+
+		// BGMを開始
+		if (soundManager) {
+			soundManager.startBGM();
+		}
 
 		// カウントダウン後にゲームタイマーを開始
 		if (gameMode === 'practice') {

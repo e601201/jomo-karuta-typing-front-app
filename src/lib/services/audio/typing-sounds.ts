@@ -7,10 +7,13 @@ export class TypingSoundManager {
 	private gameEndSound: HTMLAudioElement | null = null;
 	private flickCardSound: HTMLAudioElement | null = null;
 	private completeSound: HTMLAudioElement | null = null;
+	private bgmTypingSound: HTMLAudioElement | null = null;
 	private typingSoundEnabled: boolean = true;
 	private effectsEnabled: boolean = true;
+	private bgmEnabled: boolean = true;
 	private typingSoundVolume: number = 0.5;
 	private effectsVolume: number = 0.5;
+	private bgmVolume: number = 0.3;
 	private unsubscribe: (() => void) | null = null;
 
 	constructor() {
@@ -28,18 +31,24 @@ export class TypingSoundManager {
 			this.gameEndSound = new Audio('/sounds/effects/whistle.mp3');
 			this.flickCardSound = new Audio('/sounds/effects/flickCard.mp3');
 			this.completeSound = new Audio('/sounds/effects/correct.mp3');
+			this.bgmTypingSound = new Audio('/sounds/BGM/Typing01.mp3');
 
 			this.correctSound.volume = this.typingSoundVolume;
 			this.incorrectSound.volume = this.typingSoundVolume;
 			this.gameEndSound.volume = this.effectsVolume;
 			this.flickCardSound.volume = this.effectsVolume;
 			this.completeSound.volume = this.effectsVolume;
+			this.bgmTypingSound.volume = this.bgmVolume;
 
 			this.correctSound.preload = 'auto';
 			this.incorrectSound.preload = 'auto';
 			this.gameEndSound.preload = 'auto';
 			this.flickCardSound.preload = 'auto';
 			this.completeSound.preload = 'auto';
+			this.bgmTypingSound.preload = 'auto';
+			
+			// BGMをループ再生に設定
+			this.bgmTypingSound.loop = true;
 		} catch (error) {
 			console.error('Failed to initialize typing sounds:', error);
 		}
@@ -113,14 +122,63 @@ export class TypingSoundManager {
 		}
 	}
 
+	public startBGM() {
+		if (!this.bgmEnabled || !this.bgmTypingSound) return;
+
+		try {
+			this.bgmTypingSound.currentTime = 0;
+			this.bgmTypingSound.play().catch((error) => {
+				console.error('Failed to play BGM:', error);
+			});
+		} catch (error) {
+			console.error('Error playing BGM:', error);
+		}
+	}
+
+	public stopBGM() {
+		if (!this.bgmTypingSound) return;
+
+		try {
+			this.bgmTypingSound.pause();
+			this.bgmTypingSound.currentTime = 0;
+		} catch (error) {
+			console.error('Error stopping BGM:', error);
+		}
+	}
+
+	public pauseBGM() {
+		if (!this.bgmTypingSound) return;
+
+		try {
+			this.bgmTypingSound.pause();
+		} catch (error) {
+			console.error('Error pausing BGM:', error);
+		}
+	}
+
+	public resumeBGM() {
+		if (!this.bgmEnabled || !this.bgmTypingSound) return;
+
+		try {
+			this.bgmTypingSound.play().catch((error) => {
+				console.error('Failed to resume BGM:', error);
+			});
+		} catch (error) {
+			console.error('Error resuming BGM:', error);
+		}
+	}
+
 	public setEnabled(typingSoundEnabled: boolean, effectsEnabled: boolean) {
 		this.typingSoundEnabled = typingSoundEnabled;
 		this.effectsEnabled = effectsEnabled;
 	}
 
-	public setVolume(typingSoundVolume: number, effectsVolume: number) {
+	public setVolume(typingSoundVolume: number, effectsVolume: number, bgmVolume?: number) {
 		this.typingSoundVolume = Math.max(0, Math.min(1, typingSoundVolume));
 		this.effectsVolume = Math.max(0, Math.min(1, effectsVolume));
+		if (bgmVolume !== undefined) {
+			this.bgmVolume = Math.max(0, Math.min(1, bgmVolume));
+		}
 		if (this.correctSound) {
 			this.correctSound.volume = this.typingSoundVolume;
 		}
@@ -136,6 +194,9 @@ export class TypingSoundManager {
 		if (this.completeSound) {
 			this.completeSound.volume = this.effectsVolume;
 		}
+		if (this.bgmTypingSound) {
+			this.bgmTypingSound.volume = this.bgmVolume;
+		}
 	}
 
 	public isAvailable(): boolean {
@@ -149,6 +210,8 @@ export class TypingSoundManager {
 		this.typingSoundVolume = settings.sound.typingSoundVolume / 100;
 		this.effectsEnabled = settings.sound.effectsEnabled;
 		this.effectsVolume = settings.sound.effectsVolume / 100;
+		this.bgmEnabled = settings.sound.bgmEnabled;
+		this.bgmVolume = settings.sound.bgmVolume / 100;
 
 		// 既存の音声要素に適用
 		if (this.correctSound) {
@@ -166,6 +229,9 @@ export class TypingSoundManager {
 		if (this.completeSound) {
 			this.completeSound.volume = this.effectsVolume;
 		}
+		if (this.bgmTypingSound) {
+			this.bgmTypingSound.volume = this.bgmVolume;
+		}
 	}
 
 	private subscribeToSettings() {
@@ -175,6 +241,8 @@ export class TypingSoundManager {
 			const newTypingSoundVolume = settings.sound.typingSoundVolume / 100;
 			const newEffectsEnabled = settings.sound.effectsEnabled;
 			const newEffectsVolume = settings.sound.effectsVolume / 100;
+			const newBGMEnabled = settings.sound.bgmEnabled;
+			const newBGMVolume = settings.sound.bgmVolume / 100;
 
 			if (this.typingSoundEnabled !== newTypingSoundEnabled) {
 				this.typingSoundEnabled = newTypingSoundEnabled;
@@ -193,10 +261,22 @@ export class TypingSoundManager {
 				this.effectsVolume = newEffectsVolume;
 				this.setVolume(this.typingSoundVolume, newEffectsVolume);
 			}
+
+			if (this.bgmEnabled !== newBGMEnabled) {
+				this.bgmEnabled = newBGMEnabled;
+			}
+
+			if (this.bgmVolume !== newBGMVolume) {
+				this.bgmVolume = newBGMVolume;
+				this.setVolume(this.typingSoundVolume, this.effectsVolume, newBGMVolume);
+			}
 		});
 	}
 
 	public destroy() {
+		// BGMを停止
+		this.stopBGM();
+		
 		if (this.unsubscribe) {
 			this.unsubscribe();
 			this.unsubscribe = null;
