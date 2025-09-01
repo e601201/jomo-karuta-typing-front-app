@@ -5,6 +5,8 @@ export class TypingSoundManager {
 	private correctSound: HTMLAudioElement | null = null;
 	private incorrectSound: HTMLAudioElement | null = null;
 	private gameEndSound: HTMLAudioElement | null = null;
+	private flickCardSound: HTMLAudioElement | null = null;
+	private completeSound: HTMLAudioElement | null = null;
 	private typingSoundEnabled: boolean = true;
 	private effectsEnabled: boolean = true;
 	private typingSoundVolume: number = 0.5;
@@ -24,14 +26,20 @@ export class TypingSoundManager {
 			this.correctSound = new Audio('/sounds/typing/keyStroke.mp3');
 			this.incorrectSound = new Audio('/sounds/typing/incorrect.mp3');
 			this.gameEndSound = new Audio('/sounds/effects/whistle.mp3');
+			this.flickCardSound = new Audio('/sounds/effects/flickCard.mp3');
+			this.completeSound = new Audio('/sounds/effects/correct.mp3');
 
 			this.correctSound.volume = this.typingSoundVolume;
 			this.incorrectSound.volume = this.typingSoundVolume;
 			this.gameEndSound.volume = this.effectsVolume;
+			this.flickCardSound.volume = this.effectsVolume;
+			this.completeSound.volume = this.effectsVolume;
 
 			this.correctSound.preload = 'auto';
 			this.incorrectSound.preload = 'auto';
 			this.gameEndSound.preload = 'auto';
+			this.flickCardSound.preload = 'auto';
+			this.completeSound.preload = 'auto';
 		} catch (error) {
 			console.error('Failed to initialize typing sounds:', error);
 		}
@@ -77,6 +85,34 @@ export class TypingSoundManager {
 		}
 	}
 
+	public playFlickCard() {
+		if (!this.effectsEnabled || !this.flickCardSound) return;
+
+		try {
+			const sound = this.flickCardSound.cloneNode() as HTMLAudioElement;
+			sound.volume = this.effectsVolume;
+			sound.play().catch((error) => {
+				console.error('Failed to play flick card sound:', error);
+			});
+		} catch (error) {
+			console.error('Error playing flick card sound:', error);
+		}
+	}
+
+	public playComplete() {
+		if (!this.effectsEnabled || !this.completeSound) return;
+
+		try {
+			const sound = this.completeSound.cloneNode() as HTMLAudioElement;
+			sound.volume = this.effectsVolume;
+			sound.play().catch((error) => {
+				console.error('Failed to play complete sound:', error);
+			});
+		} catch (error) {
+			console.error('Error playing complete sound:', error);
+		}
+	}
+
 	public setEnabled(typingSoundEnabled: boolean, effectsEnabled: boolean) {
 		this.typingSoundEnabled = typingSoundEnabled;
 		this.effectsEnabled = effectsEnabled;
@@ -93,6 +129,12 @@ export class TypingSoundManager {
 		}
 		if (this.gameEndSound) {
 			this.gameEndSound.volume = this.effectsVolume;
+		}
+		if (this.flickCardSound) {
+			this.flickCardSound.volume = this.effectsVolume;
+		}
+		if (this.completeSound) {
+			this.completeSound.volume = this.effectsVolume;
 		}
 	}
 
@@ -117,6 +159,12 @@ export class TypingSoundManager {
 		}
 		if (this.gameEndSound) {
 			this.gameEndSound.volume = this.effectsVolume;
+		}
+		if (this.flickCardSound) {
+			this.flickCardSound.volume = this.effectsVolume;
+		}
+		if (this.completeSound) {
+			this.completeSound.volume = this.effectsVolume;
 		}
 	}
 

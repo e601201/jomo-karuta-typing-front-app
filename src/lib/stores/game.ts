@@ -55,6 +55,7 @@ export interface GameState {
 		currentIndex: number;
 		remaining: KarutaCard[];
 		completed: CompletedCard[];
+		wasSkipped?: boolean;
 	};
 	input: {
 		current: string;
@@ -317,7 +318,8 @@ export function createGameStore() {
 					current: nextCard,
 					currentIndex: newIndex,
 					remaining: s.cards.remaining.slice(1),
-					completed: s.cards.completed // そのまま維持
+					completed: s.cards.completed, // そのまま維持
+					wasSkipped: true // スキップフラグを追加
 				},
 				input: {
 					...s.input,
@@ -417,7 +419,8 @@ export function createGameStore() {
 					current: nextCard,
 					currentIndex: newIndex,
 					remaining: s.cards.remaining.slice(1),
-					completed: newCompleted
+					completed: newCompleted,
+					wasSkipped: false // 正常完了フラグ
 				},
 				input: {
 					...s.input,
