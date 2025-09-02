@@ -158,7 +158,7 @@
 	<div class="container mx-auto max-w-6xl px-4 py-8">
 		<!-- Header -->
 		<header class="mb-8 text-center">
-			<h1 class="mb-6 text-4xl font-bold text-green-800 md:text-5xl">上毛カルタタイピング</h1>
+			<img src="/images/game-title.png" alt="上毛カルタタイピング" class="mx-auto mb-6 h-auto w-full max-w-2xl" />
 			<!-- カルタスライドショー -->
 			<KarutaSlideshow />
 		</header>
