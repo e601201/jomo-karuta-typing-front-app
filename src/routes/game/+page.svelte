@@ -1187,6 +1187,11 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モ�
 					</div>
 					<button
 						onclick={() => {
+							// BGMを確実に停止
+							if (soundManager) {
+								soundManager.stopBGM();
+							}
+							
 							// 特定札練習モードの場合は特定札選択画面に戻る
 							if (isFromSpecificMode) {
 								goto('/practice/specific');
