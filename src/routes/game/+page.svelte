@@ -143,7 +143,7 @@
 
 						previousCardId = currentCard.id;
 						validator = new InputValidator();
-						// タイピング検証用にひらがなテキストからスペースを削除
+						// タイピング検証用にひらがなテキストからスペースのみを削除（読点は残す）
 						const targetText = currentCard.hiragana.replace(/\s/g, '');
 						validator.setTarget(targetText);
 						updateRomajiGuide();
@@ -309,6 +309,7 @@
 
 				// カードが変更された場合はバリデータを更新（内容とインデックス両方をチェック）
 				if (currentCard && cardIndexChanged) {
+					// スペースのみを削除（読点は残す）
 					const targetText = currentCard.hiragana.replace(/\s/g, '');
 
 					// テキストが変更された場合はバリデータをリセット
@@ -352,8 +353,13 @@
 		// 入力を処理
 		if (event.key === 'Backspace') {
 			handleBackspace();
-		} else if (event.key.length === 1 && (/^[a-zA-Z]$/.test(event.key) || event.key === '-')) {
-			handleCharacterInput(event.key.toLowerCase());
+		} else if (
+			event.key.length === 1 &&
+			(/^[a-zA-Z]$/.test(event.key) || event.key === '-' || event.key === ',' || event.key === '、')
+		) {
+			// カンマと読点を処理
+			const inputChar = event.key === ',' || event.key === '、' ? '、' : event.key.toLowerCase();
+			handleCharacterInput(inputChar);
 		} else if (event.key === 'Escape') {
 			handlePause();
 		}
@@ -371,8 +377,13 @@
 			const current = text[i];
 			const next = text[i + 1];
 
+			// 読点をそのまま単位として扱う
+			if (current === '、') {
+				units.push(current);
+				i++;
+			}
 			// 小さいや、ゆ、よ（拗音）をチェック
-			if (
+			else if (
 				next &&
 				(next === 'ゃ' ||
 					next === 'ゅ' ||
@@ -409,6 +420,7 @@
 		if (!validator || !currentCard) return;
 
 		const newInput = currentInput + char;
+		// スペースのみを削除し、読点は残す
 		const targetText = currentCard.hiragana.replace(/\s/g, '');
 
 		// 入力文字列全体を検証
@@ -1178,6 +1190,11 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モ�
 					</div>
 					<button
 						onclick={() => {
+							// BGMを確実に停止
+							if (soundManager) {
+								soundManager.stopBGM();
+							}
+
 							// 特定札練習モードの場合は特定札選択画面に戻る
 							if (isFromSpecificMode) {
 								goto('/practice/specific');
@@ -1266,81 +1283,87 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モ�
 			{/if}
 
 			<!-- カード表示 -->
-			{#if isLoading}
-				<div class="mb-6 rounded-lg bg-gray-100 p-8 text-center">
-					<p class="text-gray-800">読み込み中...</p>
-				</div>
-			{:else if currentCard && currentCard.hiragana}
-				<CardDisplay card={currentCard} shake={showError} />
-			{:else}
-				<div class="mb-6 rounded-lg bg-yellow-100 p-8 text-center">
-					<p class="text-gray-800">カードを読み込み中...</p>
-					<p class="mt-2 text-sm text-gray-600">
-						モード: {gameMode || 'なし'}, カード数: {totalCards}, インデックス: {cardIndex},
-						currentCard: {JSON.stringify(currentCard)}, isLoading: {isLoading}
-					</p>
-				</div>
-			{/if}
+			{#if !showCountdown}
+				{#if isLoading}
+					<div class="mb-6 rounded-lg bg-gray-100 p-8 text-center">
+						<p class="text-gray-800">読み込み中...</p>
+					</div>
+				{:else if currentCard && currentCard.hiragana}
+					<CardDisplay card={currentCard} shake={showError} />
+				{:else}
+					<div class="mb-6 rounded-lg bg-yellow-100 p-8 text-center">
+						<p class="text-gray-800">カードを読み込み中...</p>
+						<p class="mt-2 text-sm text-gray-600">
+							モード: {gameMode || 'なし'}, カード数: {totalCards}, インデックス: {cardIndex},
+							currentCard: {JSON.stringify(currentCard)}, isLoading: {isLoading}
+						</p>
+					</div>
+				{/if}
 
-			<!-- 入力ハイライト表示 -->
-			{#if currentCard}
-				<div class="mb-6">
-					<InputHighlight
-						text={parseHiraganaUnits(currentCard.hiragana.replace(/\s/g, '')).join('')}
-						{inputStates}
-						currentPosition={completedHiraganaCount}
-						showRomaji={true}
-						romaji={romajiGuide}
-						{romajiStates}
-						animateErrors={true}
-						currentRomajiPosition={currentInput.length}
-					/>
-				</div>
+				<!-- 入力ハイライト表示 -->
+				{#if currentCard}
+					<div class="mb-6">
+						<InputHighlight
+							text={parseHiraganaUnits(currentCard.hiragana.replace(/\s/g, '')).join('')}
+							{inputStates}
+							currentPosition={completedHiraganaCount}
+							showRomaji={true}
+							romaji={romajiGuide}
+							{romajiStates}
+							animateErrors={true}
+							currentRomajiPosition={currentInput.length}
+						/>
+					</div>
+				{/if}
 			{/if}
 
 			<!-- スコア表示 -->
-			<div class="mb-6 rounded-lg bg-white p-4 shadow-md">
-				<div class="grid grid-cols-3 gap-4 text-center">
-					<div>
-						<p class="text-sm text-gray-600">正確率</p>
-						<p data-testid="accuracy-display" class="text-xl font-bold">
-							{(score.accuracy || 100).toFixed(2)}%
-						</p>
-					</div>
-					<div>
-						<p class="text-sm text-gray-600">コンボ</p>
-						<p data-testid="combo-display" class="text-xl font-bold">
-							{score.combo || 0}
-						</p>
-					</div>
-					<div>
-						<p class="text-sm text-gray-600">スコア</p>
-						<p class="text-xl font-bold">{score.total || 0}</p>
+			{#if !showCountdown}
+				<div class="mb-6 rounded-lg bg-white p-4 shadow-md">
+					<div class="grid grid-cols-3 gap-4 text-center">
+						<div>
+							<p class="text-sm text-gray-600">正確率</p>
+							<p data-testid="accuracy-display" class="text-xl font-bold">
+								{(score.accuracy || 100).toFixed(2)}%
+							</p>
+						</div>
+						<div>
+							<p class="text-sm text-gray-600">コンボ</p>
+							<p data-testid="combo-display" class="text-xl font-bold">
+								{score.combo || 0}
+							</p>
+						</div>
+						<div>
+							<p class="text-sm text-gray-600">スコア</p>
+							<p class="text-xl font-bold">{score.total || 0}</p>
+						</div>
 					</div>
 				</div>
-			</div>
+			{/if}
 
 			<!-- ゲームコントロール -->
-			<div class="flex justify-center gap-4">
-				<button
-					onclick={handlePause}
-					class="rounded-lg bg-yellow-600 px-6 py-2 text-white hover:bg-yellow-700"
-				>
-					{isPaused ? '再開' : '一時停止'}
-				</button>
-				<button
-					onclick={handleSkip}
-					class="rounded-lg bg-gray-600 px-6 py-2 text-white hover:bg-gray-700"
-				>
-					スキップ
-				</button>
-				<button
-					onclick={handleExit}
-					class="rounded-lg bg-red-600 px-6 py-2 text-white hover:bg-red-700"
-				>
-					終了
-				</button>
-			</div>
+			{#if !showCountdown}
+				<div class="flex justify-center gap-4">
+					<button
+						onclick={handlePause}
+						class="rounded-lg bg-yellow-600 px-6 py-2 text-white hover:bg-yellow-700"
+					>
+						{isPaused ? '再開' : '一時停止'}
+					</button>
+					<button
+						onclick={handleSkip}
+						class="rounded-lg bg-gray-600 px-6 py-2 text-white hover:bg-gray-700"
+					>
+						スキップ
+					</button>
+					<button
+						onclick={handleExit}
+						class="rounded-lg bg-red-600 px-6 py-2 text-white hover:bg-red-700"
+					>
+						終了
+					</button>
+				</div>
+			{/if}
 
 			<!-- モバイル用の非表示入力 -->
 			<input

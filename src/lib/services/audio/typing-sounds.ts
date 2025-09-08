@@ -122,16 +122,31 @@ export class TypingSoundManager {
 		}
 	}
 
-	public startBGM() {
+	public async startBGM() {
 		if (!this.bgmEnabled || !this.bgmTypingSound) return;
 
 		try {
+			// 既に再生中の場合は一度停止
+			if (!this.bgmTypingSound.paused) {
+				this.bgmTypingSound.pause();
+			}
+
 			this.bgmTypingSound.currentTime = 0;
-			this.bgmTypingSound.play().catch((error) => {
-				console.error('Failed to play BGM:', error);
-			});
+
+			// 少し遅延を入れてから再生（ブラウザの自動再生ポリシー対策）
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
+			await this.bgmTypingSound.play();
 		} catch (error) {
-			console.error('Error playing BGM:', error);
+			console.error('Failed to play BGM:', error);
+			// リトライ機構
+			setTimeout(() => {
+				if (this.bgmTypingSound && this.bgmEnabled) {
+					this.bgmTypingSound.play().catch(() => {
+						console.error('BGM retry also failed');
+					});
+				}
+			}, 500);
 		}
 	}
 
@@ -261,6 +276,33 @@ export class TypingSoundManager {
 	public destroy() {
 		// BGMを停止
 		this.stopBGM();
+
+		// オーディオ要素をクリーンアップ
+		if (this.bgmTypingSound) {
+			this.bgmTypingSound.pause();
+			this.bgmTypingSound.src = '';
+			this.bgmTypingSound = null;
+		}
+		if (this.correctSound) {
+			this.correctSound.src = '';
+			this.correctSound = null;
+		}
+		if (this.incorrectSound) {
+			this.incorrectSound.src = '';
+			this.incorrectSound = null;
+		}
+		if (this.gameEndSound) {
+			this.gameEndSound.src = '';
+			this.gameEndSound = null;
+		}
+		if (this.flickCardSound) {
+			this.flickCardSound.src = '';
+			this.flickCardSound = null;
+		}
+		if (this.completeSound) {
+			this.completeSound.src = '';
+			this.completeSound = null;
+		}
 
 		if (this.unsubscribe) {
 			this.unsubscribe();

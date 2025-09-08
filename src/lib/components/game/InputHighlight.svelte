@@ -77,13 +77,13 @@
 	function getColorClass(state: InputState): string {
 		switch (state) {
 			case 'correct':
-				return 'text-green-500';
+				return 'text-gray-200';
 			case 'incorrect':
 				return 'text-red-500';
 			case 'current':
 				return 'text-blue-500 font-bold';
 			default:
-				return 'text-gray-400';
+				return 'text-gray-600';
 		}
 	}
 
@@ -151,7 +151,7 @@
 					romajiStates[index] || 'pending'
 				)} transition-colors duration-200"
 			>
-				{romajiChar}
+				{romajiChar.toUpperCase()}
 
 				<!-- Colorblind mode icons for romaji -->
 				{#if colorblindMode}
