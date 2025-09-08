@@ -353,9 +353,12 @@
 		// 入力を処理
 		if (event.key === 'Backspace') {
 			handleBackspace();
-		} else if (event.key.length === 1 && (/^[a-zA-Z]$/.test(event.key) || event.key === '-' || event.key === ',' || event.key === '、')) {
+		} else if (
+			event.key.length === 1 &&
+			(/^[a-zA-Z]$/.test(event.key) || event.key === '-' || event.key === ',' || event.key === '、')
+		) {
 			// カンマと読点を処理
-			const inputChar = (event.key === ',' || event.key === '、') ? '、' : event.key.toLowerCase();
+			const inputChar = event.key === ',' || event.key === '、' ? '、' : event.key.toLowerCase();
 			handleCharacterInput(inputChar);
 		} else if (event.key === 'Escape') {
 			handlePause();
@@ -1191,7 +1194,7 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モ�
 							if (soundManager) {
 								soundManager.stopBGM();
 							}
-							
+
 							// 特定札練習モードの場合は特定札選択画面に戻る
 							if (isFromSpecificMode) {
 								goto('/practice/specific');

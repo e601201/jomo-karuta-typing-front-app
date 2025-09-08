@@ -158,7 +158,11 @@
 	<div class="container mx-auto max-w-6xl px-4 py-8">
 		<!-- Header -->
 		<header class="mb-8 text-center">
-			<img src="/images/game-title.png" alt="上毛カルタタイピング" class="mx-auto mb-6 h-auto w-full max-w-2xl" />
+			<img
+				src="/images/game-title.png"
+				alt="上毛カルタタイピング"
+				class="mx-auto mb-6 h-auto w-full max-w-2xl"
+			/>
 			<!-- カルタスライドショー -->
 			<KarutaSlideshow />
 		</header>

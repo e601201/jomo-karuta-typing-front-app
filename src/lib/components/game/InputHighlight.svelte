@@ -151,7 +151,7 @@
 					romajiStates[index] || 'pending'
 				)} transition-colors duration-200"
 			>
-			{romajiChar.toUpperCase()}
+				{romajiChar.toUpperCase()}
 
 				<!-- Colorblind mode icons for romaji -->
 				{#if colorblindMode}

@@ -130,12 +130,12 @@ export class TypingSoundManager {
 			if (!this.bgmTypingSound.paused) {
 				this.bgmTypingSound.pause();
 			}
-			
+
 			this.bgmTypingSound.currentTime = 0;
-			
+
 			// 少し遅延を入れてから再生（ブラウザの自動再生ポリシー対策）
-			await new Promise(resolve => setTimeout(resolve, 100));
-			
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
 			await this.bgmTypingSound.play();
 		} catch (error) {
 			console.error('Failed to play BGM:', error);
