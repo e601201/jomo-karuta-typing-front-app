@@ -143,7 +143,7 @@
 
 						previousCardId = currentCard.id;
 						validator = new InputValidator();
-						// タイピング検証用にひらがなテキストからスペースを削除
+						// タイピング検証用にひらがなテキストからスペースのみを削除（読点は残す）
 						const targetText = currentCard.hiragana.replace(/\s/g, '');
 						validator.setTarget(targetText);
 						updateRomajiGuide();
@@ -309,6 +309,7 @@
 
 				// カードが変更された場合はバリデータを更新（内容とインデックス両方をチェック）
 				if (currentCard && cardIndexChanged) {
+					// スペースのみを削除（読点は残す）
 					const targetText = currentCard.hiragana.replace(/\s/g, '');
 
 					// テキストが変更された場合はバリデータをリセット
@@ -352,8 +353,10 @@
 		// 入力を処理
 		if (event.key === 'Backspace') {
 			handleBackspace();
-		} else if (event.key.length === 1 && (/^[a-zA-Z]$/.test(event.key) || event.key === '-')) {
-			handleCharacterInput(event.key.toLowerCase());
+		} else if (event.key.length === 1 && (/^[a-zA-Z]$/.test(event.key) || event.key === '-' || event.key === ',' || event.key === '、')) {
+			// カンマと読点を処理
+			const inputChar = (event.key === ',' || event.key === '、') ? '、' : event.key.toLowerCase();
+			handleCharacterInput(inputChar);
 		} else if (event.key === 'Escape') {
 			handlePause();
 		}
@@ -371,8 +374,13 @@
 			const current = text[i];
 			const next = text[i + 1];
 
+			// 読点をそのまま単位として扱う
+			if (current === '、') {
+				units.push(current);
+				i++;
+			}
 			// 小さいや、ゆ、よ（拗音）をチェック
-			if (
+			else if (
 				next &&
 				(next === 'ゃ' ||
 					next === 'ゅ' ||
@@ -409,6 +417,7 @@
 		if (!validator || !currentCard) return;
 
 		const newInput = currentInput + char;
+		// スペースのみを削除し、読点は残す
 		const targetText = currentCard.hiragana.replace(/\s/g, '');
 
 		// 入力文字列全体を検証
