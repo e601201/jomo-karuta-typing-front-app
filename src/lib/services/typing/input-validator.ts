@@ -148,7 +148,7 @@ const ROMAJI_MAP: Record<string, string[]> = {
 
 	// スペース
 	' ': [' '],
-	
+
 	// 句読点
 	'、': ['、', ','],
 	'　': [' '],
