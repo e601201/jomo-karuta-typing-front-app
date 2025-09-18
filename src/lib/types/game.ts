@@ -8,6 +8,7 @@
 export interface KarutaCard {
 	id: string; // 一意識別子 (例: 'tsu', 'ne', 'chi')
 	hiragana: string; // ひらがな読み
+	hiraganaShort?: string; // 初心者用の短縮版ひらがな
 	romaji: string; // ローマ字表記
 	meaning: string; // 意味・解説
 	category: CardCategory; // カテゴリー
@@ -165,6 +166,11 @@ export interface PartialInputRange {
  * 部分入力プリセット
  */
 export type PartialInputPreset = 'beginner' | 'intermediate' | 'advanced' | 'custom';
+
+/**
+ * ランダムモード難易度
+ */
+export type RandomModeDifficulty = 'beginner' | 'standard' | 'advanced';
 
 /**
  * 統計データ - 全体統計

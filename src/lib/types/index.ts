@@ -19,7 +19,8 @@ export type {
 	PartialInputConfig,
 	PartialInputMode,
 	PartialInputRange,
-	PartialInputPreset
+	PartialInputPreset,
+	RandomModeDifficulty
 } from './game';
 
 // ユーザー関連
