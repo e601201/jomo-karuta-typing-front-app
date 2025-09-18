@@ -99,7 +99,7 @@
 			navigateToGame('practice');
 		}
 	}
-	
+
 	function handleDifficultySelect(difficulty: RandomModeDifficulty) {
 		// 難易度をパラメータに追加してゲーム画面へ遷移
 		const params = new URLSearchParams({

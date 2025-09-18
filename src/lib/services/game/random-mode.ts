@@ -54,7 +54,7 @@ export class RandomModeService {
 		if (difficulty) {
 			this.difficulty = difficulty;
 		}
-		
+
 		// カードをシャッフルしてセッションを開始
 		this.cards = this.shuffleCards(cards);
 		this.currentIndex = 0;
@@ -136,19 +136,19 @@ export class RandomModeService {
 		this.sessionStarted = false;
 		this.difficulty = 'standard';
 	}
-	
+
 	/**
 	 * 現在の難易度を取得
-	 * 
+	 *
 	 * @returns 現在の難易度設定
 	 */
 	getDifficulty(): RandomModeDifficulty {
 		return this.difficulty;
 	}
-	
+
 	/**
 	 * 難易度を設定
-	 * 
+	 *
 	 * @param difficulty - 設定する難易度
 	 */
 	setDifficulty(difficulty: RandomModeDifficulty): void {

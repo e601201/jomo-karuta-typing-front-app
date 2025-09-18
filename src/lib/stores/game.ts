@@ -185,7 +185,11 @@ export function createGameStore() {
 	});
 
 	// セッション開始
-	async function startSession(mode: GameMode, cards: KarutaCard[], difficulty?: RandomModeDifficulty) {
+	async function startSession(
+		mode: GameMode,
+		cards: KarutaCard[],
+		difficulty?: RandomModeDifficulty
+	) {
 		if (cards.length === 0) return;
 
 		// ランダムモードの場合はカードをシャッフル
@@ -259,9 +263,10 @@ export function createGameStore() {
 		const state = get(gameStore);
 		if (state.input.validator && state.cards.current) {
 			// 初心者モードの場合はhiraganaShortを使用
-			const hiraganaText = (difficulty === 'beginner' && state.cards.current.hiraganaShort) 
-				? state.cards.current.hiraganaShort 
-				: state.cards.current.hiragana;
+			const hiraganaText =
+				difficulty === 'beginner' && state.cards.current.hiraganaShort
+					? state.cards.current.hiraganaShort
+					: state.cards.current.hiragana;
 			const targetText = hiraganaText.replace(/\s/g, '');
 			state.input.validator.setTarget(targetText);
 		}
@@ -314,9 +319,10 @@ export function createGameStore() {
 			// InputValidatorに新しいターゲットを設定（スペースを除去）
 			if (s.input.validator && nextCard) {
 				// 初心者モードの場合はhiraganaShortを使用
-				const hiraganaText = (s.session?.difficulty === 'beginner' && nextCard.hiraganaShort)
-					? nextCard.hiraganaShort
-					: nextCard.hiragana;
+				const hiraganaText =
+					s.session?.difficulty === 'beginner' && nextCard.hiraganaShort
+						? nextCard.hiraganaShort
+						: nextCard.hiragana;
 				const targetText = hiraganaText.replace(/\s/g, '');
 				s.input.validator.setTarget(targetText);
 			}
@@ -420,9 +426,10 @@ export function createGameStore() {
 			// InputValidatorに新しいターゲットを設定（スペースを除去）
 			if (s.input.validator && nextCard) {
 				// 初心者モードの場合はhiraganaShortを使用
-				const hiraganaText = (s.session?.difficulty === 'beginner' && nextCard.hiraganaShort)
-					? nextCard.hiraganaShort
-					: nextCard.hiragana;
+				const hiraganaText =
+					s.session?.difficulty === 'beginner' && nextCard.hiraganaShort
+						? nextCard.hiraganaShort
+						: nextCard.hiragana;
 				const targetText = hiraganaText.replace(/\s/g, '');
 				s.input.validator.setTarget(targetText);
 			}
@@ -502,9 +509,10 @@ export function createGameStore() {
 
 		// 入力検証（スペースを除去してから検証）
 		// 初心者モードの場合はhiraganaShortを使用
-		const hiraganaText = (state.session.difficulty === 'beginner' && state.cards.current.hiraganaShort)
-			? state.cards.current.hiraganaShort
-			: state.cards.current.hiragana;
+		const hiraganaText =
+			state.session.difficulty === 'beginner' && state.cards.current.hiraganaShort
+				? state.cards.current.hiraganaShort
+				: state.cards.current.hiragana;
 		const targetText = hiraganaText.replace(/\s/g, '');
 		const result = state.input.validator.validateInput(targetText, input);
 
@@ -567,12 +575,15 @@ export function createGameStore() {
 			// Q: 解いた（完了した）札数
 			const Q = state.cards.completed.length;
 
-			const total = calcTypingScore({
-				Q,
-				accuracy,
-				wpm,
-				maxCombo: state.statistics.maxCombo
-			});
+			const total = calcTypingScore(
+				{
+					Q,
+					accuracy,
+					wpm,
+					maxCombo: state.statistics.maxCombo
+				},
+				state.session?.difficulty
+			);
 
 			return {
 				...state,
@@ -604,12 +615,15 @@ export function createGameStore() {
 		const words = state.statistics.correctKeystrokes / 5;
 		const wpm = elapsedMinutes > 0 ? Math.round(words / elapsedMinutes) : 0;
 
-		const total = calcTypingScore({
-			Q: state.cards.completed.length,
-			accuracy,
-			wpm,
-			maxCombo: state.statistics.maxCombo
-		});
+		const total = calcTypingScore(
+			{
+				Q: state.cards.completed.length,
+				accuracy,
+				wpm,
+				maxCombo: state.statistics.maxCombo
+			},
+			state.session?.difficulty
+		);
 
 		const session = {
 			id: state.session.id,

@@ -43,6 +43,7 @@
 	let gameStarted = $state(false);
 	let showRankingModal = $state(false);
 	let isRankingRegistered = $state(false);
+	let currentDifficulty: RandomModeDifficulty = $state('standard');
 
 	// ストアからのゲーム状態
 	let currentCard = $state<KarutaCard | null>(null);
@@ -125,12 +126,15 @@
 					remainingTime = state.timer.remainingTime;
 					hasTimeLimit = state.timer.timeLimit !== null;
 					wasSkipped = state.cards.wasSkipped || false;
-					
+
 					// displayHiraganaが未設定の場合（最初のカード）、難易度に応じて設定
 					if (currentCard && !displayHiragana) {
-						const hiraganaText = (state.session?.difficulty === 'beginner' && 'hiraganaShort' in currentCard && currentCard.hiraganaShort)
-							? currentCard.hiraganaShort as string
-							: currentCard.hiragana;
+						const hiraganaText =
+							state.session?.difficulty === 'beginner' &&
+							'hiraganaShort' in currentCard &&
+							currentCard.hiraganaShort
+								? (currentCard.hiraganaShort as string)
+								: currentCard.hiragana;
 						displayHiragana = hiraganaText;
 					}
 
@@ -156,9 +160,12 @@
 						// タイピング検証用にひらがなテキストからスペースのみを削除（読点は残す）
 						// 初心者モードの場合はhiraganaShortを使用
 						const gameState = get(gameStore);
-						const hiraganaText = (gameState.session?.difficulty === 'beginner' && 'hiraganaShort' in currentCard && currentCard.hiraganaShort)
-							? currentCard.hiraganaShort
-							: currentCard.hiragana;
+						const hiraganaText =
+							gameState.session?.difficulty === 'beginner' &&
+							'hiraganaShort' in currentCard &&
+							currentCard.hiraganaShort
+								? currentCard.hiraganaShort
+								: currentCard.hiragana;
 						displayHiragana = hiraganaText; // 表示用に保存
 						const targetText = hiraganaText.replace(/\s/g, '');
 						validator.setTarget(targetText);
@@ -309,12 +316,15 @@
 				const wpm = practiceModeStore.calculateWPM();
 				const Q = state.completedCards.size;
 				completedCardsCount = Q;
-				const totalScore = calcTypingScore({
-					Q,
-					accuracy,
-					wpm,
-					maxCombo: state.statistics.maxCombo
-				});
+				const totalScore = calcTypingScore(
+					{
+						Q,
+						accuracy,
+						wpm,
+						maxCombo: state.statistics.maxCombo
+					},
+					undefined
+				); // 練習モードではデフォルト（標準）のスコアリングを使用
 				score = {
 					total: totalScore,
 					accuracy: Math.round(accuracy * 100 * 100) / 100,
@@ -358,6 +368,9 @@
 			// 他のモードでは通常のゲームストアを使用（async関数なのでawait）
 			// ランダムモードの場合は難易度を渡す
 			const difficulty = gameMode === 'random' ? data.difficulty : undefined;
+			if (difficulty) {
+				currentDifficulty = difficulty; // 難易度を保存
+			}
 			await gameStore.startSession(gameMode!, cards, difficulty);
 		}
 	}
@@ -781,9 +794,12 @@
 		// displayHiraganaが空の場合は初期化
 		if (!displayHiragana) {
 			const gameState = get(gameStore);
-			const hiraganaText = (gameState.session?.difficulty === 'beginner' && 'hiraganaShort' in currentCard && currentCard.hiraganaShort)
-				? currentCard.hiraganaShort as string
-				: currentCard.hiragana;
+			const hiraganaText =
+				gameState.session?.difficulty === 'beginner' &&
+				'hiraganaShort' in currentCard &&
+				currentCard.hiraganaShort
+					? (currentCard.hiraganaShort as string)
+					: currentCard.hiragana;
 			displayHiragana = hiraganaText;
 		}
 		const targetText = displayHiragana.replace(/\s/g, '');
@@ -1085,9 +1101,12 @@
 		// displayHiraganaが空の場合は初期化（最初のカード用）
 		if (!displayHiragana) {
 			const gameState = get(gameStore);
-			const hiraganaText = (gameState.session?.difficulty === 'beginner' && 'hiraganaShort' in currentCard && currentCard.hiraganaShort)
-				? currentCard.hiraganaShort as string
-				: currentCard.hiragana;
+			const hiraganaText =
+				gameState.session?.difficulty === 'beginner' &&
+				'hiraganaShort' in currentCard &&
+				currentCard.hiraganaShort
+					? (currentCard.hiraganaShort as string)
+					: currentCard.hiragana;
 			displayHiragana = hiraganaText;
 		}
 		const targetText = displayHiragana.replace(/\s/g, '');
@@ -1148,11 +1167,24 @@
 						{#if isFromSpecificMode}
 							特定札練習
 						{:else if gameMode === 'practice'}
-							練習モード
+							練習
 						{:else if gameMode === 'random'}
-							ランダムモード
+							ランダム
 						{:else}
 							{gameMode}
+						{/if}
+					</span>
+					<span
+						class="inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-green-800"
+					>
+						{#if gameMode === 'random'}
+							{#if currentDifficulty === 'beginner'}
+								初心者モード
+							{:else if currentDifficulty === 'standard'}
+								標準モード
+							{:else if currentDifficulty === 'advanced'}
+								上級モード
+							{/if}
 						{/if}
 					</span>
 				</div>
@@ -1418,6 +1450,7 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モ�
 <RankingRegistrationModal
 	isOpen={showRankingModal}
 	score={score.total || 0}
+	difficulty={gameMode === 'random' ? currentDifficulty : undefined}
 	onClose={() => {
 		showRankingModal = false;
 	}}
