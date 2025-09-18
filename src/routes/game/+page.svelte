@@ -7,7 +7,7 @@
 	import { InputValidator } from '$lib/services/typing/input-validator';
 	import { LocalStorageService } from '$lib/services/storage/local-storage';
 	import { TypingSoundManager } from '$lib/services/audio/typing-sounds';
-	import type { GameMode, KarutaCard } from '$lib/types';
+	import type { GameMode, KarutaCard, RandomModeDifficulty } from '$lib/types';
 	import { calcTypingScore } from '$lib/services/game/score';
 
 	// +page.tsからのページデータ
@@ -18,6 +18,7 @@
 			resume: boolean;
 			error: string | null;
 			isFromSpecific?: boolean;
+			difficulty?: RandomModeDifficulty;
 		};
 	}
 
@@ -65,6 +66,7 @@
 	// 入力検証
 	let validator: InputValidator | null = null;
 	let romajiGuide = $state('');
+	let displayHiragana = $state(''); // 表示用のひらがなテキスト（難易度に応じて変わる）
 
 	let inputProgress = $state(0);
 	let inputStates = $state<Array<'pending' | 'correct' | 'incorrect' | 'current'>>([]);
@@ -123,6 +125,14 @@
 					remainingTime = state.timer.remainingTime;
 					hasTimeLimit = state.timer.timeLimit !== null;
 					wasSkipped = state.cards.wasSkipped || false;
+					
+					// displayHiraganaが未設定の場合（最初のカード）、難易度に応じて設定
+					if (currentCard && !displayHiragana) {
+						const hiraganaText = (state.session?.difficulty === 'beginner' && 'hiraganaShort' in currentCard && currentCard.hiraganaShort)
+							? currentCard.hiraganaShort as string
+							: currentCard.hiragana;
+						displayHiragana = hiraganaText;
+					}
 
 					// カードが変更された場合はバリデータを更新
 					if (currentCard && currentCard.id !== previousCardId) {
@@ -144,7 +154,13 @@
 						previousCardId = currentCard.id;
 						validator = new InputValidator();
 						// タイピング検証用にひらがなテキストからスペースのみを削除（読点は残す）
-						const targetText = currentCard.hiragana.replace(/\s/g, '');
+						// 初心者モードの場合はhiraganaShortを使用
+						const gameState = get(gameStore);
+						const hiraganaText = (gameState.session?.difficulty === 'beginner' && 'hiraganaShort' in currentCard && currentCard.hiraganaShort)
+							? currentCard.hiraganaShort
+							: currentCard.hiragana;
+						displayHiragana = hiraganaText; // 表示用に保存
+						const targetText = hiraganaText.replace(/\s/g, '');
 						validator.setTarget(targetText);
 						updateRomajiGuide();
 						initializeInputStates();
@@ -310,7 +326,9 @@
 				// カードが変更された場合はバリデータを更新（内容とインデックス両方をチェック）
 				if (currentCard && cardIndexChanged) {
 					// スペースのみを削除（読点は残す）
-					const targetText = currentCard.hiragana.replace(/\s/g, '');
+					// 練習モードではhiraganaをそのまま使用
+					displayHiragana = currentCard.hiragana; // 表示用に保存
+					const targetText = displayHiragana.replace(/\s/g, '');
 
 					// テキストが変更された場合はバリデータをリセット
 					if (!validator || validator.getTarget() !== targetText) {
@@ -338,7 +356,9 @@
 			});
 		} else {
 			// 他のモードでは通常のゲームストアを使用（async関数なのでawait）
-			await gameStore.startSession(gameMode!, cards);
+			// ランダムモードの場合は難易度を渡す
+			const difficulty = gameMode === 'random' ? data.difficulty : undefined;
+			await gameStore.startSession(gameMode!, cards, difficulty);
 		}
 	}
 
@@ -421,7 +441,7 @@
 
 		const newInput = currentInput + char;
 		// スペースのみを削除し、読点は残す
-		const targetText = currentCard.hiragana.replace(/\s/g, '');
+		const targetText = displayHiragana.replace(/\s/g, '');
 
 		// 入力文字列全体を検証
 		const result = validator.validateInput(targetText, newInput);
@@ -620,7 +640,7 @@
 			currentInput = currentInput.slice(0, -1);
 
 			// 完了文字を再計算
-			const targetText = currentCard?.hiragana.replace(/\s/g, '') || '';
+			const targetText = displayHiragana.replace(/\s/g, '') || '';
 			const hiraganaUnits = parseHiraganaUnits(targetText);
 			let completedCount = 0;
 			let partiallyCompleteIndex = -1;
@@ -740,7 +760,7 @@
 
 		// 緑色のハイライトをクリアするため入力状態配列をリセット
 		if (currentCard) {
-			const targetText = currentCard.hiragana.replace(/\s/g, '');
+			const targetText = displayHiragana.replace(/\s/g, '');
 			const hiraganaUnits = parseHiraganaUnits(targetText);
 			inputStates = new Array(hiraganaUnits.length).fill('pending');
 			romajiStates = new Array(romajiGuide.length).fill('pending');
@@ -758,7 +778,15 @@
 
 	function updateRomajiGuide() {
 		if (!validator || !currentCard) return;
-		const targetText = currentCard.hiragana.replace(/\s/g, '');
+		// displayHiraganaが空の場合は初期化
+		if (!displayHiragana) {
+			const gameState = get(gameStore);
+			const hiraganaText = (gameState.session?.difficulty === 'beginner' && 'hiraganaShort' in currentCard && currentCard.hiraganaShort)
+				? currentCard.hiraganaShort as string
+				: currentCard.hiragana;
+			displayHiragana = hiraganaText;
+		}
+		const targetText = displayHiragana.replace(/\s/g, '');
 		const patterns = validator.getRomajiPatterns(targetText);
 		romajiGuide = patterns[0] || '';
 	}
@@ -775,7 +803,7 @@
 			return;
 		}
 
-		const targetText = currentCard.hiragana.replace(/\s/g, '');
+		const targetText = displayHiragana.replace(/\s/g, '');
 		const hiraganaUnits = parseHiraganaUnits(targetText);
 		let newRomajiGuide = '';
 		let tempInput = currentInput;
@@ -1011,7 +1039,7 @@
 
 		// ハイライトをクリアするため入力状態配列をリセット
 		if (currentCard) {
-			const targetText = currentCard.hiragana.replace(/\s/g, '');
+			const targetText = displayHiragana.replace(/\s/g, '');
 			const hiraganaUnits = parseHiraganaUnits(targetText);
 			inputStates = new Array(hiraganaUnits.length).fill('pending');
 			romajiStates = new Array(romajiGuide.length).fill('pending');
@@ -1054,7 +1082,15 @@
 
 	function initializeInputStates() {
 		if (!currentCard) return;
-		const targetText = currentCard.hiragana.replace(/\s/g, '');
+		// displayHiraganaが空の場合は初期化（最初のカード用）
+		if (!displayHiragana) {
+			const gameState = get(gameStore);
+			const hiraganaText = (gameState.session?.difficulty === 'beginner' && 'hiraganaShort' in currentCard && currentCard.hiraganaShort)
+				? currentCard.hiraganaShort as string
+				: currentCard.hiragana;
+			displayHiragana = hiraganaText;
+		}
+		const targetText = displayHiragana.replace(/\s/g, '');
 		const hiraganaUnits = parseHiraganaUnits(targetText);
 		inputStates = new Array(hiraganaUnits.length).fill('pending');
 		romajiStates = new Array(romajiGuide.length).fill('pending');
@@ -1288,7 +1324,7 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モ�
 					<div class="mb-6 rounded-lg bg-gray-100 p-8 text-center">
 						<p class="text-gray-800">読み込み中...</p>
 					</div>
-				{:else if currentCard && currentCard.hiragana}
+				{:else if currentCard && displayHiragana}
 					<CardDisplay card={currentCard} shake={showError} />
 				{:else}
 					<div class="mb-6 rounded-lg bg-yellow-100 p-8 text-center">
@@ -1304,7 +1340,7 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モ�
 				{#if currentCard}
 					<div class="mb-6">
 						<InputHighlight
-							text={parseHiraganaUnits(currentCard.hiragana.replace(/\s/g, '')).join('')}
+							text={parseHiraganaUnits(displayHiragana.replace(/\s/g, '')).join('')}
 							{inputStates}
 							currentPosition={completedHiraganaCount}
 							showRomaji={true}
