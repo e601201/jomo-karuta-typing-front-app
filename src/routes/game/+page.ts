@@ -1,11 +1,12 @@
 import type { PageLoad } from './$types';
-import type { GameMode, KarutaCard } from '$lib/types';
+import type { GameMode, KarutaCard, RandomModeDifficulty } from '$lib/types';
 import { getKarutaCards } from '$lib/data/karuta-cards';
 
 export const load: PageLoad = async ({ url }) => {
 	const mode = url.searchParams.get('mode') || 'practice';
 	const resume = url.searchParams.get('resume') === 'true';
 	const isFromSpecific = url.searchParams.get('specific') === 'true';
+	const difficulty = url.searchParams.get('difficulty') as RandomModeDifficulty | null;
 
 	// Validate mode
 	if (!['practice', 'specific', 'random'].includes(mode)) {
@@ -14,7 +15,8 @@ export const load: PageLoad = async ({ url }) => {
 			mode: null,
 			cards: [],
 			resume: false,
-			isFromSpecific: false
+			isFromSpecific: false,
+			difficulty: null
 		};
 	}
 
@@ -54,6 +56,7 @@ export const load: PageLoad = async ({ url }) => {
 		cards,
 		resume,
 		error: null,
-		isFromSpecific
+		isFromSpecific,
+		difficulty: difficulty || 'standard'
 	};
 };

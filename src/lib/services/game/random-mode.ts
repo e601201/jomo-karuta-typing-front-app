@@ -3,7 +3,7 @@
  * カードをランダムな順序で出題する機能を提供
  */
 
-import type { KarutaCard } from '$lib/types';
+import type { KarutaCard, RandomModeDifficulty } from '$lib/types';
 
 /**
  * セッション状態の型定義
@@ -12,12 +12,14 @@ export interface RandomSessionState {
 	cards: KarutaCard[];
 	currentIndex: number;
 	sessionStarted: boolean;
+	difficulty?: RandomModeDifficulty;
 }
 
 export class RandomModeService {
 	private cards: KarutaCard[] = [];
 	private currentIndex = 0;
 	private sessionStarted = false;
+	private difficulty: RandomModeDifficulty = 'standard';
 
 	/**
 	 * カードデックをシャッフル
@@ -45,8 +47,14 @@ export class RandomModeService {
 	 * カードをシャッフルして新しいセッションを開始する
 	 *
 	 * @param cards - 使用するカードの配列
+	 * @param difficulty - 難易度設定（オプション）
 	 */
-	async startSession(cards: KarutaCard[]): Promise<void> {
+	async startSession(cards: KarutaCard[], difficulty?: RandomModeDifficulty): Promise<void> {
+		// 難易度を設定
+		if (difficulty) {
+			this.difficulty = difficulty;
+		}
+		
 		// カードをシャッフルしてセッションを開始
 		this.cards = this.shuffleCards(cards);
 		this.currentIndex = 0;
@@ -89,7 +97,8 @@ export class RandomModeService {
 		return {
 			cards: this.cards,
 			currentIndex: this.currentIndex,
-			sessionStarted: this.sessionStarted
+			sessionStarted: this.sessionStarted,
+			difficulty: this.difficulty
 		};
 	}
 
@@ -103,6 +112,7 @@ export class RandomModeService {
 		this.cards = state.cards || [];
 		this.currentIndex = state.currentIndex || 0;
 		this.sessionStarted = state.sessionStarted !== undefined ? state.sessionStarted : true;
+		this.difficulty = state.difficulty || 'standard';
 	}
 
 	/**
@@ -124,5 +134,24 @@ export class RandomModeService {
 		this.cards = [];
 		this.currentIndex = 0;
 		this.sessionStarted = false;
+		this.difficulty = 'standard';
+	}
+	
+	/**
+	 * 現在の難易度を取得
+	 * 
+	 * @returns 現在の難易度設定
+	 */
+	getDifficulty(): RandomModeDifficulty {
+		return this.difficulty;
+	}
+	
+	/**
+	 * 難易度を設定
+	 * 
+	 * @param difficulty - 設定する難易度
+	 */
+	setDifficulty(difficulty: RandomModeDifficulty): void {
+		this.difficulty = difficulty;
 	}
 }
