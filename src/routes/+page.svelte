@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { IndexedDBService } from '$lib/services/storage/indexed-db';
-	import type { GameMode } from '$lib/types';
+	import type { GameMode, RandomModeDifficulty } from '$lib/types';
 
 	const db = new IndexedDBService();
 
@@ -13,6 +13,7 @@
 	import ContinueProgress from '$lib/components/main-menu/ContinueProgress.svelte';
 	import KarutaSlideshow from '$lib/components/main-menu/KarutaSlideshow.svelte';
 	import PracticeModeModal from '$lib/components/main-menu/PracticeModeModal.svelte';
+	import DifficultySelectModal from '$lib/components/main-menu/DifficultySelectModal.svelte';
 
 	interface GameModeOption {
 		id: GameMode;
@@ -27,6 +28,7 @@
 	let hasProgress = $state(false);
 	let progressInfo = $state<{ completedCards: number; totalCards: number } | null>(null);
 	let showPracticeModeModal = $state(false);
+	let showDifficultyModal = $state(false);
 
 	// Game modes configuration - 2つのメインボタンに変更
 	const gameModes: GameModeOption[] = [
@@ -82,8 +84,10 @@
 		// 練習モードの場合はモーダルを表示
 		if (mode === 'practice') {
 			showPracticeModeModal = true;
+		} else if (mode === 'random') {
+			// ランダムモード（プレイ開始）の場合は難易度選択モーダルを表示
+			showDifficultyModal = true;
 		} else {
-			// ランダムモード（プレイ開始）の場合は直接遷移
 			navigateToGame(mode);
 		}
 	}
@@ -94,6 +98,15 @@
 		} else {
 			navigateToGame('practice');
 		}
+	}
+
+	function handleDifficultySelect(difficulty: RandomModeDifficulty) {
+		// 難易度をパラメータに追加してゲーム画面へ遷移
+		const params = new URLSearchParams({
+			mode: 'random',
+			difficulty
+		});
+		goto(`/game?${params.toString()}`);
 	}
 
 	function handleContinue() {
@@ -245,5 +258,11 @@
 		isOpen={showPracticeModeModal}
 		onclose={() => (showPracticeModeModal = false)}
 		onselect={handlePracticeModeSelect}
+	/>
+	<!-- 難易度選択モーダル -->
+	<DifficultySelectModal
+		show={showDifficultyModal}
+		onClose={() => (showDifficultyModal = false)}
+		onSelect={handleDifficultySelect}
 	/>
 </main>

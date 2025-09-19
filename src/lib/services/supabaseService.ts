@@ -1,9 +1,13 @@
 import { supabase } from '$lib/supabaseClient';
 
-export async function saveScore(nickName: string, score: number) {
+export async function saveScore(
+	nickName: string,
+	score: number,
+	difficulty: 'beginner' | 'standard' | 'advanced' = 'standard'
+) {
 	const { data, error } = await supabase
 		.from('Score')
-		.insert([{ nick_name: nickName, score: score }])
+		.insert([{ nick_name: nickName, score: score, difficulty: difficulty }])
 		.select();
 
 	if (error) {
@@ -14,15 +18,19 @@ export async function saveScore(nickName: string, score: number) {
 	return { success: true, data };
 }
 
-export async function getTopScores(limit: number = 100) {
+export async function getTopScoresByDifficulty(
+	difficulty: 'beginner' | 'standard' | 'advanced',
+	limit: number = 100
+) {
 	const { data, error } = await supabase
 		.from('Score')
 		.select('*')
+		.eq('difficulty', difficulty)
 		.order('score', { ascending: false })
 		.limit(limit);
 
 	if (error) {
-		console.error('Error fetching scores:', error);
+		console.error('Error fetching scores by difficulty:', error);
 		return [];
 	}
 

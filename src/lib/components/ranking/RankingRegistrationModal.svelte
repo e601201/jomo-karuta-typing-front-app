@@ -1,15 +1,17 @@
 <script lang="ts">
 	import { saveScore } from '$lib/services/supabaseService';
 	import { X, Trophy, Send } from 'lucide-svelte';
+	import type { RandomModeDifficulty } from '$lib/types';
 
 	interface Props {
 		isOpen: boolean;
 		score: number;
+		difficulty?: RandomModeDifficulty;
 		onClose: () => void;
 		onSuccess?: (nickName: string) => void;
 	}
 
-	let { isOpen, score, onClose, onSuccess }: Props = $props();
+	let { isOpen, score, difficulty = 'standard', onClose, onSuccess }: Props = $props();
 
 	let nickName = $state('');
 	let loading = $state(false);
@@ -36,8 +38,8 @@
 		try {
 			const nameToSave = nickName.trim() || '名無しの挑戦者';
 
-			// スコアを保存
-			const result = await saveScore(nameToSave, score);
+			// スコアを保存（難易度付き）
+			const result = await saveScore(nameToSave, score, difficulty);
 
 			if (result.success) {
 				// 名前をLocalStorageに保存
@@ -136,12 +138,28 @@
 				<div
 					class="mb-6 rounded-lg border border-yellow-200 bg-gradient-to-r from-yellow-50 to-orange-50 p-4"
 				>
-					<p class="mb-1 text-sm text-gray-600">あなたのスコア</p>
-					<p
-						class="bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-4xl font-bold text-transparent"
-					>
-						{score.toLocaleString()}
-					</p>
+					<div class="flex items-center justify-between">
+						<div>
+							<p class="mb-1 text-sm text-gray-600">あなたのスコア</p>
+							<p
+								class="bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-4xl font-bold text-transparent"
+							>
+								{score.toLocaleString()}
+							</p>
+						</div>
+						<div class="text-right">
+							<p class="mb-1 text-sm text-gray-600">難易度</p>
+							<p class="text-lg font-bold">
+								{#if difficulty === 'beginner'}
+									<span class="text-green-500">🔰 初心者</span>
+								{:else if difficulty === 'advanced'}
+									<span class="text-purple-500">🏆 上級者</span>
+								{:else}
+									<span class="text-blue-500">📖 標準</span>
+								{/if}
+							</p>
+						</div>
+					</div>
 				</div>
 
 				<!-- 入力フォーム -->

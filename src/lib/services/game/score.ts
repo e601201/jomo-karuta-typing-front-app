@@ -14,6 +14,8 @@ export type ScoreParams = {
 	ACC_EXP: number;
 };
 
+import type { RandomModeDifficulty } from '$lib/types';
+
 /**
  * タイピングスコアを計算します。
  *
@@ -31,20 +33,42 @@ export type ScoreParams = {
  * - 速度はシグモイドで飽和（極端な高速での伸びを抑制）
  * - コンボは平方根で逓減し、過度な偏りを防止
  *
+ * difficulty に応じて異なるパラメータを使用します。
  * p に一部パラメータを渡すとデフォルト値を上書き可能です。
  */
 export function calcTypingScore(
 	{ Q, accuracy, wpm, maxCombo }: ScoreInput,
+	difficulty?: RandomModeDifficulty,
 	p: Partial<ScoreParams> = {}
 ): number {
+	// 難易度に応じた基本パラメータを設定
+	let defaultParams: ScoreParams;
+
+	if (difficulty === 'beginner') {
+		// 初心者モード: よりやさしいスコアリング
+		defaultParams = {
+			BASE_PER_Q: 50, // 1問あたりの基礎点を高く
+			W_MID: 70, // 速度の中心を低めに（低速でも良いスコア）
+			W_SHARPNESS: 0.2, // 速度感度を緩やかに
+			COMBO_CAP: 60, // コンボ上限を低めに（達成しやすく）
+			COMBO_WEIGHT: 0.2, // コンボ補正を大きめに（最大+0.4）
+			ACC_EXP: 2.5 // 正確度の重みを緩やかに（ミスに寛容）
+		};
+	} else {
+		// 標準モード（standard/advanced/undefined）: 従来のスコアリング
+		defaultParams = {
+			BASE_PER_Q: 100, // 1問あたりの基礎点
+			W_MID: 60, // 速度シグモイドの中心（このWPM付近で増分が効きやすい）
+			W_SHARPNESS: 0.1, // 速度感度（勾配の鋭さ）
+			COMBO_CAP: 50, // コンボ正規化の上限目安
+			COMBO_WEIGHT: 0.3, // コンボ補正の寄与（最大で +0.3）
+			ACC_EXP: 2.0 // 正確度の重み指数（>1でミスに厳しく）
+		};
+	}
+
 	// スコア算出に用いるパラメータ（p で部分的に上書き可能）
 	const params: ScoreParams = {
-		BASE_PER_Q: 100, // 1問あたりの基礎点
-		W_MID: 60, // 速度シグモイドの中心（このWPM付近で増分が効きやすい）
-		W_SHARPNESS: 0.1, // 速度感度（勾配の鋭さ）
-		COMBO_CAP: 50, // コンボ正規化の上限目安
-		COMBO_WEIGHT: 0.3, // コンボ補正の寄与（最大で +0.3）
-		ACC_EXP: 2.0, // 正確度の重み指数（>1でミスに厳しく）
+		...defaultParams,
 		...p
 	};
 

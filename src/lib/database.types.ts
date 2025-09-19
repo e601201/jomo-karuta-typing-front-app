@@ -1,3 +1,5 @@
+import type { RandomModeDifficulty } from './types/game';
+
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
@@ -14,18 +16,21 @@ export type Database = {
 					id: number;
 					nick_name: string | null;
 					score: number | null;
+					difficulty: RandomModeDifficulty;
 				};
 				Insert: {
 					created_at?: string;
 					id?: number;
 					nick_name?: string | null;
 					score?: number | null;
+					difficulty: RandomModeDifficulty;
 				};
 				Update: {
 					created_at?: string;
 					id?: number;
 					nick_name?: string | null;
 					score?: number | null;
+					difficulty?: RandomModeDifficulty;
 				};
 				Relationships: [];
 			};
