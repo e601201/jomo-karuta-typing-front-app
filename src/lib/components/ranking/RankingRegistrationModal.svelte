@@ -147,18 +147,18 @@
 								{score.toLocaleString()}
 							</p>
 						</div>
-						{#if difficulty !== 'standard'}
-							<div class="text-right">
-								<p class="mb-1 text-sm text-gray-600">難易度</p>
-								<p class="text-lg font-bold">
-									{#if difficulty === 'beginner'}
-										<span class="text-green-600">🔰 初心者</span>
-									{:else if difficulty === 'advanced'}
-										<span class="text-purple-600">🏆 上級者</span>
-									{/if}
-								</p>
-							</div>
-						{/if}
+						<div class="text-right">
+							<p class="mb-1 text-sm text-gray-600">難易度</p>
+							<p class="text-lg font-bold">
+								{#if difficulty === 'beginner'}
+									<span class="text-green-500">🔰 初心者</span>
+								{:else if difficulty === 'advanced'}
+									<span class="text-purple-500">🏆 上級者</span>
+								{:else}
+									<span class="text-blue-500">📖 標準</span>
+								{/if}
+							</p>
+						</div>
 					</div>
 				</div>
 

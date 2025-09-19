@@ -1237,7 +1237,7 @@
 						<button
 							onclick={() => {
 								const shareText = `【上毛かるたタイピング】
-${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習モード' : 'ランダムモード'}で${score.total.toLocaleString()}点獲得！
+${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習' : 'ランダム'} ${gameMode === 'random' ? (currentDifficulty === 'beginner' ? '初心者モード' : currentDifficulty === 'standard' ? '標準モード' : '上級モード') : ''}で${score.total.toLocaleString()}点獲得！
 
 📊 ゲーム結果
 ・正解した札: ${completedCardsCount}枚
