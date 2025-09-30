@@ -4,7 +4,7 @@
 
 import { writable, derived, get, type Writable, type Readable } from 'svelte/store';
 import { InputValidator } from '../services/typing/input-validator';
-import type { KarutaCard, GameMode } from '$lib/types';
+import type { KarutaCard, GameMode, RandomModeDifficulty } from '$lib/types';
 import { LocalStorageService } from '$lib/services/storage/local-storage';
 import { calcTypingScore } from '$lib/services/game/score';
 import { ImagePreloader } from '$lib/utils/image-preloader';
@@ -17,6 +17,7 @@ export interface GameSession {
 	isActive: boolean;
 	totalCards: number;
 	isManualExit?: boolean;
+	difficulty?: RandomModeDifficulty; // ランダムモードの難易度
 }
 
 export interface CompletedCard {
@@ -184,7 +185,11 @@ export function createGameStore() {
 	});
 
 	// セッション開始
-	async function startSession(mode: GameMode, cards: KarutaCard[]) {
+	async function startSession(
+		mode: GameMode,
+		cards: KarutaCard[],
+		difficulty?: RandomModeDifficulty
+	) {
 		if (cards.length === 0) return;
 
 		// ランダムモードの場合はカードをシャッフル
@@ -210,7 +215,8 @@ export function createGameStore() {
 				mode,
 				startTime,
 				isActive: true,
-				totalCards: gameCards.length
+				totalCards: gameCards.length,
+				difficulty: mode === 'random' ? difficulty : undefined
 			},
 			cards: {
 				current: gameCards[0],
@@ -256,7 +262,12 @@ export function createGameStore() {
 		// InputValidatorにターゲットを設定（スペースを除去）
 		const state = get(gameStore);
 		if (state.input.validator && state.cards.current) {
-			const targetText = state.cards.current.hiragana.replace(/\s/g, '');
+			// 初心者モードの場合はhiraganaShortを使用
+			const hiraganaText =
+				difficulty === 'beginner' && state.cards.current.hiraganaShort
+					? state.cards.current.hiraganaShort
+					: state.cards.current.hiragana;
+			const targetText = hiraganaText.replace(/\s/g, '');
 			state.input.validator.setTarget(targetText);
 		}
 
@@ -307,7 +318,12 @@ export function createGameStore() {
 
 			// InputValidatorに新しいターゲットを設定（スペースを除去）
 			if (s.input.validator && nextCard) {
-				const targetText = nextCard.hiragana.replace(/\s/g, '');
+				// 初心者モードの場合はhiraganaShortを使用
+				const hiraganaText =
+					s.session?.difficulty === 'beginner' && nextCard.hiraganaShort
+						? nextCard.hiraganaShort
+						: nextCard.hiragana;
+				const targetText = hiraganaText.replace(/\s/g, '');
 				s.input.validator.setTarget(targetText);
 			}
 
@@ -409,7 +425,12 @@ export function createGameStore() {
 
 			// InputValidatorに新しいターゲットを設定（スペースを除去）
 			if (s.input.validator && nextCard) {
-				const targetText = nextCard.hiragana.replace(/\s/g, '');
+				// 初心者モードの場合はhiraganaShortを使用
+				const hiraganaText =
+					s.session?.difficulty === 'beginner' && nextCard.hiraganaShort
+						? nextCard.hiraganaShort
+						: nextCard.hiragana;
+				const targetText = hiraganaText.replace(/\s/g, '');
 				s.input.validator.setTarget(targetText);
 			}
 
@@ -487,7 +508,12 @@ export function createGameStore() {
 		const inputDiff = input.length - previousInput.length;
 
 		// 入力検証（スペースを除去してから検証）
-		const targetText = state.cards.current.hiragana.replace(/\s/g, '');
+		// 初心者モードの場合はhiraganaShortを使用
+		const hiraganaText =
+			state.session.difficulty === 'beginner' && state.cards.current.hiraganaShort
+				? state.cards.current.hiraganaShort
+				: state.cards.current.hiragana;
+		const targetText = hiraganaText.replace(/\s/g, '');
 		const result = state.input.validator.validateInput(targetText, input);
 
 		// 新しい文字が入力された場合のみキーストロークを処理
@@ -549,12 +575,15 @@ export function createGameStore() {
 			// Q: 解いた（完了した）札数
 			const Q = state.cards.completed.length;
 
-			const total = calcTypingScore({
-				Q,
-				accuracy,
-				wpm,
-				maxCombo: state.statistics.maxCombo
-			});
+			const total = calcTypingScore(
+				{
+					Q,
+					accuracy,
+					wpm,
+					maxCombo: state.statistics.maxCombo
+				},
+				state.session?.difficulty
+			);
 
 			return {
 				...state,
@@ -586,12 +615,15 @@ export function createGameStore() {
 		const words = state.statistics.correctKeystrokes / 5;
 		const wpm = elapsedMinutes > 0 ? Math.round(words / elapsedMinutes) : 0;
 
-		const total = calcTypingScore({
-			Q: state.cards.completed.length,
-			accuracy,
-			wpm,
-			maxCombo: state.statistics.maxCombo
-		});
+		const total = calcTypingScore(
+			{
+				Q: state.cards.completed.length,
+				accuracy,
+				wpm,
+				maxCombo: state.statistics.maxCombo
+			},
+			state.session?.difficulty
+		);
 
 		const session = {
 			id: state.session.id,

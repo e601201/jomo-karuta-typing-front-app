@@ -10,7 +10,8 @@
 			"torifuda": "/images/karuta/torifuda/a.webp",
 			"yomifuda": "/images/karuta/yomifuda/a.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/a.webp"
-		}
+		},
+		"hiraganaShort": "あさまのいたずら"
 	},
 	{
 		"id": "i",
@@ -23,7 +24,8 @@
 			"torifuda": "/images/karuta/torifuda/i.webp",
 			"yomifuda": "/images/karuta/yomifuda/i.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/i.webp"
-		}
+		},
+		"hiraganaShort": "いかほおんせん"
 	},
 	{
 		"id": "u",
@@ -36,7 +38,8 @@
 			"torifuda": "/images/karuta/torifuda/u.webp",
 			"yomifuda": "/images/karuta/yomifuda/u.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/u.webp"
-		}
+		},
+		"hiraganaShort": "うすいとうげ"
 	},
 	{
 		"id": "e",
@@ -49,7 +52,8 @@
 			"torifuda": "/images/karuta/torifuda/e.webp",
 			"yomifuda": "/images/karuta/yomifuda/e.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/e.webp"
-		}
+		},
+		"hiraganaShort": "えんぎだるま"
 	},
 	{
 		"id": "o",
@@ -62,7 +66,8 @@
 			"torifuda": "/images/karuta/torifuda/o.webp",
 			"yomifuda": "/images/karuta/yomifuda/o.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/o.webp"
-		}
+		},
+		"hiraganaShort": "おおたかなやま"
 	},
 	{
 		"id": "ka",
@@ -75,7 +80,8 @@
 			"torifuda": "/images/karuta/torifuda/ka.webp",
 			"yomifuda": "/images/karuta/yomifuda/ka.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ka.webp"
-		}
+		},
+		"hiraganaShort": "たかさきし"
 	},
 	{
 		"id": "ki",
@@ -88,7 +94,8 @@
 			"torifuda": "/images/karuta/torifuda/ki.webp",
 			"yomifuda": "/images/karuta/yomifuda/ki.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ki.webp"
-		}
+		},
+		"hiraganaShort": "はたどころ"
 	},
 	{
 		"id": "ku",
@@ -101,7 +108,8 @@
 			"torifuda": "/images/karuta/torifuda/ku.webp",
 			"yomifuda": "/images/karuta/yomifuda/ku.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ku.webp"
-		}
+		},
+		"hiraganaShort": "くさづよいとこ"
 	},
 	{
 		"id": "ke",
@@ -114,7 +122,8 @@
 			"torifuda": "/images/karuta/torifuda/ke.webp",
 			"yomifuda": "/images/karuta/yomifuda/ke.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ke.webp"
-		}
+		},
+		"hiraganaShort": "けんとまえばし"
 	},
 	{
 		"id": "ko",
@@ -127,7 +136,8 @@
 			"torifuda": "/images/karuta/torifuda/ko.webp",
 			"yomifuda": "/images/karuta/yomifuda/ko.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ko.webp"
-		}
+		},
+		"hiraganaShort": "うちむらかんぞう"
 	},
 	{
 		"id": "sa",
@@ -140,7 +150,8 @@
 			"torifuda": "/images/karuta/torifuda/sa.webp",
 			"yomifuda": "/images/karuta/yomifuda/sa.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/sa.webp"
-		}
+		},
+		"hiraganaShort": "さんばせき"
 	},
 	{
 		"id": "shi",
@@ -153,7 +164,8 @@
 			"torifuda": "/images/karuta/torifuda/shi.webp",
 			"yomifuda": "/images/karuta/yomifuda/shi.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/shi.webp"
-		}
+		},
+		"hiraganaShort": "ふたごづか"
 	},
 	{
 		"id": "su",
@@ -166,7 +178,8 @@
 			"torifuda": "/images/karuta/torifuda/su.webp",
 			"yomifuda": "/images/karuta/yomifuda/su.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/su.webp"
-		}
+		},
+		"hiraganaShort": "あかぎやま"
 	},
 	{
 		"id": "se",
@@ -179,7 +192,8 @@
 			"torifuda": "/images/karuta/torifuda/se.webp",
 			"yomifuda": "/images/karuta/yomifuda/se.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/se.webp"
-		}
+		},
+		"hiraganaShort": "せんきょうおぜぬま"
 	},
 	{
 		"id": "so",
@@ -192,7 +206,8 @@
 			"torifuda": "/images/karuta/torifuda/so.webp",
 			"yomifuda": "/images/karuta/yomifuda/so.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/so.webp"
-		}
+		},
+		"hiraganaShort": "やぎぶしおんど"
 	},
 	{
 		"id": "ta",
@@ -205,7 +220,8 @@
 			"torifuda": "/images/karuta/torifuda/ta.webp",
 			"yomifuda": "/images/karuta/yomifuda/ta.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ta.webp"
-		}
+		},
+		"hiraganaShort": "かたしなけいこく"
 	},
 	{
 		"id": "chi",
@@ -218,7 +234,8 @@
 			"torifuda": "/images/karuta/torifuda/chi.webp",
 			"yomifuda": "/images/karuta/yomifuda/chi.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/chi.webp"
-		}
+		},
+		"hiraganaShort": "にひゃくまん"
 	},
 	{
 		"id": "tsu",
@@ -231,7 +248,8 @@
 			"torifuda": "/images/karuta/torifuda/tsu.webp",
 			"yomifuda": "/images/karuta/yomifuda/tsu.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/tsu.webp"
-		}
+		},
+		"hiraganaShort": "ぐんまけん"
 	},
 	{
 		"id": "te",
@@ -244,7 +262,8 @@
 			"torifuda": "/images/karuta/torifuda/te.webp",
 			"yomifuda": "/images/karuta/yomifuda/te.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/te.webp"
-		}
+		},
+		"hiraganaShort": "もざえもん"
 	},
 	{
 		"id": "to",
@@ -257,7 +276,8 @@
 			"torifuda": "/images/karuta/torifuda/to.webp",
 			"yomifuda": "/images/karuta/yomifuda/to.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/to.webp"
-		}
+		},
+		"hiraganaShort": "ばんどういちのかわ"
 	},
 	{
 		"id": "na",
@@ -270,7 +290,8 @@
 			"torifuda": "/images/karuta/torifuda/na.webp",
 			"yomifuda": "/images/karuta/yomifuda/na.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/na.webp"
-		}
+		},
+		"hiraganaShort": "あんなかすぎ"
 	},
 	{
 		"id": "ni",
@@ -283,7 +304,8 @@
 			"torifuda": "/images/karuta/torifuda/ni.webp",
 			"yomifuda": "/images/karuta/yomifuda/ni.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ni.webp"
-		}
+		},
+		"hiraganaShort": "とみおかせいし"
 	},
 	{
 		"id": "nu",
@@ -296,7 +318,8 @@
 			"torifuda": "/images/karuta/torifuda/nu.webp",
 			"yomifuda": "/images/karuta/yomifuda/nu.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/nu.webp"
-		}
+		},
+		"hiraganaShort": "しおばらたすけ"
 	},
 	{
 		"id": "ne",
@@ -309,7 +332,8 @@
 			"torifuda": "/images/karuta/torifuda/ne.webp",
 			"yomifuda": "/images/karuta/yomifuda/ne.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ne.webp"
-		}
+		},
+		"hiraganaShort": "ねぎとこんにゃく"
 	},
 	{
 		"id": "no",
@@ -322,7 +346,8 @@
 			"torifuda": "/images/karuta/torifuda/no.webp",
 			"yomifuda": "/images/karuta/yomifuda/no.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/no.webp"
-		}
+		},
+		"hiraganaShort": "きゃんぷむら"
 	},
 	{
 		"id": "ha",
@@ -335,7 +360,8 @@
 			"torifuda": "/images/karuta/torifuda/ha.webp",
 			"yomifuda": "/images/karuta/yomifuda/ha.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ha.webp"
-		}
+		},
+		"hiraganaShort": "はなやまこうえん"
 	},
 	{
 		"id": "hi",
@@ -348,7 +374,8 @@
 			"torifuda": "/images/karuta/torifuda/hi.webp",
 			"yomifuda": "/images/karuta/yomifuda/hi.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/hi.webp"
-		}
+		},
+		"hiraganaShort": "びゃくいかんのん"
 	},
 	{
 		"id": "hu",
@@ -361,7 +388,8 @@
 			"torifuda": "/images/karuta/torifuda/hu.webp",
 			"yomifuda": "/images/karuta/yomifuda/hu.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/hu.webp"
-		}
+		},
+		"hiraganaShort": "もりんじ"
 	},
 	{
 		"id": "he",
@@ -374,7 +402,8 @@
 			"torifuda": "/images/karuta/torifuda/he.webp",
 			"yomifuda": "/images/karuta/yomifuda/he.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/he.webp"
-		}
+		},
+		"hiraganaShort": "にいじまじょう"
 	},
 	{
 		"id": "ho",
@@ -387,7 +416,8 @@
 			"torifuda": "/images/karuta/torifuda/ho.webp",
 			"yomifuda": "/images/karuta/yomifuda/ho.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ho.webp"
-		}
+		},
+		"hiraganaShort": "たやまかたい"
 	},
 	{
 		"id": "ma",
@@ -400,7 +430,8 @@
 			"torifuda": "/images/karuta/torifuda/ma.webp",
 			"yomifuda": "/images/karuta/yomifuda/ma.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ma.webp"
-		}
+		},
+		"hiraganaShort": "まゆときいと"
 	},
 	{
 		"id": "mi",
@@ -413,7 +444,8 @@
 			"torifuda": "/images/karuta/torifuda/mi.webp",
 			"yomifuda": "/images/karuta/yomifuda/mi.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/mi.webp"
-		}
+		},
+		"hiraganaShort": "みなかみ、たにがわ"
 	},
 	{
 		"id": "mu",
@@ -426,7 +458,8 @@
 			"torifuda": "/images/karuta/torifuda/mu.webp",
 			"yomifuda": "/images/karuta/yomifuda/mu.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/mu.webp"
-		}
+		},
+		"hiraganaShort": "たごのこひ"
 	},
 	{
 		"id": "me",
@@ -439,7 +472,8 @@
 			"torifuda": "/images/karuta/torifuda/me.webp",
 			"yomifuda": "/images/karuta/yomifuda/me.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/me.webp"
-		}
+		},
+		"hiraganaShort": "いせさきし"
 	},
 	{
 		"id": "mo",
@@ -452,7 +486,8 @@
 			"torifuda": "/images/karuta/torifuda/mo.webp",
 			"yomifuda": "/images/karuta/yomifuda/mo.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/mo.webp"
-		}
+		},
+		"hiraganaShort": "みょうぎさん"
 	},
 	{
 		"id": "ya",
@@ -465,7 +500,8 @@
 			"torifuda": "/images/karuta/torifuda/ya.webp",
 			"yomifuda": "/images/karuta/yomifuda/ya.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ya.webp"
-		}
+		},
+		"hiraganaShort": "あがつまきょう"
 	},
 	{
 		"id": "yu",
@@ -478,7 +514,8 @@
 			"torifuda": "/images/karuta/torifuda/yu.webp",
 			"yomifuda": "/images/karuta/yomifuda/yu.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/yu.webp"
-		}
+		},
+		"hiraganaShort": "ぬきさきじんじゃ"
 	},
 	{
 		"id": "yo",
@@ -491,7 +528,8 @@
 			"torifuda": "/images/karuta/torifuda/yo.webp",
 			"yomifuda": "/images/karuta/yomifuda/yo.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/yo.webp"
-		}
+		},
+		"hiraganaShort": "しまおんせん"
 	},
 	{
 		"id": "ra",
@@ -504,7 +542,8 @@
 			"torifuda": "/images/karuta/torifuda/ra.webp",
 			"yomifuda": "/images/karuta/yomifuda/ra.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ra.webp"
-		}
+		},
+		"hiraganaShort": "からっかぜ"
 	},
 	{
 		"id": "ri",
@@ -517,7 +556,8 @@
 			"torifuda": "/images/karuta/torifuda/ri.webp",
 			"yomifuda": "/images/karuta/yomifuda/ri.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ri.webp"
-		}
+		},
+		"hiraganaShort": "でんげんぐんま"
 	},
 	{
 		"id": "ru",
@@ -530,7 +570,8 @@
 			"torifuda": "/images/karuta/torifuda/ru.webp",
 			"yomifuda": "/images/karuta/yomifuda/ru.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ru.webp"
-		}
+		},
+		"hiraganaShort": "しみずとんねる"
 	},
 	{
 		"id": "re",
@@ -543,7 +584,8 @@
 			"torifuda": "/images/karuta/torifuda/re.webp",
 			"yomifuda": "/images/karuta/yomifuda/re.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/re.webp"
-		}
+		},
+		"hiraganaShort": "にったよしさだ"
 	},
 	{
 		"id": "ro",
@@ -556,7 +598,8 @@
 			"torifuda": "/images/karuta/torifuda/ro.webp",
 			"yomifuda": "/images/karuta/yomifuda/ro.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/ro.webp"
-		}
+		},
+		"hiraganaShort": "ふなつでんじべい"
 	},
 	{
 		"id": "wa",
@@ -569,6 +612,7 @@
 			"torifuda": "/images/karuta/torifuda/wa.webp",
 			"yomifuda": "/images/karuta/yomifuda/wa.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/wa.webp"
-		}
+		},
+		"hiraganaShort": "せきこうわ"
 	}
 ]

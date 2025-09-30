@@ -1,19 +1,22 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getTopScores } from '$lib/services/supabaseService';
+	import { getTopScoresByDifficulty } from '$lib/services/supabaseService';
 	import { ArrowLeft, Trophy, Medal, Award } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
+	import type { RandomModeDifficulty } from '$lib/types';
 
 	interface RankingEntry {
 		id: number;
 		nick_name: string;
 		score: number;
 		created_at: string;
+		difficulty?: RandomModeDifficulty;
 	}
 
 	let rankings = $state<RankingEntry[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
+	let selectedDifficulty = $state<RandomModeDifficulty | 'standard'>('standard');
 
 	onMount(async () => {
 		await loadRankings();
@@ -23,7 +26,8 @@
 		try {
 			loading = true;
 			error = null;
-			const data = await getTopScores(100);
+			let data;
+			data = await getTopScoresByDifficulty(selectedDifficulty, 100);
 			rankings = data as RankingEntry[];
 		} catch (err) {
 			error = 'ランキングの読み込みに失敗しました';
@@ -31,6 +35,11 @@
 		} finally {
 			loading = false;
 		}
+	}
+
+	async function handleDifficultyChange(difficulty: RandomModeDifficulty | 'standard') {
+		selectedDifficulty = difficulty;
+		await loadRankings();
 	}
 
 	function getRankIcon(rank: number) {
@@ -70,6 +79,44 @@
 			<p class="text-gray-600">ランダムモード TOP100</p>
 		</div>
 
+		<!-- 難易度タブ -->
+		<div class="mb-6 flex justify-center">
+			<div class="inline-flex overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+				<button
+					onclick={() => handleDifficultyChange('beginner')}
+					class={`border-l border-gray-200 px-6 py-3 font-medium transition-colors ${
+						selectedDifficulty === 'beginner'
+							? 'bg-green-500 text-white'
+							: 'text-gray-700 hover:bg-gray-50'
+					}`}
+				>
+					🔰 初心者
+				</button>
+				<button
+					onclick={() => handleDifficultyChange('standard')}
+					class={`border-l border-gray-200 px-6 py-3 font-medium transition-colors ${
+						selectedDifficulty === 'standard'
+							? 'bg-blue-500 text-white'
+							: 'text-gray-700 hover:bg-gray-50'
+					}`}
+				>
+					📖 標準
+				</button>
+				<button
+					onclick={() => handleDifficultyChange('advanced')}
+					class={`border-l border-gray-200 px-6 py-3 font-medium transition-colors ${
+						selectedDifficulty === 'advanced'
+							? 'bg-purple-500 text-white'
+							: 'text-gray-700 hover:bg-gray-50'
+					}`}
+					disabled
+					title="準備中"
+				>
+					🏆 上級者
+				</button>
+			</div>
+		</div>
+
 		<!-- ランキングテーブル -->
 		<div class="mx-auto max-w-4xl">
 			{#if loading}
@@ -91,7 +138,17 @@
 				</div>
 			{:else if rankings.length === 0}
 				<div class="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
-					<p class="mb-4 text-xl text-gray-800">まだランキングデータがありません</p>
+					<p class="mb-4 text-xl text-gray-800">
+						{#if selectedDifficulty === 'beginner'}
+							初心者モードのランキングデータがありません
+						{:else if selectedDifficulty === 'standard'}
+							標準モードのランキングデータがありません
+						{:else if selectedDifficulty === 'advanced'}
+							上級者モードのランキングデータがありません
+						{:else}
+							ランキングデータがありません
+						{/if}
+					</p>
 					<p class="text-gray-600">最初の挑戦者になりましょう！</p>
 				</div>
 			{:else}
