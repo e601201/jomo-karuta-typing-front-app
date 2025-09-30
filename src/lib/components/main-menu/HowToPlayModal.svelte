@@ -34,54 +34,71 @@
 
 			<div class="modal-body">
 				<section class="section">
-					<h3 class="section-title">🎮 ゲームの概要</h3>
+					<h3 class="section-title">上毛かるたタイピングとは</h3>
 					<p class="section-content">
-						上毛カルタの読み札を見ながら、取り札の文字をタイピングするゲームです。
-						正確で素早いタイピングを目指しましょう！
+						群馬名物「上毛かるた」を使ったタイピングゲームです。<br>
+						楽しく遊びながら、かるたを覚えてタイピングも上達！
 					</p>
 				</section>
 
 				<section class="section">
-					<h3 class="section-title">📚 練習モード</h3>
-					<div class="mode-list">
-						<div class="mode-item">
-							<span class="mode-name">全44札を順番に練習</span>
-							<span class="mode-desc">あ〜わ行の順番で全ての札を練習できます</span>
+					<h3 class="section-title">ゲームの進め方</h3>
+					<ul class="rule-list">
+						<li>ゲームモードを選択してください。3秒後にゲームが開始します。</li>
+						<li>画面中央に表示されるひらがなを入力してください。</li>
+						<li>画面左上に現在の枚数が表示されます。</li>
+						<li>「、」や「ゃ」「ゅ」「ょ」などの小文字も正確に入力しましょう。</li>
+						<li>間違えた文字は赤く表示されます。間違えた文字から再スタートしましょう。削除は必要ありません。</li>
+						<li>取れた札の枚数や正確率、コンボ数などからスコアが計算されます。</li>
+					</ul>
+				</section>
+
+				<section class="section">
+					<h3 class="section-title">タイピングルール</h3>
+					<ul class="rule-list">
+						<li>画面に表示されるローマ字以外でも入力できます。</li>
+						<li>「くさつ」は「KUSATSU」「KUSATU」でもOK。</li>
+						<li>「まえばし」は「MAEBASHI」「MAEBASI」でもOK。</li>
+						<li>「からっかぜ」は「KARAKKAZE」「KARALTUKAZE」「KARAXTUKAZE」でもOK。</li>
+					</ul>
+				</section>
+
+				<section class="section">
+					<h3 class="section-title">ゲームモード</h3>
+
+					<div class="sections-row">
+						<div class="feature-card">
+							<h3 class="mode-title">📚 練習モード</h3>
+							<div class="mode-list">
+								<div class="mode-item">
+									<span class="mode-name">全44札を順番に練習</span>
+									<span class="mode-desc">あ〜わ行の順番で全ての札を練習できます。</span>
+								</div>
+								<div class="mode-item">
+									<span class="mode-name">特定札で練習</span>
+									<span class="mode-desc">好きな札を選んで集中的に練習できます。</span>
+								</div>
+							</div>
 						</div>
-						<div class="mode-item">
-							<span class="mode-name">特定札で練習</span>
-							<span class="mode-desc">好きな札を選んで集中的に練習できます</span>
+						<div class="feature-card">
+							<h3 class="mode-title">🎮 プレイ開始 (本番モード)</h3>
+							<p class="mode-desc">
+								全44札がランダムな順序で出題されます。<br>
+								制限時間は1分間です。<br>
+								画面右上に残り時間が表示されます。<br>
+								正確さとスピードで高スコアを目指しましょう！
+							</p>
 						</div>
 					</div>
 				</section>
 
 				<section class="section">
-					<h3 class="section-title">🎯 プレイ開始（ランダムモード）</h3>
+					<h3 class="section-title">ランキング</h3>
 					<p class="section-content">
-						全44札がランダムな順序で出題されます。 タイムを競い、ランキングに挑戦しましょう！
+						ランダムモードのプレイ終了後に表示される「ランキングに登録する」ボタンからランキングに登録できます。<br>
+						全国のプレイヤーと競い合いましょう！
 					</p>
 				</section>
-
-				<section class="section">
-					<h3 class="section-title">⌨️ タイピングルール</h3>
-					<ul class="rule-list">
-						<li>ひらがなで入力してください</li>
-						<li>句読点や「ゃ」「ゅ」「ょ」などの小文字も正確に入力</li>
-						<li>間違えた文字は赤く表示されます</li>
-						<li>Escキーでゲームを一時停止できます</li>
-					</ul>
-				</section>
-
-				<section class="section">
-					<h3 class="section-title">🏆 ランキング</h3>
-					<p class="section-content">
-						ランダムモードの記録はランキングに登録できます。 全国のプレイヤーと競い合いましょう！
-					</p>
-				</section>
-
-				<div class="image-container">
-					<img src="/images/how-to-play.png" alt="ゲーム画面の説明" class="how-to-play-image" />
-				</div>
 			</div>
 
 			<div class="modal-footer">
@@ -124,6 +141,7 @@
 		font-size: 1.75rem;
 		font-weight: bold;
 		color: #166534; /* green-800 */
+		margin-top: 1.5rem;
 		margin-bottom: 1.5rem;
 		text-align: center;
 	}
@@ -139,9 +157,26 @@
 	.section:last-child {
 		margin-bottom: 0;
 	}
+	.sections-row {
+		display: flex;
+		gap: 1rem;
+		align-items: stretch;
+	}
 
+	.feature-card {
+		flex: 1;
+		padding: 1rem;
+		border-radius: 10px;
+		box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+		border: 1px solid rgba(0,0,0,0.06);
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		background: #f0fdf4;       /* green-50 */
+		border-left: 4px solid #22c55e; /* green-500 */
+	}
 	.section-title {
-		font-size: 1.125rem;
+		font-size: 1.25rem;
 		font-weight: 600;
 		color: #059669; /* green-600 */
 		margin-bottom: 0.75rem;
@@ -150,26 +185,28 @@
 	.section-content {
 		color: #4b5563; /* gray-600 */
 		line-height: 1.6;
+		padding-left: 1rem;
 	}
 
+	.mode-title {
+		font-weight: 600;
+		color: #166534; /* green-800 */
+		margin-bottom: 0.25rem;
+	}
 	.mode-list {
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
-		margin-top: 0.5rem;
 	}
 
 	.mode-item {
 		display: flex;
 		flex-direction: column;
-		padding: 0.75rem;
-		background: #f0fdf4; /* green-50 */
-		border-radius: 6px;
-		border-left: 3px solid #22c55e; /* green-500 */
+		padding-left: 1rem;
 	}
 
 	.mode-name {
-		font-weight: 600;
+		font-size: 0.875rem;
 		color: #166534; /* green-800 */
 		margin-bottom: 0.25rem;
 	}
@@ -177,12 +214,14 @@
 	.mode-desc {
 		font-size: 0.875rem;
 		color: #6b7280; /* gray-500 */
+		padding-left: 1rem;
 	}
 
 	.rule-list {
 		list-style: none;
 		padding: 0;
 		margin: 0.5rem 0 0 0;
+		padding-left: 1rem;
 	}
 
 	.rule-list li {
@@ -222,21 +261,6 @@
 	.close-button:hover {
 		background: #16a34a; /* green-600 */
 		transform: translateY(-1px);
-	}
-
-	.image-container {
-		margin-top: 1.5rem;
-		padding-top: 1.5rem;
-		border-top: 1px solid #e5e7eb; /* gray-200 */
-	}
-
-	.how-to-play-image {
-		width: 100%;
-		height: auto;
-		border-radius: 8px;
-		box-shadow:
-			0 4px 6px -1px rgba(0, 0, 0, 0.1),
-			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 	}
 
 	@keyframes fadeIn {
