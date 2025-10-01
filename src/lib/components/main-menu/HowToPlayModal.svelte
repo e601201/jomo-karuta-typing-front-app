@@ -69,6 +69,11 @@
 					<div class="sections-row">
 						<div class="feature-card">
 							<h3 class="mode-title">📚 練習モード</h3>
+							<p class="mode-desc">
+								制限時間はありません。<br>
+								自分のペースで上毛かるたを覚えましょう！
+							</p>
+							<br>
 							<div class="mode-list">
 								<div class="mode-item">
 									<span class="mode-name">全44札を順番に練習</span>
@@ -84,10 +89,20 @@
 							<h3 class="mode-title">🎮 プレイ開始 (本番モード)</h3>
 							<p class="mode-desc">
 								全44札がランダムな順序で出題されます。<br>
-								制限時間は1分間です。<br>
-								画面右上に残り時間が表示されます。<br>
+								制限時間は1分間です。画面右上に残り時間が表示されます。<br>
 								正確さとスピードで高スコアを目指しましょう！
 							</p>
+							<br>
+							<div class="mode-list">
+								<div class="mode-item">
+									<span class="mode-name">初心者モード</span>
+									<span class="mode-desc">5~10文字程度の短いワードで練習ができます。</span>
+								</div>
+								<div class="mode-item">
+									<span class="mode-name">標準モード</span>
+									<span class="mode-desc">すべての読み札がそのまま出題されます。</span>
+								</div>
+							</div>
 						</div>
 					</div>
 				</section>
