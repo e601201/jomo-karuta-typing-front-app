@@ -59,7 +59,19 @@
 						<li>画面に表示されるローマ字以外でも入力できます。</li>
 						<li>「くさつ」は「KUSATSU」「KUSATU」でもOK。</li>
 						<li>「まえばし」は「MAEBASHI」「MAEBASI」でもOK。</li>
-						<li>「からっかぜ」は「KARAKKAZE」「KARALTUKAZE」「KARAXTUKAZE」でもOK。</li>
+						<!-- TODO: <li>「ん」の入力について：子音の前では「N」ひとつでもOK。母音の前と単語の最後では「NN」、「XN」で打ちます。</li> -->
+						<li>「ん」の入力について：子音の前では「N」ひとつでもOK。母音の前と単語の最後では「NN」で打ちます。</li>
+							<ul>
+								<li>「ぐんま」は「GUNMA」でも「GUNNMA」でもOK。</li>
+								<li>「たんい」は「TANNI」で打ちます。（※「TANI」では「たに」になってしまいます）</li>
+								<li>「みかん」は「MIKANN」で打ちます。（※「MIKAN」では「みかN」になってしまいます）</li>
+							</ul>
+						<li>小文字「っ」の入力について：「っ」の次の文字の最初のキーを2重に打ちます。</li>
+							<ul>
+								<li>「かっこう」は「KAKKOU」で打ちます。</li>
+							</ul>
+						<!-- TODO: <li>小文字「ぁぃぅぇぉゃゅょっ」の単体入力について：大文字（A, I, U, E, O, YA, YU, YO, TU）の前に「L」か「X」をつけます。</li> -->
+						<!-- TODO: <li>「からっかぜ」は「KARAKKAZE」「KARALTUKAZE」「KARAXTUKAZE」でもOK。</li> -->
 					</ul>
 				</section>
 
@@ -276,6 +288,15 @@
 	.close-button:hover {
 		background: #16a34a; /* green-600 */
 		transform: translateY(-1px);
+	}
+
+	ul{
+  margin:0px 0px 0px 0px;
+  padding:0px 0px 0px 64px;
+	}
+	ul ul{
+		margin:0px 0px 0px 0px;
+		padding:0px 0px 0px 24px;
 	}
 
 	@keyframes fadeIn {
