@@ -13,6 +13,7 @@
 	import ContinueProgress from '$lib/components/main-menu/ContinueProgress.svelte';
 	import KarutaSlideshow from '$lib/components/main-menu/KarutaSlideshow.svelte';
 	import PracticeModeModal from '$lib/components/main-menu/PracticeModeModal.svelte';
+	import HowToPlayModal from '$lib/components/main-menu/HowToPlayModal.svelte';
 	import DifficultySelectModal from '$lib/components/main-menu/DifficultySelectModal.svelte';
 
 	interface GameModeOption {
@@ -28,6 +29,7 @@
 	let hasProgress = $state(false);
 	let progressInfo = $state<{ completedCards: number; totalCards: number } | null>(null);
 	let showPracticeModeModal = $state(false);
+	let showHowToPlayModal = $state(false);
 	let showDifficultyModal = $state(false);
 
 	// Game modes configuration - 2つのメインボタンに変更
@@ -214,6 +216,14 @@
 
 			<!-- Navigation Links -->
 			<nav class="flex justify-center gap-8">
+				<button
+					onclick={() => (showHowToPlayModal = true)}
+					class="flex items-center gap-2 text-gray-600 transition-colors hover:text-green-600"
+					type="button"
+				>
+					<span class="text-xl">📖</span>
+					<span>遊び方</span>
+				</button>
 				<a
 					href="/ranking"
 					onclick={(e) => {
@@ -259,6 +269,10 @@
 		onclose={() => (showPracticeModeModal = false)}
 		onselect={handlePracticeModeSelect}
 	/>
+
+	<!-- 遊び方モーダル -->
+	<HowToPlayModal isOpen={showHowToPlayModal} onclose={() => (showHowToPlayModal = false)} />
+
 	<!-- 難易度選択モーダル -->
 	<DifficultySelectModal
 		show={showDifficultyModal}
