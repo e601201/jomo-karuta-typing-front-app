@@ -98,7 +98,7 @@
 			aria-label="取り札のスライドショー"
 		>
 			{#each displayTorifuda as card, index (card.id + '-torifuda-' + index)}
-				<div class="karuta-card torifuda-card">
+				<div class="karuta-card torifuda-card" data-nosnippet>
 					<img
 						src={card.images?.torifuda || `/images/karuta/torifuda/${card.id}.webp`}
 						alt={`取り札: ${card.id}`}
@@ -121,7 +121,7 @@
 			aria-label="読み札のスライドショー"
 		>
 			{#each displayYomifuda as card, index (card.id + '-yomifuda-' + index)}
-				<div class="karuta-card yomifuda-card">
+				<div class="karuta-card yomifuda-card" data-nosnippet>
 					<img
 						src={card.images?.yomifuda || `/images/karuta/yomifuda/${card.id}.webp`}
 						alt={card.hiragana}

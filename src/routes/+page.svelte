@@ -139,7 +139,7 @@
 
 <svelte:head>
 	<title>上毛かるたタイピング</title>
-	<meta name="description" content="群馬の郷土かるたでタイピング練習" />
+	<meta name="description" content="群馬の郷土かるたでタイピング練習。楽しみながら上毛かるたを覚えよう！" />
 
 	<!-- OGP Meta Tags -->
 	<meta property="og:title" content="上毛かるたタイピング" />
