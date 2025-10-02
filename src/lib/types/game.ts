@@ -3,7 +3,7 @@
  */
 
 /**
- * 上毛カルタの札データ
+ * 上毛かるたの札データ
  */
 export interface KarutaCard {
 	id: string; // 一意識別子 (例: 'tsu', 'ne', 'chi')
@@ -23,7 +23,7 @@ export interface KarutaCard {
 }
 
 /**
- * カルタのカテゴリー
+ * かるたのカテゴリー
  */
 export type CardCategory = 'history' | 'geography' | 'culture' | 'nature' | 'industry';
 

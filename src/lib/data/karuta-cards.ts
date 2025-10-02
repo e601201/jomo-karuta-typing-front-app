@@ -1,5 +1,5 @@
 /**
- * 上毛カルタデータのTypeScript版
+ * 上毛かるたデータのTypeScript版
  */
 
 import type { KarutaCard } from '$lib/types';

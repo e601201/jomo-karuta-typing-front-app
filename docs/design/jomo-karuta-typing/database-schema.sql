@@ -46,10 +46,10 @@ CREATE TABLE user_settings (
 );
 
 -- ============================================
--- カルタデータテーブル
+-- かるたデータテーブル
 -- ============================================
 
--- カルタ札マスターデータ
+-- かるた札マスターデータ
 CREATE TABLE karuta_cards (
     id VARCHAR(10) PRIMARY KEY,  -- 例: 'tsu', 'ne', 'chi'
     hiragana TEXT NOT NULL,
@@ -381,7 +381,7 @@ CREATE TRIGGER update_user_achievements_updated_at BEFORE UPDATE ON user_achieve
 -- 初期データ投入
 -- ============================================
 
--- 上毛カルタの札データ（サンプル）
+-- 上毛かるたの札データ（サンプル）
 INSERT INTO karuta_cards (id, hiragana, romaji, meaning, category, difficulty, display_order) VALUES
 ('tsu', 'つる まう かたちの ぐんまけん', 'tsuru mau katachi no gunmaken', '鶴舞う形の群馬県', 'geography', 'easy', 1),
 ('ne', 'ねぎと こんにゃく しもにた めいぶつ', 'negi to konnyaku shimonita meibutsu', 'ねぎとこんにゃく下仁田名物', 'industry', 'medium', 2),
@@ -394,4 +394,4 @@ INSERT INTO achievements (id, name, description, category, target_value, points,
 ('speed_demon', 'スピードデーモン', 'WPM100以上を達成', 'skill', 100, 50, 2),
 ('perfect_accuracy', '完璧主義者', '正確率100%で10枚完走', 'skill', 10, 100, 3),
 ('daily_player', '毎日練習', '7日連続でプレイ', 'dedication', 7, 30, 4),
-('karuta_master', 'カルタマスター', '全44枚をマスター', 'completion', 44, 200, 5);
+('karuta_master', 'かるたマスター', '全44枚をマスター', 'completion', 44, 200, 5);

@@ -1,5 +1,5 @@
 /**
- * カルタデータの検証スクリプト
+ * かるたデータの検証スクリプト
  */
 
 import { karutaCards } from './karuta-cards';

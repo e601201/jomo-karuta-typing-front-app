@@ -645,7 +645,7 @@ export class IndexedDBService {
 
 		achievements.push({
 			id: 'games_100',
-			name: 'カルタマスター',
+			name: 'かるたマスター',
 			description: '100回プレイ',
 			progress: summary.totalGames,
 			target: 100,
@@ -714,7 +714,7 @@ export class IndexedDBService {
 			mode: latestHistory.mode,
 			startedAt: latestHistory.startTime,
 			completedCards: latestHistory.cards.length,
-			totalCards: 44 // 上毛カルタの総数
+			totalCards: 44 // 上毛かるたの総数
 		};
 	}
 

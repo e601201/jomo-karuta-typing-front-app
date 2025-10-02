@@ -1136,7 +1136,7 @@
 </script>
 
 <svelte:head>
-	<title>タイピングゲーム - 上毛カルタ</title>
+	<title>タイピングゲーム - 上毛かるた</title>
 </svelte:head>
 
 <main class="min-h-screen bg-gradient-to-b from-blue-50 to-white">

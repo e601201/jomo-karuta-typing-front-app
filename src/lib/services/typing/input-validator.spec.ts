@@ -339,7 +339,7 @@ describe('InputValidator', () => {
 		});
 	});
 
-	describe('上毛カルタの実データテスト', () => {
+	describe('上毛かるたの実データテスト', () => {
 		it('「つる まう かたち の ぐんまけん」を正しく判定する', () => {
 			const hiragana = 'つる まう かたち の ぐんまけん';
 			const romaji = 'tsuru mau katachi no gunmaken';

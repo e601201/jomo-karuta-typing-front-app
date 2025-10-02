@@ -1,5 +1,5 @@
 /**
- * カルタデータのテスト
+ * かるたデータのテスト
  */
 
 import { describe, it, expect } from 'vitest';
@@ -13,7 +13,7 @@ import {
 	validateCardData
 } from './karuta-cards';
 
-describe('カルタデータ', () => {
+describe('かるたデータ', () => {
 	describe('基本データ', () => {
 		it('44枚の札が存在する', () => {
 			expect(karutaCards.length).toBe(44);

@@ -3,7 +3,7 @@
 // ============================================
 
 /**
- * 上毛カルタの札データ
+ * 上毛かるたの札データ
  */
 export interface KarutaCard {
 	id: string; // 一意識別子
@@ -17,7 +17,7 @@ export interface KarutaCard {
 }
 
 /**
- * カルタのカテゴリー
+ * かるたのカテゴリー
  */
 export type CardCategory =
 	| 'history' // 歴史

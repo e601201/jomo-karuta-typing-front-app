@@ -76,8 +76,8 @@ describe('MainMenu Page', () => {
 		it('TC-001: should display page title and header', () => {
 			render(Page);
 
-			expect(screen.getByText('上毛カルタタイピング')).toBeInTheDocument();
-			expect(screen.getByText('群馬の郷土カルタでタイピング練習')).toBeInTheDocument();
+			expect(screen.getByText('上毛かるたタイピング')).toBeInTheDocument();
+			expect(screen.getByText('群馬の郷土かるたでタイピング練習')).toBeInTheDocument();
 		});
 
 		it('TC-002: should show loading state when data is loading', async () => {

@@ -138,14 +138,14 @@
 </script>
 
 <svelte:head>
-	<title>上毛カルタタイピング</title>
-	<meta name="description" content="群馬の郷土カルタでタイピング練習" />
+	<title>上毛かるたタイピング</title>
+	<meta name="description" content="群馬の郷土かるたでタイピング練習" />
 
 	<!-- OGP Meta Tags -->
-	<meta property="og:title" content="上毛カルタタイピング" />
+	<meta property="og:title" content="上毛かるたタイピング" />
 	<meta
 		property="og:description"
-		content="群馬の郷土カルタでタイピング練習。楽しみながら上毛カルタを覚えよう！"
+		content="群馬の郷土かるたでタイピング練習。楽しみながら上毛かるたを覚えよう！"
 	/>
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://jomo-karuta-typing-front-app.vercel.app" />
@@ -153,15 +153,15 @@
 		property="og:image"
 		content="https://jomo-karuta-typing-front-app.vercel.app/images/ogp/og-image-optimized.jpg"
 	/>
-	<meta property="og:site_name" content="上毛カルタタイピング" />
+	<meta property="og:site_name" content="上毛かるたタイピング" />
 	<meta property="og:locale" content="ja_JP" />
 
 	<!-- Twitter Card Meta Tags -->
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="上毛カルタタイピング" />
+	<meta name="twitter:title" content="上毛かるたタイピング" />
 	<meta
 		name="twitter:description"
-		content="群馬の郷土カルタでタイピング練習。楽しみながら上毛カルタを覚えよう！"
+		content="群馬の郷土かるたでタイピング練習。楽しみながら上毛かるたを覚えよう！"
 	/>
 	<meta
 		name="twitter:image"
@@ -175,10 +175,10 @@
 		<header class="mb-8 text-center">
 			<img
 				src="/images/game-title.png"
-				alt="上毛カルタタイピング"
+				alt="上毛かるたタイピング"
 				class="mx-auto mb-6 h-auto w-full max-w-2xl"
 			/>
-			<!-- カルタスライドショー -->
+			<!-- かるたスライドショー -->
 			<KarutaSlideshow />
 		</header>
 
