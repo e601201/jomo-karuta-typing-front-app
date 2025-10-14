@@ -44,6 +44,10 @@
 	let showRankingModal = $state(false);
 	let isRankingRegistered = $state(false);
 	let currentDifficulty: RandomModeDifficulty = $state('standard');
+	
+	// ヒント表示用の状態
+	let showHint = $state(false);
+	let hintTimer: number | null = null;
 
 	// ストアからのゲーム状態
 	let currentCard = $state<KarutaCard | null>(null);
@@ -95,6 +99,8 @@
 			// +page.tsからのデータを使用
 			gameMode = data.mode;
 			shouldContinue = data.resume;
+			currentDifficulty = data.difficulty || 'standard';
+			console.log('Game initialized with difficulty:', currentDifficulty, 'from data.difficulty:', data.difficulty);
 
 			// 特定モード選択から来たかどうかをチェック
 			isFromSpecificMode = data.isFromSpecific || false;
@@ -141,6 +147,7 @@
 					// カードが変更された場合はバリデータを更新
 					if (currentCard && currentCard.id !== previousCardId) {
 						// 前のカードがあった場合（初回以外）、かつスキップでない場合のみ正解音を再生
+						// 上級者モードは常に音を鳴らす
 						if (previousCardId && soundManager && !wasSkipped) {
 							soundManager.playComplete();
 						}
@@ -378,6 +385,15 @@
 	function handleKeydown(event: KeyboardEvent) {
 		if (isPaused || isGameComplete || !currentCard || showCountdown) return;
 
+		// Enterキーでヒント表示（上級者モードのみ）
+		if (event.key === 'Enter') {
+			if (currentDifficulty === 'advanced') {
+				event.preventDefault();
+				showHintText();
+				return;
+			}
+		}
+
 		// ゲームキーのデフォルト動作を防止
 		if (event.key.length === 1 || event.key === 'Backspace') {
 			event.preventDefault();
@@ -396,6 +412,19 @@
 		} else if (event.key === 'Escape') {
 			handlePause();
 		}
+	}
+	
+	// ヒント表示機能
+	function showHintText() {
+		if (hintTimer) return; // 既にヒント表示中なら無視
+		
+		showHint = true;
+		
+		// ヒントは2秒後に自動で非表示になる
+		hintTimer = window.setTimeout(() => {
+			showHint = false;
+			hintTimer = null;
+		}, 2000);
 	}
 
 	// 完了文字数を追跡
@@ -1357,7 +1386,7 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習' : 
 						<p class="text-gray-800">読み込み中...</p>
 					</div>
 				{:else if currentCard && displayHiragana}
-					<CardDisplay card={currentCard} shake={showError} />
+					<CardDisplay card={currentCard} shake={showError} difficulty={currentDifficulty} />
 				{:else}
 					<div class="mb-6 rounded-lg bg-yellow-100 p-8 text-center">
 						<p class="text-gray-800">カードを読み込み中...</p>
@@ -1375,11 +1404,13 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習' : 
 							text={parseHiraganaUnits(displayHiragana.replace(/\s/g, '')).join('')}
 							{inputStates}
 							currentPosition={completedHiraganaCount}
-							showRomaji={true}
+							showRomaji={currentDifficulty !== 'advanced'}
 							romaji={romajiGuide}
 							{romajiStates}
 							animateErrors={true}
 							currentRomajiPosition={currentInput.length}
+							difficulty={currentDifficulty}
+							{showHint}
 						/>
 					</div>
 				{/if}

@@ -63,6 +63,24 @@
 						</div>
 					</div>
 				</button>
+
+				<button
+					onclick={() => handleSelect('advanced')}
+					class="group w-full rounded-lg border-2 border-red-200 p-4 text-left transition-all hover:border-red-400 hover:bg-red-50"
+				>
+					<div class="flex items-start gap-3">
+						<span class="text-2xl">⚡</span>
+						<div class="flex-1">
+							<h3 class="text-lg font-semibold text-gray-900 group-hover:text-red-600">
+								上級者モード
+							</h3>
+							<p class="mt-1 text-sm text-gray-600">競技かるた式</p>
+							<p class="mt-1 text-xs text-red-600">
+								取り札のみ表示・読み札の暗記必須
+							</p>
+						</div>
+					</div>
+				</button>
 			</div>
 
 			<button
