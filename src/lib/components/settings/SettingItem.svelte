@@ -84,7 +84,13 @@
 			<button
 				id={inputId}
 				role="switch"
-				aria-checked={value}
+				aria-checked={typeof value === 'boolean'
+					? value
+					: value === 'true'
+						? true
+						: value === 'false'
+							? false
+							: undefined}
 				aria-label={ariaLabel || label}
 				{disabled}
 				onclick={handleToggle}
@@ -100,7 +106,7 @@
 					aria-label={ariaLabel || label}
 					aria-valuemin={min}
 					aria-valuemax={max}
-					aria-valuenow={value}
+					aria-valuenow={typeof value === 'number' ? value : undefined}
 					{min}
 					{max}
 					{step}
@@ -224,6 +230,7 @@
 		background: #e5e7eb;
 		outline: none;
 		-webkit-appearance: none;
+		appearance: none;
 	}
 
 	.slider::-webkit-slider-thumb {

@@ -36,7 +36,7 @@
 				<section class="section">
 					<h3 class="section-title">上毛かるたタイピングとは</h3>
 					<p class="section-content">
-						群馬名物「上毛かるた」を使ったタイピングゲームです。<br>
+						群馬名物「上毛かるた」を使ったタイピングゲームです。<br />
 						楽しく遊びながら、かるたを覚えてタイピングも上達！
 					</p>
 				</section>
@@ -48,7 +48,9 @@
 						<li>画面中央に表示されるひらがなを入力してください。</li>
 						<li>画面左上に現在の枚数が表示されます。</li>
 						<li>「、」や「ゃ」「ゅ」「ょ」などの小文字も正確に入力しましょう。</li>
-						<li>間違えた文字は赤く表示されます。間違えた文字から再スタートしましょう。削除は必要ありません。</li>
+						<li>
+							間違えた文字は赤く表示されます。間違えた文字から再スタートしましょう。削除は必要ありません。
+						</li>
 						<li>取れた札の枚数や正確率、コンボ数などからスコアが計算されます。</li>
 					</ul>
 				</section>
@@ -60,16 +62,20 @@
 						<li>「くさつ」は「KUSATSU」「KUSATU」でもOK。</li>
 						<li>「まえばし」は「MAEBASHI」「MAEBASI」でもOK。</li>
 						<!-- TODO: <li>「ん」の入力について：子音の前では「N」ひとつでもOK。母音の前と単語の最後では「NN」、「XN」で打ちます。</li> -->
-						<li>「ん」の入力について：子音の前では「N」ひとつでもOK。母音の前と単語の最後では「NN」で打ちます。</li>
-							<ul>
-								<li>「ぐんま」は「GUNMA」でも「GUNNMA」でもOK。</li>
-								<li>「たんい」は「TANNI」で打ちます。（※「TANI」では「たに」になってしまいます）</li>
-								<li>「みかん」は「MIKANN」で打ちます。（※「MIKAN」では「みかN」になってしまいます）</li>
-							</ul>
+						<li>
+							「ん」の入力について：子音の前では「N」ひとつでもOK。母音の前と単語の最後では「NN」で打ちます。
+						</li>
+						<ul>
+							<li>「ぐんま」は「GUNMA」でも「GUNNMA」でもOK。</li>
+							<li>「たんい」は「TANNI」で打ちます。（※「TANI」では「たに」になってしまいます）</li>
+							<li>
+								「みかん」は「MIKANN」で打ちます。（※「MIKAN」では「みかN」になってしまいます）
+							</li>
+						</ul>
 						<li>小文字「っ」の入力について：「っ」の次の文字の最初のキーを2重に打ちます。</li>
-							<ul>
-								<li>「かっこう」は「KAKKOU」で打ちます。</li>
-							</ul>
+						<ul>
+							<li>「かっこう」は「KAKKOU」で打ちます。</li>
+						</ul>
 						<!-- TODO: <li>小文字「ぁぃぅぇぉゃゅょっ」の単体入力について：大文字（A, I, U, E, O, YA, YU, YO, TU）の前に「L」か「X」をつけます。</li> -->
 						<!-- TODO: <li>「からっかぜ」は「KARAKKAZE」「KARALTUKAZE」「KARAXTUKAZE」でもOK。</li> -->
 					</ul>
@@ -82,10 +88,10 @@
 						<div class="feature-card">
 							<h3 class="mode-title">📚 練習モード</h3>
 							<p class="mode-desc">
-								制限時間はありません。<br>
+								制限時間はありません。<br />
 								自分のペースで上毛かるたを覚えましょう！
 							</p>
-							<br>
+							<br />
 							<div class="mode-list">
 								<div class="mode-item">
 									<span class="mode-name">全44札を順番に練習</span>
@@ -100,11 +106,11 @@
 						<div class="feature-card">
 							<h3 class="mode-title">🎮 プレイ開始 (本番モード)</h3>
 							<p class="mode-desc">
-								全44札がランダムな順序で出題されます。<br>
-								制限時間は1分間です。画面右上に残り時間が表示されます。<br>
+								全44札がランダムな順序で出題されます。<br />
+								制限時間は1分間です。画面右上に残り時間が表示されます。<br />
 								正確さとスピードで高スコアを目指しましょう！
 							</p>
-							<br>
+							<br />
 							<div class="mode-list">
 								<div class="mode-item">
 									<span class="mode-name">初心者モード</span>
@@ -122,7 +128,8 @@
 				<section class="section">
 					<h3 class="section-title">ランキング</h3>
 					<p class="section-content">
-						ランダムモードのプレイ終了後に表示される「ランキングに登録する」ボタンからランキングに登録できます。<br>
+						ランダムモードのプレイ終了後に表示される「ランキングに登録する」ボタンからランキングに登録できます。<br
+						/>
 						全国のプレイヤーと競い合いましょう！
 					</p>
 				</section>
@@ -194,12 +201,12 @@
 		flex: 1;
 		padding: 1rem;
 		border-radius: 10px;
-		box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-		border: 1px solid rgba(0,0,0,0.06);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+		border: 1px solid rgba(0, 0, 0, 0.06);
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
-		background: #f0fdf4;       /* green-50 */
+		background: #f0fdf4; /* green-50 */
 		border-left: 4px solid #22c55e; /* green-500 */
 	}
 	.section-title {
@@ -290,13 +297,13 @@
 		transform: translateY(-1px);
 	}
 
-	ul{
-  margin:0px 0px 0px 0px;
-  padding:0px 0px 0px 64px;
+	ul {
+		margin: 0px 0px 0px 0px;
+		padding: 0px 0px 0px 64px;
 	}
-	ul ul{
-		margin:0px 0px 0px 0px;
-		padding:0px 0px 0px 24px;
+	ul ul {
+		margin: 0px 0px 0px 0px;
+		padding: 0px 0px 0px 24px;
 	}
 
 	@keyframes fadeIn {

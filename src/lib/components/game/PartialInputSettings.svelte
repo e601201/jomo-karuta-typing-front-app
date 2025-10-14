@@ -97,6 +97,7 @@
 			id="partial-toggle"
 			role="switch"
 			aria-checked={config.enabled}
+			aria-label="部分入力モードの切り替え"
 			onclick={handleToggle}
 			class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {config.enabled
 				? 'bg-blue-600'
@@ -120,7 +121,6 @@
 			<input
 				id="char-count"
 				type="range"
-				role="slider"
 				min="1"
 				max="20"
 				value={config.characterCount}
@@ -223,7 +223,8 @@
 	/* Mobile responsive adjustments */
 	@media (max-width: 640px) {
 		.space-y-4 {
-			@apply flex-col;
+			display: flex;
+			flex-direction: column;
 		}
 
 		button {
