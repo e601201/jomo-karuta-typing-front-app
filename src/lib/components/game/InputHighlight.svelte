@@ -123,8 +123,10 @@
 	}
 
 	// Determine if the last input was correct for blind mode
-	const isLastInputCorrect = $derived(currentPosition > 0 ? inputStates[currentPosition - 1] === 'correct' : true);
-	
+	const isLastInputCorrect = $derived(
+		currentPosition > 0 ? inputStates[currentPosition - 1] === 'correct' : true
+	);
+
 	// Get completed text for blind mode
 	const completedText = $derived(() => {
 		const units = parseTextUnits(text);
@@ -136,7 +138,7 @@
 		}
 		return result;
 	});
-	
+
 	// Get current character being typed
 	const currentCharacter = $derived(() => {
 		const units = parseTextUnits(text);
@@ -145,7 +147,7 @@
 		}
 		return '';
 	});
-	
+
 	// Get completed romaji for blind mode
 	const completedRomaji = $derived(() => {
 		let result = '';
@@ -155,12 +157,12 @@
 		}
 		return result;
 	});
-	
+
 	// Get current romaji being typed
 	const currentRomajiChar = $derived(() => {
 		// 現在位置のローマ字文字を返す（入力中の場合のみ）
 		// romajiStatesが'current'または入力中の場合のみ表示
-		return '';  // 一旦空文字を返す（現在入力中の1文字を特別に表示する必要はない）
+		return ''; // 一旦空文字を返す（現在入力中の1文字を特別に表示する必要はない）
 	});
 </script>
 
@@ -203,42 +205,42 @@
 
 	<!-- Romaji display -->
 	{#if showRomaji && romaji}
-	<div
-		data-testid="romaji-container"
-		class="mt-2 flex items-center justify-center gap-0.5 font-mono {getTextSizeClass()}"
-	>
-		{#each romajiCharacters as romajiChar, index (index)}
-			<span
-				data-testid="romaji-char-{index}"
-				class="relative inline-block {getColorClass(
-					romajiStates[index] || 'pending'
-				)} transition-colors duration-200"
-			>
-				{romajiChar.toUpperCase()}
+		<div
+			data-testid="romaji-container"
+			class="mt-2 flex items-center justify-center gap-0.5 font-mono {getTextSizeClass()}"
+		>
+			{#each romajiCharacters as romajiChar, index (index)}
+				<span
+					data-testid="romaji-char-{index}"
+					class="relative inline-block {getColorClass(
+						romajiStates[index] || 'pending'
+					)} transition-colors duration-200"
+				>
+					{romajiChar.toUpperCase()}
 
-				<!-- Colorblind mode icons for romaji -->
-				{#if colorblindMode}
-					{#if romajiStates[index] === 'correct'}
-						<span class="icon-check absolute -top-2 left-1/2 -translate-x-1/2 transform text-xs"
-							>✓</span
-						>
-					{:else if romajiStates[index] === 'incorrect'}
-						<span class="icon-cross absolute -top-2 left-1/2 -translate-x-1/2 transform text-xs"
-							>✗</span
-						>
+					<!-- Colorblind mode icons for romaji -->
+					{#if colorblindMode}
+						{#if romajiStates[index] === 'correct'}
+							<span class="icon-check absolute -top-2 left-1/2 -translate-x-1/2 transform text-xs"
+								>✓</span
+							>
+						{:else if romajiStates[index] === 'incorrect'}
+							<span class="icon-cross absolute -top-2 left-1/2 -translate-x-1/2 transform text-xs"
+								>✗</span
+							>
+						{/if}
 					{/if}
-				{/if}
 
-				<!-- Cursor for romaji at current input position -->
-				{#if index === currentRomajiPosition}
-					<span
-						data-testid="romaji-cursor-{index}"
-						class="absolute -bottom-1 left-0 h-0.5 w-full animate-pulse bg-blue-500"
-					></span>
-				{/if}
-			</span>
-		{/each}
-	</div>
+					<!-- Cursor for romaji at current input position -->
+					{#if index === currentRomajiPosition}
+						<span
+							data-testid="romaji-cursor-{index}"
+							class="absolute -bottom-1 left-0 h-0.5 w-full animate-pulse bg-blue-500"
+						></span>
+					{/if}
+				</span>
+			{/each}
+		</div>
 	{/if}
 {/if}
 

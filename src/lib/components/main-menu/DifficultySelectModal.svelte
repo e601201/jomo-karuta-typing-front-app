@@ -75,9 +75,7 @@
 								上級者モード
 							</h3>
 							<p class="mt-1 text-sm text-gray-600">競技かるた式</p>
-							<p class="mt-1 text-xs text-red-600">
-								取り札のみ表示・読み札の暗記必須
-							</p>
+							<p class="mt-1 text-xs text-red-600">取り札のみ表示・読み札の暗記必須</p>
 						</div>
 					</div>
 				</button>

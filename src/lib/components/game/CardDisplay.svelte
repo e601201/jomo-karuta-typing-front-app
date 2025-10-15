@@ -44,7 +44,7 @@
 						<p class="text-gray-500">取り札を読み込み中...</p>
 					</div>
 				{/if}
-				
+
 				<!-- 解説画像 -->
 				{#if card.images?.kaisetsu && !imageLoadError.kaisetsu}
 					<div class="flex flex-col items-center rounded-lg bg-white p-4">

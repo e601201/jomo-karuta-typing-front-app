@@ -36,12 +36,12 @@
 		{
 			id: 'practice',
 			title: '練習モード',
-			description: '順番または特定札で練習',
+			description: '順番または特定札で練習'
 		},
 		{
 			id: 'random',
 			title: 'プレイ開始',
-			description: 'ランダムな順序でゲーム開始',
+			description: 'ランダムな順序でゲーム開始'
 		}
 	];
 

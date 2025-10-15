@@ -11,18 +11,17 @@
 		hintText?: string; // 表示する読み札全文
 	}
 
-	let { 
-		totalChars, 
-		currentPosition, 
-		isCorrect, 
-		completedText = '', 
+	let {
+		totalChars,
+		currentPosition,
+		isCorrect,
+		completedText = '',
 		currentChar = '',
 		completedRomaji = '',
 		currentRomaji = '',
 		showHint = false,
 		hintText = ''
 	}: Props = $props();
-
 </script>
 
 <div class="blind-input-wrapper">
@@ -45,7 +44,9 @@
 			<div class="completed-text-container">
 				<span class="completed-text">{completedText}</span>
 				<span class="current-char" class:error={!isCorrect}>{currentChar}</span>
-				<span class="remaining-placeholder">{'_'.repeat(Math.max(0, totalChars - currentPosition))}</span>
+				<span class="remaining-placeholder"
+					>{'_'.repeat(Math.max(0, totalChars - currentPosition))}</span
+				>
 			</div>
 		{:else}
 			<!-- 初期状態：全てアンダースコア -->
@@ -65,7 +66,7 @@
 		{:else}
 			<!-- ローマ字の初期状態 -->
 			<div class="romaji-container">
-				<span class="romaji-placeholder">　</span>
+				<span class="romaji-placeholder"> </span>
 			</div>
 		{/if}
 	</div>
@@ -115,14 +116,26 @@
 	}
 
 	@keyframes pulse {
-		0%, 100% { opacity: 1; }
-		50% { opacity: 0.5; }
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.5;
+		}
 	}
 
 	@keyframes shake {
-		0%, 100% { transform: translateX(0); }
-		25% { transform: translateX(-4px); }
-		75% { transform: translateX(4px); }
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+		25% {
+			transform: translateX(-4px);
+		}
+		75% {
+			transform: translateX(4px);
+		}
 	}
 
 	.romaji-container {
@@ -179,11 +192,11 @@
 	}
 
 	@keyframes fadeIn {
-		from { 
+		from {
 			opacity: 0;
 			transform: translateX(-50%) translateY(-10px);
 		}
-		to { 
+		to {
 			opacity: 1;
 			transform: translateX(-50%) translateY(0);
 		}
@@ -217,7 +230,8 @@
 	}
 
 	@keyframes pulseGlow {
-		0%, 100% {
+		0%,
+		100% {
 			background: rgba(59, 130, 246, 0.1);
 			box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
 		}
@@ -228,7 +242,8 @@
 	}
 
 	@keyframes bounce {
-		0%, 100% {
+		0%,
+		100% {
 			transform: translateY(0);
 		}
 		50% {

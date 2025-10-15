@@ -44,7 +44,7 @@
 	let showRankingModal = $state(false);
 	let isRankingRegistered = $state(false);
 	let currentDifficulty: RandomModeDifficulty = $state('standard');
-	
+
 	// ヒント表示用の状態
 	let showHint = $state(false);
 	let hintTimer: number | null = null;
@@ -100,7 +100,12 @@
 			gameMode = data.mode;
 			shouldContinue = data.resume;
 			currentDifficulty = data.difficulty || 'standard';
-			console.log('Game initialized with difficulty:', currentDifficulty, 'from data.difficulty:', data.difficulty);
+			console.log(
+				'Game initialized with difficulty:',
+				currentDifficulty,
+				'from data.difficulty:',
+				data.difficulty
+			);
 
 			// 特定モード選択から来たかどうかをチェック
 			isFromSpecificMode = data.isFromSpecific || false;
@@ -413,13 +418,13 @@
 			handlePause();
 		}
 	}
-	
+
 	// ヒント表示機能
 	function showHintText() {
 		if (hintTimer) return; // 既にヒント表示中なら無視
-		
+
 		showHint = true;
-		
+
 		// ヒントは2秒後に自動で非表示になる
 		hintTimer = window.setTimeout(() => {
 			showHint = false;
