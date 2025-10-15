@@ -23,11 +23,9 @@
 		hintText = ''
 	}: Props = $props();
 
-	// 進捗のパーセンテージを計算
-	const progressPercent = $derived(totalChars > 0 ? (currentPosition / totalChars) * 100 : 0);
 </script>
 
-<div class="blind-input-container">
+<div class="blind-input-wrapper">
 	<!-- ヒント表示（Enterキーで表示） -->
 	{#if showHint && hintText}
 		<div class="hint-overlay">
@@ -35,94 +33,61 @@
 		</div>
 	{/if}
 
-	<!-- 正解した文字列の表示（ひらがな） -->
-	{#if completedText}
-		<div class="completed-text-container">
-			<span class="completed-text">{completedText}</span>
-			<span class="current-char" class:error={!isCorrect}>{currentChar}</span>
-			<span class="remaining-placeholder">{'_'.repeat(Math.max(0, totalChars - currentPosition))}</span>
-		</div>
-	{:else}
-		<!-- 初期状態：全てアンダースコア -->
-		<div class="completed-text-container">
-			<span class="remaining-placeholder">{'_'.repeat(totalChars)}</span>
-		</div>
-	{/if}
-
-	<!-- 入力したローマ字の表示 -->
-	{#if completedRomaji}
-		<div class="romaji-container">
-			<span class="completed-romaji">{completedRomaji}</span>
-			{#if currentRomaji}
-				<span class="current-romaji" class:error={!isCorrect}>{currentRomaji}</span>
-			{/if}
-		</div>
-	{:else}
-		<!-- ローマ字の初期状態 -->
-		<div class="romaji-container">
-			<span class="romaji-placeholder">　</span>
-		</div>
-	{/if}
-
-	<!-- 進捗バー -->
-	<div class="progress-indicator">
-		<div
-			class="progress-bar"
-			class:correct={isCorrect}
-			class:incorrect={!isCorrect}
-			style="width: {progressPercent}%"
-		></div>
-	</div>
-
-	<!-- 位置表示 -->
-	<div class="position-display">
-		{currentPosition} / {totalChars}文字
-	</div>
-
-	<!-- ヒント機能の説明 -->
+	<!-- ヒント機能の説明（右端に配置） -->
 	<div class="hint-help">
 		<span class="hint-help-icon">💡</span>
 		<span class="hint-help-text">Enterキーでヒント表示</span>
 	</div>
+
+	<div class="blind-input-container">
+		<!-- 正解した文字列の表示（ひらがな） -->
+		{#if completedText}
+			<div class="completed-text-container">
+				<span class="completed-text">{completedText}</span>
+				<span class="current-char" class:error={!isCorrect}>{currentChar}</span>
+				<span class="remaining-placeholder">{'_'.repeat(Math.max(0, totalChars - currentPosition))}</span>
+			</div>
+		{:else}
+			<!-- 初期状態：全てアンダースコア -->
+			<div class="completed-text-container">
+				<span class="remaining-placeholder">{'_'.repeat(totalChars)}</span>
+			</div>
+		{/if}
+
+		<!-- 入力したローマ字の表示 -->
+		{#if completedRomaji}
+			<div class="romaji-container">
+				<span class="completed-romaji">{completedRomaji}</span>
+				{#if currentRomaji}
+					<span class="current-romaji" class:error={!isCorrect}>{currentRomaji}</span>
+				{/if}
+			</div>
+		{:else}
+			<!-- ローマ字の初期状態 -->
+			<div class="romaji-container">
+				<span class="romaji-placeholder">　</span>
+			</div>
+		{/if}
+	</div>
 </div>
 
 <style>
+	.blind-input-wrapper {
+		position: relative;
+		width: 100%;
+	}
+
 	.blind-input-container {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		justify-content: center;
 		gap: 1rem;
 		padding: 2rem;
-		position: relative; /* ヒントオーバーレイの基準点 */
-	}
-
-	.progress-indicator {
-		height: 0.5rem;
-		width: 100%;
-		max-width: 28rem;
-		overflow: hidden;
-		border-radius: 9999px;
-		background-color: rgb(229 231 235);
-	}
-
-	.progress-bar {
-		height: 100%;
-		background-color: rgb(34 197 94);
-		transition: all 0.2s;
-	}
-
-	.progress-bar.incorrect {
-		background-color: rgb(239 68 68);
-	}
-
-	.position-display {
-		font-family: monospace;
-		font-size: 1.125rem;
-		color: rgb(75 85 99);
 	}
 
 	.completed-text-container {
-		font-size: 2rem;
+		font-size: 1.5rem;
 		font-family: monospace;
 		letter-spacing: 0.1em;
 		margin-bottom: 1rem;
@@ -161,7 +126,7 @@
 	}
 
 	.romaji-container {
-		font-size: 1.5rem;
+		font-size: 1.2rem;
 		font-family: monospace;
 		letter-spacing: 0.05em;
 		margin-bottom: 1rem;
@@ -225,27 +190,30 @@
 	}
 
 	.hint-help {
+		position: absolute;
+		top: 2rem;
+		right: 2rem;
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		margin-top: 1rem;
-		padding: 0.5rem 1rem;
+		gap: 0.3rem;
+		padding: 0.3rem 0.6rem;
 		background: rgba(59, 130, 246, 0.1);
 		border: 1px solid rgba(59, 130, 246, 0.3);
-		border-radius: 6px;
+		border-radius: 4px;
 		animation: pulseGlow 3s ease-in-out infinite;
+		z-index: 10;
 	}
 
 	.hint-help-icon {
-		font-size: 1.2rem;
+		font-size: 0.9rem;
 		animation: bounce 2s ease-in-out infinite;
 	}
 
 	.hint-help-text {
-		font-size: 0.9rem;
+		font-size: 0.75rem;
 		color: rgb(59, 130, 246);
 		font-weight: 500;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.03em;
 	}
 
 	@keyframes pulseGlow {

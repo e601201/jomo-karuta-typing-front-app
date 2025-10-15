@@ -32,7 +32,7 @@
 						<img
 							src={card.images.torifuda.replace('.jpg', '.webp')}
 							alt={`${card.meaning}の取り札`}
-							class="h-auto w-full max-w-[250px] rounded object-contain shadow-xl md:max-w-[350px]"
+							class="h-auto w-full max-w-[140px] rounded object-contain shadow-xl md:max-w-[180px]"
 							style="filter: none !important; opacity: 1 !important; mix-blend-mode: normal !important; background-color: white !important;"
 							onerror={() => handleImageError('torifuda')}
 							loading="eager"
@@ -40,7 +40,7 @@
 					</div>
 				{:else}
 					<!-- フォールバック：画像が読み込めない場合 -->
-					<div class="flex h-[350px] w-[250px] items-center justify-center rounded-lg bg-gray-100">
+					<div class="flex h-[200px] w-[140px] items-center justify-center rounded-lg bg-gray-100">
 						<p class="text-gray-500">取り札を読み込み中...</p>
 					</div>
 				{/if}
@@ -51,7 +51,7 @@
 						<img
 							src={card.images.kaisetsu.replace('.jpg', '.webp')}
 							alt={`${card.meaning}の解説`}
-							class="h-auto w-full max-w-[250px] rounded object-contain shadow-xl md:max-w-[350px]"
+							class="h-auto w-full max-w-[140px] rounded object-contain shadow-xl md:max-w-[180px]"
 							style="filter: none !important; opacity: 1 !important; mix-blend-mode: normal !important; background-color: white !important;"
 							onerror={() => handleImageError('kaisetsu')}
 							loading="eager"
@@ -63,7 +63,7 @@
 						<img
 							src={`/images/karuta/kaisetsu/${card.id}.webp`}
 							alt={`${card.meaning}の解説`}
-							class="h-auto w-full max-w-[250px] rounded object-contain shadow-xl md:max-w-[350px]"
+							class="h-auto w-full max-w-[140px] rounded object-contain shadow-xl md:max-w-[180px]"
 							style="filter: none !important; opacity: 1 !important; mix-blend-mode: normal !important; background-color: white !important;"
 							onerror={() => handleImageError('kaisetsu')}
 							loading="eager"

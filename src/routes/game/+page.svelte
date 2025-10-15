@@ -1399,7 +1399,7 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習' : 
 
 				<!-- 入力ハイライト表示 -->
 				{#if currentCard}
-					<div class="mb-6">
+					<div class="mb-1">
 						<InputHighlight
 							text={parseHiraganaUnits(displayHiragana.replace(/\s/g, '')).join('')}
 							{inputStates}
