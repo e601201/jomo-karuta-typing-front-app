@@ -16,7 +16,7 @@
 	let rankings = $state<RankingEntry[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
-	let selectedDifficulty = $state<RandomModeDifficulty | 'standard'>('standard');
+	let selectedDifficulty = $state<RandomModeDifficulty>('standard');
 
 	onMount(async () => {
 		await loadRankings();
@@ -37,7 +37,7 @@
 		}
 	}
 
-	async function handleDifficultyChange(difficulty: RandomModeDifficulty | 'standard') {
+	async function handleDifficultyChange(difficulty: RandomModeDifficulty) {
 		selectedDifficulty = difficulty;
 		await loadRankings();
 	}
@@ -106,13 +106,11 @@
 					onclick={() => handleDifficultyChange('advanced')}
 					class={`border-l border-gray-200 px-6 py-3 font-medium transition-colors ${
 						selectedDifficulty === 'advanced'
-							? 'bg-purple-500 text-white'
+							? 'bg-red-500 text-white'
 							: 'text-gray-700 hover:bg-gray-50'
 					}`}
-					disabled
-					title="準備中"
 				>
-					🏆 上級者
+					⚡ 上級者
 				</button>
 			</div>
 		</div>
