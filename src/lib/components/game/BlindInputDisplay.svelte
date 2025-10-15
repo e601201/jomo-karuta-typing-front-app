@@ -182,8 +182,10 @@
 		animation: fadeIn 0.3s ease-in-out;
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 		border: 2px solid rgba(59, 130, 246, 0.5);
-		min-width: 300px;
+		width: max-content;
+		max-width: 90vw;
 		text-align: center;
+		white-space: nowrap;
 	}
 
 	.hint-text {
