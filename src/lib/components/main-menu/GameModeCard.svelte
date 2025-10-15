@@ -5,23 +5,21 @@
 		mode: GameMode;
 		title: string;
 		description: string;
-		icon: string;
 		disabled?: boolean;
 		onclick: (mode: GameMode) => void;
 	}
 
-	let { mode, title, description, icon, disabled = false, onclick }: Props = $props();
+	let { mode, title, description, disabled = false, onclick }: Props = $props();
 </script>
 
 <button
 	onclick={() => onclick(mode)}
 	{disabled}
-	class="group min-h-[44px] w-full transform rounded-xl bg-white p-6 text-left shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+	class="group min-h-[44px] w-full transform rounded-xl border-3 border-green-400 bg-white p-5 text-left shadow-lg transition-all hover:-translate-y-1 hover:border-green-600 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
 	aria-label={title}
 	aria-describedby={`${mode}-description`}
 >
-	<div class="mb-4 text-4xl">{icon}</div>
-	<h2 class="mb-2 text-xl font-bold text-gray-800">
+	<h2 class="mb-1 text-xl font-bold text-gray-800">
 		{title}
 	</h2>
 	<p id={`${mode}-description`} class="text-gray-600">

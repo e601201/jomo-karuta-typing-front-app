@@ -20,7 +20,6 @@
 		id: GameMode;
 		title: string;
 		description: string;
-		icon: string;
 	}
 
 	// State
@@ -38,13 +37,11 @@
 			id: 'practice',
 			title: '練習モード',
 			description: '順番または特定札で練習',
-			icon: '📚'
 		},
 		{
 			id: 'random',
 			title: 'プレイ開始',
 			description: 'ランダムな順序でゲーム開始',
-			icon: '🎮'
 		}
 	];
 
@@ -179,7 +176,7 @@
 			<img
 				src="/images/game-title.png"
 				alt="上毛かるたタイピング"
-				class="mx-auto mb-6 h-auto w-full max-w-2xl"
+				class="mx-auto mb-6 h-auto w-full max-w-xl"
 			/>
 			<!-- かるたスライドショー -->
 			<KarutaSlideshow />
@@ -263,7 +260,7 @@
 			</nav>
 		{/if}
 		<!-- 著作権表示 -->
-		<div class="mt-8 text-center text-sm text-gray-500">© 2025 株式会社Vitalize</div>
+		<div class="mt-3 text-center text-sm text-gray-500">© 2025 株式会社Vitalize</div>
 	</div>
 
 	<!-- 練習モード選択モーダル -->

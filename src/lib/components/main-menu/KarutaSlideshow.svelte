@@ -17,8 +17,8 @@
 
 	// アニメーション設定
 	const SCROLL_SPEED = 0.5; // ピクセル/フレーム
-	let YOMIFUDA_CARD_WIDTH = 170; // 読み札の幅 + 間隔（120→170に拡大）
-	let TORIFUDA_CARD_WIDTH = 160; // 取り札の幅 + 間隔（120→160に拡大）
+	let YOMIFUDA_CARD_WIDTH = 130; // 読み札の幅 + 間隔
+	let TORIFUDA_CARD_WIDTH = 120; // 取り札の幅 + 間隔
 	let YOMIFUDA_TOTAL_WIDTH = shuffledYomifuda.length * YOMIFUDA_CARD_WIDTH;
 	let TORIFUDA_TOTAL_WIDTH = shuffledTorifuda.length * TORIFUDA_CARD_WIDTH;
 
@@ -142,7 +142,7 @@
 	.karuta-slideshow-container {
 		position: relative;
 		width: 100%;
-		height: 400px; /* 2段分の高さを拡大 300px → 400px */
+		height: 280px; /* 2段分の高さ */
 		overflow: hidden;
 		margin: 1.5rem 0;
 	}
@@ -150,7 +150,7 @@
 	.karuta-slideshow-wrapper {
 		position: absolute;
 		width: 100%;
-		height: 190px; /* 各段の高さを拡大 140px → 190px */
+		height: 130px; /* 各段の高さ */
 		display: flex;
 		align-items: center;
 		overflow: hidden;
@@ -173,8 +173,8 @@
 
 	.karuta-card {
 		flex-shrink: 0;
-		width: 150px; /* 100px → 150px に拡大 */
-		height: 180px; /* 130px → 180px に拡大 */
+		width: 100px; /* カードの幅 */
+		height: 120px; /* カードの高さ */
 		position: relative;
 		border-radius: 8px;
 		overflow: hidden;
@@ -199,8 +199,8 @@
 
 	/* 取り札のスタイル調整 */
 	.torifuda-card {
-		width: 140px; /* 幅は140pxのまま */
-		height: 168px; /* 読み札と同じ縦横比（140 * 1.2 = 168）に修正 */
+		width: 90px; /* 幅 */
+		height: 108px; /* 縦横比を維持 */
 	}
 
 	.torifuda-image {
@@ -240,21 +240,21 @@
 	/* レスポンシブ対応 */
 	@media (max-width: 640px) {
 		.karuta-slideshow-container {
-			height: 320px; /* 2段分に調整 240px → 320px */
+			height: 220px; /* 2段分に調整 */
 		}
 
 		.karuta-slideshow-wrapper {
-			height: 150px; /* 110px → 150px */
+			height: 100px;
 		}
 
 		.karuta-card {
-			width: 110px; /* 80px → 110px */
-			height: 140px; /* 104px → 140px */
+			width: 75px;
+			height: 90px;
 		}
 
 		.torifuda-card {
-			width: 110px; /* 幅は110px */
-			height: 132px; /* 読み札と同じ縦横比（110 * 1.2 = 132）に修正 */
+			width: 70px;
+			height: 84px;
 		}
 
 		.gradient-mask {
