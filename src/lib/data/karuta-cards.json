@@ -209,8 +209,8 @@
 	},
 	{
 		"id": "chi",
-		"hiragana": "ちからあわせる にひゃくまん",
-		"meaning": "力あわせる二百万",
+		"hiragana": "ちからあわせる ひゃくきゅうじゅうまん",
+		"meaning": "力あわせる百九十万",
 		"category": "nature",
 		"difficulty": "medium",
 		"images": {
@@ -218,7 +218,7 @@
 			"yomifuda": "/images/karuta/yomifuda/chi.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/chi.webp"
 		},
-		"hiraganaShort": "にひゃくまん"
+		"hiraganaShort": "ひゃくきゅうじゅうまん"
 	},
 	{
 		"id": "tsu",
