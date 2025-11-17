@@ -2,7 +2,6 @@
 	{
 		"id": "a",
 		"hiragana": "あさまのいたずら おにのおしだし",
-		"romaji": "tsuru mau katachi no gunmaken",
 		"meaning": "浅間のいたずら 鬼の押出し",
 		"category": "geography",
 		"difficulty": "easy",
@@ -16,7 +15,6 @@
 	{
 		"id": "i",
 		"hiragana": "いかほおんせん にほんのめいとう",
-		"romaji": "negi to konnyaku shimonita meibutsu",
 		"meaning": "伊香保温泉 日本の名湯",
 		"category": "industry",
 		"difficulty": "medium",
@@ -30,7 +28,6 @@
 	{
 		"id": "u",
 		"hiragana": "うすいとうげのせきしょあと",
-		"romaji": "chikara awaseru nihyakumannin",
 		"meaning": "碓氷峠の関所跡",
 		"category": "culture",
 		"difficulty": "easy",
@@ -44,7 +41,6 @@
 	{
 		"id": "e",
 		"hiragana": "えんぎだるまの しょうりんざん",
-		"romaji": "isesaki meisen nihonichi",
 		"meaning": "縁起だるまの少林山",
 		"category": "industry",
 		"difficulty": "medium",
@@ -58,7 +54,6 @@
 	{
 		"id": "o",
 		"hiragana": "おおたかなやま こそだてどんりゅう",
-		"romaji": "e hi mo sesu iroha karuta",
 		"meaning": "太田金山子育呑龍",
 		"category": "culture",
 		"difficulty": "easy",
@@ -72,7 +67,6 @@
 	{
 		"id": "ka",
 		"hiragana": "かんとうと しんえつつなぐ たかさきし",
-		"romaji": "rouno karamatsu tengen",
 		"meaning": "関東と信越つなぐ高崎市",
 		"category": "history",
 		"difficulty": "hard",
@@ -86,7 +80,6 @@
 	{
 		"id": "ki",
 		"hiragana": "きりゅうはにほんのはたどころ",
-		"romaji": "hanayama kouen tsutsuji no meisho",
 		"meaning": "桐生は日本の機どころ",
 		"category": "nature",
 		"difficulty": "medium",
@@ -100,7 +93,6 @@
 	{
 		"id": "ku",
 		"hiragana": "くさづよいとこ くすりのいでゆ",
-		"romaji": "nihon de saisho no fujioka seishi",
 		"meaning": "草津よいとこ薬の温泉",
 		"category": "history",
 		"difficulty": "medium",
@@ -114,7 +106,6 @@
 	{
 		"id": "ke",
 		"hiragana": "けんとまえばし いとのまち",
-		"romaji": "hokoru bungou tamura toshiko",
 		"meaning": "県都前橋 生糸の市",
 		"category": "culture",
 		"difficulty": "hard",
@@ -128,7 +119,6 @@
 	{
 		"id": "ko",
 		"hiragana": "こころのとうだい うちむらかんぞう",
-		"romaji": "heiwa no tsukai niijima jou",
 		"meaning": "心の燈台 内村鑑三",
 		"category": "history",
 		"difficulty": "hard",
@@ -142,7 +132,6 @@
 	{
 		"id": "sa",
 		"hiragana": "さんばせきとともに なだかいふゆざくら",
-		"romaji": "tone wa sakazuki no nagare",
 		"meaning": "三波石と共に 名高い冬桜",
 		"category": "geography",
 		"difficulty": "easy",
@@ -156,7 +145,6 @@
 	{
 		"id": "shi",
 		"hiragana": "しのぶけのくに ふたごづか",
-		"romaji": "numata shiro shita shintou sengoku",
 		"meaning": "しのぶ毛の国 二子塚",
 		"category": "history",
 		"difficulty": "hard",
@@ -170,7 +158,6 @@
 	{
 		"id": "su",
 		"hiragana": "すそのはながし あかぎやま",
-		"romaji": "rui wo minai enkaku no reijou",
 		"meaning": "裾野は長し赤城山",
 		"category": "culture",
 		"difficulty": "hard",
@@ -184,7 +171,6 @@
 	{
 		"id": "se",
 		"hiragana": "せんきょうおぜぬま はなのはら",
-		"romaji": "wo noboru ayu mo kenkou onsen",
 		"meaning": "仙境尾瀬沼花の原",
 		"category": "nature",
 		"difficulty": "medium",
@@ -198,7 +184,6 @@
 	{
 		"id": "so",
 		"hiragana": "そろいのしたくで やぎぶしおんど",
-		"romaji": "wakan no sanpou akima",
 		"meaning": "そろいの仕度で八木節音頭",
 		"category": "history",
 		"difficulty": "hard",
@@ -212,7 +197,6 @@
 	{
 		"id": "ta",
 		"hiragana": "たきはふきわれ かたしなけいこく",
-		"romaji": "kakine oi tate no tetsudou",
 		"meaning": "滝は吹割 片品渓谷",
 		"category": "geography",
 		"difficulty": "medium",
@@ -225,9 +209,8 @@
 	},
 	{
 		"id": "chi",
-		"hiragana": "ちからあわせる にひゃくまん",
-		"romaji": "yo no chiri arau kawayu no yu",
-		"meaning": "力あわせる二百万",
+		"hiragana": "ちからあわせる ひゃくきゅうじゅうまん",
+		"meaning": "力あわせる百九十万",
 		"category": "nature",
 		"difficulty": "medium",
 		"images": {
@@ -235,12 +218,11 @@
 			"yomifuda": "/images/karuta/yomifuda/chi.webp",
 			"kaisetsu": "/images/karuta/kaisetsu/chi.webp"
 		},
-		"hiraganaShort": "にひゃくまん"
+		"hiraganaShort": "ひゃくきゅうじゅうまん"
 	},
 	{
 		"id": "tsu",
 		"hiragana": "つるまうかたちの ぐんまけん",
-		"romaji": "taki wa kichisui shiraito no taki",
 		"meaning": "つる舞う形の群馬県",
 		"category": "nature",
 		"difficulty": "medium",
@@ -254,7 +236,6 @@
 	{
 		"id": "te",
 		"hiragana": "てんかのぎじん もざえもん",
-		"romaji": "rekishi ni nokoru nitta yoshisada",
 		"meaning": "天下の義人 茂左衛門",
 		"category": "history",
 		"difficulty": "hard",
@@ -268,7 +249,6 @@
 	{
 		"id": "to",
 		"hiragana": "とねは ばんどういちのかわ",
-		"romaji": "sora no kuon seiseki teijou",
 		"meaning": "利根は坂東一の川",
 		"category": "geography",
 		"difficulty": "easy",
@@ -282,7 +262,6 @@
 	{
 		"id": "na",
 		"hiragana": "なかせんどうしのぶ あんなかすぎなみき",
-		"romaji": "tsuta ni haeru kouzuke sanpi",
 		"meaning": "中仙道しのぶ安中杉並木",
 		"category": "history",
 		"difficulty": "hard",
@@ -296,7 +275,6 @@
 	{
 		"id": "ni",
 		"hiragana": "にほんでさいしょの とみおかせいし",
-		"romaji": "ne no kuni no ichiban asama no yama",
 		"meaning": "日本で最初の富岡製糸",
 		"category": "geography",
 		"difficulty": "easy",
@@ -310,7 +288,6 @@
 	{
 		"id": "nu",
 		"hiragana": "ぬまたじょうかの しおばらたすけ",
-		"romaji": "nakasendou shinano no kuni",
 		"meaning": "沼田城下の塩原太助",
 		"category": "history",
 		"difficulty": "medium",
@@ -324,7 +301,6 @@
 	{
 		"id": "ne",
 		"hiragana": "ねぎとこんにゃく しもにためいさん",
-		"romaji": "raichou mo horeta harunako",
 		"meaning": "ねぎとこんにゃく下仁田名産",
 		"category": "nature",
 		"difficulty": "medium",
@@ -338,7 +314,6 @@
 	{
 		"id": "no",
 		"hiragana": "のぼるはるなの きゃんぷむら",
-		"romaji": "mukashi wo kataru tagui naki bushi",
 		"meaning": "登る榛名のキャンプ村",
 		"category": "history",
 		"difficulty": "hard",
@@ -352,7 +327,6 @@
 	{
 		"id": "ha",
 		"hiragana": "はなやまこうえん つつじのめいしょ",
-		"romaji": "usui touge no tetsudou bunka",
 		"meaning": "花山公園 つつじの名所",
 		"category": "history",
 		"difficulty": "medium",
@@ -366,7 +340,6 @@
 	{
 		"id": "hi",
 		"hiragana": "びゃくいかんのん じひのみて",
-		"romaji": "in nchuu negoro ni yamada kaoru",
 		"meaning": "白衣観音 慈悲の御手",
 		"category": "history",
 		"difficulty": "hard",
@@ -380,7 +353,6 @@
 	{
 		"id": "hu",
 		"hiragana": "ぶんぶくちゃがまの もりんじ",
-		"romaji": "noboru enen daisanji",
 		"meaning": "分福茶釜の茂林寺",
 		"category": "nature",
 		"difficulty": "easy",
@@ -394,7 +366,6 @@
 	{
 		"id": "he",
 		"hiragana": "へいわのつかい にいじまじょう",
-		"romaji": "ongaku no sato takasaki shi",
 		"meaning": "平和の使徒 新島襄",
 		"category": "culture",
 		"difficulty": "easy",
@@ -408,7 +379,6 @@
 	{
 		"id": "ho",
 		"hiragana": "ほこるぶんごう たやまかたい",
-		"romaji": "kusatsu yoitoko ichido wa oide",
 		"meaning": "誇る文豪 田山花袋",
 		"category": "nature",
 		"difficulty": "easy",
@@ -422,7 +392,6 @@
 	{
 		"id": "ma",
 		"hiragana": "まゆときいとは にほんいち",
-		"romaji": "yamato takeru no mikoto mo tachiyori",
 		"meaning": "繭と生糸は日本一",
 		"category": "history",
 		"difficulty": "hard",
@@ -436,7 +405,6 @@
 	{
 		"id": "mi",
 		"hiragana": "みなかみ、たにがわ すきーととざん",
-		"romaji": "maebashi shi kinu no shi kouchi",
 		"meaning": "水上、谷川 スキーと登山",
 		"category": "industry",
 		"difficulty": "medium",
@@ -450,7 +418,6 @@
 	{
 		"id": "mu",
 		"hiragana": "むかしをかたる たごのこひ",
-		"romaji": "ken to hissuru joumou sanchi",
 		"meaning": "昔を語る多胡の古碑",
 		"category": "industry",
 		"difficulty": "medium",
@@ -464,7 +431,6 @@
 	{
 		"id": "me",
 		"hiragana": "めいせんおりだす いせさきし",
-		"romaji": "fuji no kemuri karuizawa",
 		"meaning": "銘仙織出す伊勢崎市",
 		"category": "geography",
 		"difficulty": "easy",
@@ -478,7 +444,6 @@
 	{
 		"id": "mo",
 		"hiragana": "もみじにはえる みょうぎさん",
-		"romaji": "kokoro no e koso nihonichi",
 		"meaning": "紅葉に映える妙義山",
 		"category": "history",
 		"difficulty": "hard",
@@ -492,7 +457,6 @@
 	{
 		"id": "ya",
 		"hiragana": "やばけいしのぐ あがつまきょう",
-		"romaji": "echigo e kayou shinshuu kaidou",
 		"meaning": "耶馬渓しのぐ吾妻峡",
 		"category": "geography",
 		"difficulty": "medium",
@@ -506,7 +470,6 @@
 	{
 		"id": "yu",
 		"hiragana": "ゆかりはふるし ぬきさきじんじゃ",
-		"romaji": "tenka no meitou suishinsen",
 		"meaning": "ゆかりは古し貫前神社",
 		"category": "nature",
 		"difficulty": "easy",
@@ -520,7 +483,6 @@
 	{
 		"id": "yo",
 		"hiragana": "よのちりあらう しまおんせん",
-		"romaji": "asama no itazura oni no oshidashi",
 		"meaning": "世のちり洗う四万温泉",
 		"category": "nature",
 		"difficulty": "medium",
@@ -534,7 +496,6 @@
 	{
 		"id": "ra",
 		"hiragana": "らいとからっかぜ ぎりにんじょう",
-		"romaji": "sanchi fukaku kiryuu ni",
 		"meaning": "雷と空風 義理人情",
 		"category": "nature",
 		"difficulty": "medium",
@@ -548,7 +509,6 @@
 	{
 		"id": "ri",
 		"hiragana": "りそうのでんかに でんげんぐんま",
-		"romaji": "kinu wa nippon kiryuu wa sekai",
 		"meaning": "理想の電化に電源群馬",
 		"category": "industry",
 		"difficulty": "medium",
@@ -562,7 +522,6 @@
 	{
 		"id": "ru",
 		"hiragana": "るーぷでなだかい しみずとんねる",
-		"romaji": "yuki ga furu nihon no yane",
 		"meaning": "ループで名高い清水トンネル",
 		"category": "geography",
 		"difficulty": "easy",
@@ -576,7 +535,6 @@
 	{
 		"id": "re",
 		"hiragana": "れきしになだかい にったよしさだ",
-		"romaji": "meiji no tetsudou eikou no ato",
 		"meaning": "歴史に名高い新田義貞",
 		"category": "history",
 		"difficulty": "medium",
@@ -590,7 +548,6 @@
 	{
 		"id": "ro",
 		"hiragana": "ろうのう ふなつでんじべい",
-		"romaji": "minna de asobou tsukiyo no ban",
 		"meaning": "老農 船津傳次平",
 		"category": "culture",
 		"difficulty": "easy",
@@ -604,7 +561,6 @@
 	{
 		"id": "wa",
 		"hiragana": "わさんのたいか せきこうわ",
-		"romaji": "shinobi no kuni otasuke mairu",
 		"meaning": "和算の大家 関孝和",
 		"category": "history",
 		"difficulty": "hard",
