@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16
+    container_name: jomo_db
+    environment:
+      POSTGRES_DB: jomo_karuta_dev
+      POSTGRES_USER: localdev
+      POSTGRES_PASSWORD: localdev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init/00-auth-stub.sql:/docker-entrypoint-initdb.d/00-auth-stub.sql:ro
+      - ./docs/design/jomo-karuta-typing/database-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./docker/postgres/init/02-score.sql:/docker-entrypoint-initdb.d/02-score.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        NPM_REGISTRY: "https://registry.npmmirror.com/"
+    container_name: jomo_app
+    environment:
+      PUBLIC_BACKEND_MODE: local
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: jomo_karuta_dev
+      POSTGRES_USER: localdev
+      POSTGRES_PASSWORD: localdev
+      PUBLIC_SUPABASE_URL: http://localhost
+      PUBLIC_SUPABASE_ANON_KEY: anon
+      HOST: 0.0.0.0
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    command: bash -lc "bun --bun run dev -- --host"
+
+volumes:
+  pgdata:
+  node_modules:
+
+

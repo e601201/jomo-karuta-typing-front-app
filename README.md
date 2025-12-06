@@ -19,6 +19,42 @@ PUBLIC_SUPABASE_URL=your_supabase_project_url
 PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
+### ローカル PostgreSQL で開発する
+
+フロントから直接Supabaseへ接続する代わりに、開発時のみサーバールート経由でローカルPostgreSQLを利用できます。
+
+1. 依存をインストール（`pg` を含む）
+
+```sh
+bun install
+```
+
+2. `.env` に以下を追記
+
+```env
+# フロント側の切替フラグ（local でローカルDB、未設定でSupabase）
+PUBLIC_BACKEND_MODE=local
+
+# サーバ（SvelteKit）側だけで読み込まれるDB接続情報
+POSTGRES_HOST=127.0.0.1
+POSTGRES_PORT=5432
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password
+```
+
+3. ローカルDBにスキーマを適用
+
+`docs/design/jomo-karuta-typing/database-schema.sql` をローカルPostgreSQLへ適用してください。
+
+4. 開発サーバ起動
+
+```sh
+bun --bun run dev
+```
+
+これでランキング保存・取得などのDBアクセスは `/api/scores`（SvelteKitサーバ経由, `pg` 使用）に切り替わります。`PUBLIC_BACKEND_MODE` を未設定または `supabase` にすると、従来通り Supabase を利用します。
+
 ### 依存関係のインストール
 
 ```sh
