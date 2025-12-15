@@ -48,6 +48,7 @@
 		"vitest-browser-svelte": "^1.1.0"
 	},
 	"dependencies": {
+		"@supabase/ssr": "^0.8.0",
 		"@supabase/supabase-js": "^2.86.2",
 		"dexie": "^4.2.1",
 		"lucide-svelte": "^0.545.0"

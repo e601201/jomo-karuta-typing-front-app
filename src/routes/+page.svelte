@@ -3,10 +3,12 @@
 	import { goto } from '$app/navigation';
 	import { IndexedDBService } from '$lib/services/storage/indexed-db';
 	import type { GameMode, RandomModeDifficulty } from '$lib/types';
+	import type { PageData } from './$types';
 
 	const db = new IndexedDBService();
 
 	// Components
+	import Header from '$lib/components/layout/Header.svelte';
 	import GameModeCard from '$lib/components/main-menu/GameModeCard.svelte';
 	import LoadingSpinner from '$lib/components/main-menu/LoadingSpinner.svelte';
 	import ErrorDisplay from '$lib/components/main-menu/ErrorDisplay.svelte';
@@ -15,6 +17,8 @@
 	import PracticeModeModal from '$lib/components/main-menu/PracticeModeModal.svelte';
 	import HowToPlayModal from '$lib/components/main-menu/HowToPlayModal.svelte';
 	import DifficultySelectModal from '$lib/components/main-menu/DifficultySelectModal.svelte';
+
+	let { data }: { data: PageData } = $props();
 
 	interface GameModeOption {
 		id: GameMode;
@@ -169,7 +173,9 @@
 	/>
 </svelte:head>
 
-<main class="min-h-screen bg-gradient-to-b from-green-50 to-white">
+<Header user={data.user} />
+
+<main class="min-h-screen bg-linear-to-b from-green-50 to-white">
 	<div class="container mx-auto max-w-6xl px-4 py-8">
 		<!-- Header -->
 		<header class="mb-8 text-center">
@@ -207,7 +213,6 @@
 						mode={mode.id}
 						title={mode.title}
 						description={mode.description}
-						icon={mode.icon}
 						disabled={isLoading || !!error}
 						onclick={handleModeSelect}
 					/>

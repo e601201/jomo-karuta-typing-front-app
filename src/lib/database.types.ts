@@ -1,4 +1,5 @@
 import type { RandomModeDifficulty } from './types/game';
+import type { Profile } from './types/database';
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -39,7 +40,12 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Functions: {
-			[_ in never]: never;
+			get_profile: {
+				Args: {
+					user_id: string;
+				};
+				Returns: Profile;
+			};
 		};
 		Enums: {
 			[_ in never]: never;
