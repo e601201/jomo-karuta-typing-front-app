@@ -60,3 +60,5 @@ vite.config.ts.timestamp-*
 
 # claude
 .claude/
+
+docs/
