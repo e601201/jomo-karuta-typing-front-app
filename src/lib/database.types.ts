@@ -18,6 +18,8 @@ export type Database = {
 					nick_name: string | null;
 					score: number | null;
 					difficulty: RandomModeDifficulty;
+					time: number | null;
+					game_mode: string | null;
 				};
 				Insert: {
 					created_at?: string;
@@ -25,6 +27,8 @@ export type Database = {
 					nick_name?: string | null;
 					score?: number | null;
 					difficulty: RandomModeDifficulty;
+					time?: number | null;
+					game_mode?: string | null;
 				};
 				Update: {
 					created_at?: string;
@@ -32,6 +36,8 @@ export type Database = {
 					nick_name?: string | null;
 					score?: number | null;
 					difficulty?: RandomModeDifficulty;
+					time?: number | null;
+					game_mode?: string | null;
 				};
 				Relationships: [];
 			};

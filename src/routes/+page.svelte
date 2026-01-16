@@ -34,8 +34,9 @@
 	let showPracticeModeModal = $state(false);
 	let showHowToPlayModal = $state(false);
 	let showDifficultyModal = $state(false);
+	let selectedMode: GameMode | null = $state(null);
 
-	// Game modes configuration - 2つのメインボタンに変更
+	// Game modes configuration - 3つのメインボタンに変更
 	const gameModes: GameModeOption[] = [
 		{
 			id: 'practice',
@@ -44,8 +45,13 @@
 		},
 		{
 			id: 'random',
-			title: 'プレイ開始',
-			description: 'ランダムな順序でゲーム開始'
+			title: 'ランダムモード',
+			description: '全44札がランダムな順序で出題'
+		},
+		{
+			id: 'timeattack',
+			title: 'タイムアタック',
+			description: '10枚の札を最速でタイピング'
 		}
 	];
 
@@ -84,11 +90,13 @@
 	function handleModeSelect(mode: GameMode) {
 		if (isLoading || error) return;
 
-		// 練習モードの場合はモーダルを表示
 		if (mode === 'practice') {
 			showPracticeModeModal = true;
 		} else if (mode === 'random') {
-			// ランダムモード（プレイ開始）の場合は難易度選択モーダルを表示
+			selectedMode = mode;
+			showDifficultyModal = true;
+		} else if (mode === 'timeattack') {
+			selectedMode = mode;
 			showDifficultyModal = true;
 		} else {
 			navigateToGame(mode);
@@ -103,10 +111,10 @@
 		}
 	}
 
-	function handleDifficultySelect(difficulty: RandomModeDifficulty) {
+	function handleDifficultySelect(difficulty: RandomModeDifficulty, gameMode: GameMode) {
 		// 難易度をパラメータに追加してゲーム画面へ遷移
 		const params = new URLSearchParams({
-			mode: 'random',
+			mode: gameMode,
 			difficulty
 		});
 		goto(`/game?${params.toString()}`);
@@ -202,11 +210,12 @@
 					oncontinue={handleContinue}
 				/>
 			{/if}
+			<div class="m-3 text-center text-gray-500 text-xl">モード選択</div>
 
 			<!-- Game Modes -->
 			<div
 				data-testid="game-modes-container"
-				class="mx-auto mb-12 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-2"
+				class="mx-auto mb-12 grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-3"
 			>
 				{#each gameModes as mode (mode.id)}
 					<GameModeCard
@@ -281,7 +290,11 @@
 	<!-- 難易度選択モーダル -->
 	<DifficultySelectModal
 		show={showDifficultyModal}
-		onClose={() => (showDifficultyModal = false)}
-		onSelect={handleDifficultySelect}
+		onClose={() => {
+			showDifficultyModal = false;
+			selectedMode = null;
+		}}
+		onSelect={(difficulty) =>
+			selectedMode && handleDifficultySelect(difficulty, selectedMode as GameMode)}
 	/>
 </main>

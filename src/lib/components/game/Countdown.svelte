@@ -8,10 +8,13 @@
 
 	let { onComplete, duration = 3 }: Props = $props();
 
-	let countdown = $state(duration);
+	let countdown = $state(3);
 	let isVisible = $state(true);
 
 	onMount(() => {
+		// durationプロップから初期値を設定
+		countdown = duration;
+
 		const timer = setInterval(() => {
 			countdown--;
 
