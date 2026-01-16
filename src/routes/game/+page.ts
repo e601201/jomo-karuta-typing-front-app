@@ -9,7 +9,7 @@ export const load: PageLoad = async ({ url }) => {
 	const difficulty = url.searchParams.get('difficulty') as RandomModeDifficulty | null;
 
 	// Validate mode
-	if (!['practice', 'specific', 'random'].includes(mode)) {
+	if (!['practice', 'specific', 'random', 'timeattack'].includes(mode)) {
 		return {
 			error: '無効なゲームモードです',
 			mode: null,
@@ -45,9 +45,8 @@ export const load: PageLoad = async ({ url }) => {
 			}
 			break;
 
-		case 'random':
-			// ランダムモード: 全札をシャッフル
-			cards = getKarutaCards().sort(() => Math.random() - 0.5);
+		default:
+			cards = getKarutaCards();
 			break;
 	}
 

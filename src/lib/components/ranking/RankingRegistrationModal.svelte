@@ -136,13 +136,13 @@
 			{:else}
 				<!-- スコア表示 -->
 				<div
-					class="mb-6 rounded-lg border border-yellow-200 bg-gradient-to-r from-yellow-50 to-orange-50 p-4"
+					class="mb-6 rounded-lg border border-yellow-200 bg-linear-to-r from-yellow-50 to-orange-50 p-4"
 				>
 					<div class="flex items-center justify-between">
 						<div>
 							<p class="mb-1 text-sm text-gray-600">あなたのスコア</p>
 							<p
-								class="bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-4xl font-bold text-transparent"
+								class="bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-4xl font-bold text-transparent"
 							>
 								{score.toLocaleString()}
 							</p>
@@ -203,7 +203,7 @@
 						<button
 							onclick={handleSubmit}
 							disabled={loading}
-							class="flex flex-1 items-center justify-center rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 px-4 py-2 font-bold text-white transition-all hover:from-yellow-600 hover:to-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+							class="flex flex-1 items-center justify-center rounded-lg bg-linear-to-r from-yellow-500 to-orange-500 px-4 py-2 font-bold text-white transition-all hover:from-yellow-600 hover:to-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							{#if loading}
 								<span

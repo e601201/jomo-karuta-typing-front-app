@@ -39,6 +39,7 @@ export type GameMode =
 	| 'practice' // 練習モード
 	| 'specific' // 特定札練習
 	| 'random' // ランダム出題
+	| 'timeattack' // タイムアタックモード
 	| 'challenge' // チャレンジモード (Phase 3)
 	| 'competition' // 競技モード (Phase 4)
 	| 'multiplayer'; // 対戦モード (Phase 4)

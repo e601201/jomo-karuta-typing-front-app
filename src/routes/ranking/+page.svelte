@@ -57,7 +57,7 @@
 	}
 </script>
 
-<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+<div class="min-h-screen bg-linear-to-b from-gray-50 to-white">
 	<div class="container mx-auto px-4 py-8">
 		<!-- ヘッダー -->
 		<div class="mb-8 flex items-center justify-between">
@@ -188,7 +188,7 @@
 										<td class="px-6 py-4 text-right">
 											{#if rank <= 3}
 												<span
-													class="bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-2xl font-bold text-transparent"
+													class="bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-2xl font-bold text-transparent"
 												>
 													{entry.score.toLocaleString()}
 												</span>

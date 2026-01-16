@@ -30,6 +30,8 @@
 	import PauseOverlay from '$lib/components/game/PauseOverlay.svelte';
 	import Countdown from '$lib/components/game/Countdown.svelte';
 	import RankingRegistrationModal from '$lib/components/ranking/RankingRegistrationModal.svelte';
+	import TimeAttackTimer from '$lib/components/game/TimeAttackTimer.svelte';
+	import TimeAttackProgress from '$lib/components/game/TimeAttackProgress.svelte';
 
 	// 状態
 	let gameMode: GameMode | null = $state(null);
@@ -49,18 +51,24 @@
 	let showHint = $state(false);
 	let hintTimer: number | null = null;
 
+	// タイムアタックモード用の状態
+	let timeAttackElapsedTime = $state(0);
+	let timeAttackPenalty = $state(0);
+	let timeAttackProgress = $state({ current: 0, total: 10 });
+	let timeAttackMistakes = $state(0);
+	let timeAttackSkips = $state(0);
+	let timeAttackIsCompleted = $state(false);
+
 	// ストアからのゲーム状態
 	let currentCard = $state<KarutaCard | null>(null);
 	let cardIndex = $state(0);
 	let totalCards = $state(44);
 	let completedCardsCount = $state(0);
-	let inputPosition = $state(0);
 	let mistakes = $state(0);
 	let score = $state<any>({});
 	let isPaused = $state(false);
 	let elapsedTime = $state(0);
 	let pauseCount = $state(0);
-	let totalPauseTime = $state(0);
 	let remainingTime = $state<number | null>(null);
 	let hasTimeLimit = $state(false);
 	let wasSkipped = $state(false);
@@ -73,7 +81,6 @@
 	let romajiGuide = $state('');
 	let displayHiragana = $state(''); // 表示用のひらがなテキスト（難易度に応じて変わる）
 
-	let inputProgress = $state(0);
 	let inputStates = $state<Array<'pending' | 'correct' | 'incorrect' | 'current'>>([]);
 	let romajiStates = $state<Array<'pending' | 'correct' | 'incorrect'>>([]);
 	let currentInput = $state('');
@@ -118,7 +125,7 @@
 			// ゲームを初期化
 			await initializeGame();
 
-			// ストアにサブスクライブ - 練習モード以外のみ
+			// ストアにサブスクライブ
 			if (gameMode !== 'practice') {
 				let previousCardId: string | null = null;
 
@@ -126,17 +133,28 @@
 					currentCard = state.cards.current;
 					cardIndex = state.cards.currentIndex;
 					completedCardsCount = state.cards.completed.length;
-					inputPosition = state.input.position;
 					mistakes = state.input.mistakes;
 					score = state.score;
 					isPaused = state.timer.isPaused;
 					elapsedTime = state.timer.elapsedTime;
 					pauseCount = state.timer.pauseCount || 0;
-					totalPauseTime = state.timer.totalPauseTime || 0;
 					currentInput = state.input.current;
 					remainingTime = state.timer.remainingTime;
 					hasTimeLimit = state.timer.timeLimit !== null;
 					wasSkipped = state.cards.wasSkipped || false;
+
+					// タイムアタックモード用の変数を更新
+					if (gameMode === 'timeattack') {
+						timeAttackElapsedTime = state.timer.elapsedTime;
+						timeAttackPenalty = state.timer.penalty || 0;
+						timeAttackMistakes = state.statistics.mistakes;
+						timeAttackSkips = state.statistics.skips || 0;
+						timeAttackProgress = {
+							current: state.cards.currentIndex + 1,
+							total: state.session?.totalCards || 10
+						};
+						timeAttackIsCompleted = state.cards.currentIndex >= (state.session?.totalCards || 10);
+					}
 
 					// displayHiraganaが未設定の場合（最初のカード）、難易度に応じて設定
 					if (currentCard && !displayHiragana) {
@@ -171,9 +189,8 @@
 						validator = new InputValidator();
 						// タイピング検証用にひらがなテキストからスペースのみを削除（読点は残す）
 						// 初心者モードの場合はhiraganaShortを使用
-						const gameState = get(gameStore);
 						const hiraganaText =
-							gameState.session?.difficulty === 'beginner' &&
+							state.session?.difficulty === 'beginner' &&
 							'hiraganaShort' in currentCard &&
 							currentCard.hiraganaShort
 								? currentCard.hiraganaShort
@@ -187,7 +204,6 @@
 						// 新しいカード用に入力追跡をリセット
 						currentInput = '';
 						completedHiraganaCount = 0;
-						inputProgress = 0;
 					}
 
 					// ゲームが完了したかチェック
@@ -365,7 +381,6 @@
 					// 入力追跡変数をリセット
 					currentInput = '';
 					completedHiraganaCount = 0;
-					inputProgress = 0;
 				}
 
 				// 全値を更新後、ローディングをfalseにしてカウントダウンを表示
@@ -383,11 +398,20 @@
 			if (difficulty) {
 				currentDifficulty = difficulty; // 難易度を保存
 			}
+
+			// タイムアタックモードの場合はカウントダウンを表示
+			if (gameMode === 'timeattack') {
+				showCountdown = true;
+				gameStarted = false;
+				totalCards = 10; // タイムアタックは10枚固定
+			}
+
 			await gameStore.startSession(gameMode!, cards, difficulty);
 		}
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
+		// 通常モードの処理
 		if (isPaused || isGameComplete || !currentCard || showCountdown) return;
 
 		// Enterキーでヒント表示（上級者モードのみ）
@@ -666,6 +690,17 @@
 				// 誤入力をシミュレートするために一時的に文字を追加してから元に戻す
 				const tempInput = currentInput + char;
 				gameStore.updateInput(tempInput);
+
+				// タイムアタックモードの場合はペナルティを追加
+				if (gameMode === 'timeattack') {
+					gameStore.update((s) => ({
+						...s,
+						timer: {
+							...s.timer,
+							penalty: s.timer.penalty + 2000 // 2秒のペナルティ
+						}
+					}));
+				}
 			}
 
 			// 500ms後にエラーインジケータをリセット
@@ -800,9 +835,7 @@
 
 	function handleCardComplete() {
 		// 次のカードに移る前に入力状態をリセット
-		inputPosition = 0;
 		currentInput = '';
-		inputProgress = 0;
 		completedHiraganaCount = 0;
 
 		// 緑色のハイライトをクリアするため入力状態配列をリセット
@@ -827,9 +860,9 @@
 		if (!validator || !currentCard) return;
 		// displayHiraganaが空の場合は初期化
 		if (!displayHiragana) {
-			const gameState = get(gameStore);
+			const state = get(gameStore.gameStore) as any;
 			const hiraganaText =
-				gameState.session?.difficulty === 'beginner' &&
+				state.session?.difficulty === 'beginner' &&
 				'hiraganaShort' in currentCard &&
 				currentCard.hiraganaShort
 					? (currentCard.hiraganaShort as string)
@@ -1053,7 +1086,6 @@
 
 	function updateInputProgress() {
 		if (!currentCard || !romajiGuide) return;
-		inputProgress = (inputPosition / romajiGuide.length) * 100;
 	}
 
 	function handlePause() {
@@ -1072,7 +1104,7 @@
 		}
 	}
 
-	function handleResumeFromOverlay(options?: { skipCountdown?: boolean }) {
+	function handleResumeFromOverlay(_options?: { skipCountdown?: boolean }) {
 		gameStore.resumeGame();
 		// BGMを再開
 		if (soundManager) {
@@ -1082,9 +1114,7 @@
 
 	function handleSkip() {
 		// 入力状態をリセット
-		inputPosition = 0;
 		currentInput = '';
-		inputProgress = 0;
 		completedHiraganaCount = 0;
 
 		// ハイライトをクリアするため入力状態配列をリセット
@@ -1134,9 +1164,9 @@
 		if (!currentCard) return;
 		// displayHiraganaが空の場合は初期化（最初のカード用）
 		if (!displayHiragana) {
-			const gameState = get(gameStore);
+			const state = get(gameStore.gameStore) as any;
 			const hiraganaText =
-				gameState.session?.difficulty === 'beginner' &&
+				state.session?.difficulty === 'beginner' &&
 				'hiraganaShort' in currentCard &&
 				currentCard.hiraganaShort
 					? (currentCard.hiraganaShort as string)
@@ -1173,7 +1203,7 @@
 	<title>タイピングゲーム - 上毛かるた</title>
 </svelte:head>
 
-<main class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+<main class="min-h-screen bg--to-b from-blue-50 to-white">
 	<div data-testid="game-container" class="container mx-auto max-w-4xl flex-col px-4 py-8">
 		{#if isLoading}
 			<!-- ローディング状態 -->
@@ -1204,6 +1234,8 @@
 							練習
 						{:else if gameMode === 'random'}
 							ランダム
+						{:else if gameMode === 'timeattack'}
+							タイムアタック
 						{:else}
 							{gameMode}
 						{/if}
@@ -1211,7 +1243,7 @@
 					<span
 						class="inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-green-800"
 					>
-						{#if gameMode === 'random'}
+						{#if gameMode === 'random' || gameMode === 'timeattack'}
 							{#if currentDifficulty === 'beginner'}
 								初心者モード
 							{:else if currentDifficulty === 'standard'}
@@ -1223,11 +1255,28 @@
 					</span>
 				</div>
 
-				<!-- スコア（中段・目立つように） -->
-				<div class="mb-8 border border-gray-300 p-6 text-center text-gray-600">
-					<p class="mb-2 text-lg font-medium">スコア</p>
-					<p class="text-5xl font-bold">{score.total.toLocaleString()}</p>
-				</div>
+				<!-- スコア（中段・目立つように） / タイムアタックはタイム表示 -->
+				{#if gameMode === 'timeattack'}
+					<div class="mb-8 border border-gray-300 p-6 text-center text-gray-600">
+						<p class="mb-2 text-lg font-medium">最終タイム</p>
+						<p class="text-5xl font-bold">
+							{((timeAttackElapsedTime + timeAttackPenalty) / 1000).toFixed(2)}秒
+						</p>
+						{#if timeAttackPenalty > 0}
+							<p class="mt-2 text-sm text-red-500">
+								ペナルティ: +{(timeAttackPenalty / 1000).toFixed(2)}秒
+							</p>
+							<p class="text-xs text-gray-500">
+								（ミス: {timeAttackMistakes}回 / スキップ: {timeAttackSkips}回）
+							</p>
+						{/if}
+					</div>
+				{:else}
+					<div class="mb-8 border border-gray-300 p-6 text-center text-gray-600">
+						<p class="mb-2 text-lg font-medium">スコア</p>
+						<p class="text-5xl font-bold">{score.total.toLocaleString()}</p>
+					</div>
+				{/if}
 
 				<!-- 詳細統計 -->
 				<div data-testid="final-score" class="mb-8 grid grid-cols-2 gap-4 text-center">
@@ -1251,12 +1300,12 @@
 
 				<!-- ボタン群 -->
 				<div class="flex flex-col gap-3">
-					{#if gameMode === 'random' && !isRankingRegistered}
+					{#if (gameMode === 'random' || gameMode === 'timeattack') && !isRankingRegistered}
 						<button
 							onclick={() => {
 								showRankingModal = true;
 							}}
-							class="transform rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4 text-lg font-bold text-white transition-all hover:scale-105 hover:from-yellow-600 hover:to-orange-600"
+							class="transform rounded-lg bg-linear-to-r from-yellow-500 to-orange-500 px-6 py-4 text-lg font-bold text-white transition-all hover:scale-105 hover:from-yellow-600 hover:to-orange-600"
 						>
 							🏆 ランキングに登録する
 						</button>
@@ -1326,20 +1375,37 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習' : 
 			</div>
 		{:else}
 			<!-- ゲームヘッダー -->
-			<header class="mb-6 rounded-lg bg-white p-4 shadow-md">
-				<div class="flex items-center justify-between">
-					<div class="text-sm text-gray-600">
-						進捗: <span class="font-bold">{cardIndex + 1} / {totalCards}</span>
-					</div>
-					{#if hasTimeLimit && remainingTime !== null}
-						<div
-							class="text-sm {remainingTime < 10000 ? 'font-bold text-red-600' : 'text-gray-600'}"
-						>
-							残り時間: <span class="font-bold">{formatTime(remainingTime)}</span>
-						</div>
-					{/if}
+			{#if gameMode === 'timeattack'}
+				<!-- タイムアタック用ヘッダー -->
+				<div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+					<TimeAttackTimer
+						elapsedTime={timeAttackElapsedTime}
+						penalty={timeAttackPenalty}
+						isCompleted={timeAttackIsCompleted}
+					/>
+					<TimeAttackProgress
+						current={timeAttackProgress.current}
+						total={timeAttackProgress.total}
+						mistakes={timeAttackMistakes}
+						skips={timeAttackSkips}
+					/>
 				</div>
-			</header>
+			{:else}
+				<header class="mb-6 rounded-lg bg-white p-4 shadow-md">
+					<div class="flex items-center justify-between">
+						<div class="text-sm text-gray-600">
+							進捗: <span class="font-bold">{cardIndex + 1} / {totalCards}</span>
+						</div>
+						{#if hasTimeLimit && remainingTime !== null}
+							<div
+								class="text-sm {remainingTime < 10000 ? 'font-bold text-red-600' : 'text-gray-600'}"
+							>
+								残り時間: <span class="font-bold">{formatTime(remainingTime)}</span>
+							</div>
+						{/if}
+					</div>
+				</header>
+			{/if}
 
 			<!-- 拡張一時停止オーバーレイ -->
 			<PauseOverlay
@@ -1486,7 +1552,7 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習' : 
 <RankingRegistrationModal
 	isOpen={showRankingModal}
 	score={score.total || 0}
-	difficulty={gameMode === 'random' ? currentDifficulty : undefined}
+	difficulty={gameMode === 'random' || gameMode === 'timeattack' ? currentDifficulty : undefined}
 	onClose={() => {
 		showRankingModal = false;
 	}}

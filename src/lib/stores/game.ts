@@ -47,6 +47,9 @@ export interface GameTimer {
 	totalPauseTime: number;
 	timeLimit: number | null; // 制限時間（ミリ秒）
 	remainingTime: number; // 残り時間（ミリ秒）
+	// タイムアタック用
+	penalty: number; // ペナルティ時間（ミリ秒）
+	finalTime: number | null; // 最終タイム（実タイム＋ペナルティ）
 }
 
 export interface GameState {
@@ -57,6 +60,9 @@ export interface GameState {
 		remaining: KarutaCard[];
 		completed: CompletedCard[];
 		wasSkipped?: boolean;
+		// タイムアタック用
+		allCards?: KarutaCard[]; // 全44枚の元カード
+		selectedCards?: KarutaCard[]; // タイムアタックで選択された10枚
 	};
 	input: {
 		current: string;
@@ -72,6 +78,8 @@ export interface GameState {
 		mistakes: number;
 		currentCombo: number;
 		maxCombo: number;
+		// タイムアタック用
+		skips: number; // スキップ回数
 	};
 }
 
@@ -114,21 +122,24 @@ const initialState: GameState = {
 		pauseCount: 0,
 		totalPauseTime: 0,
 		timeLimit: null,
-		remainingTime: 0
+		remainingTime: 0,
+		penalty: 0,
+		finalTime: null
 	},
 	statistics: {
 		totalKeystrokes: 0,
 		correctKeystrokes: 0,
 		mistakes: 0,
 		currentCombo: 0,
-		maxCombo: 0
+		maxCombo: 0,
+		skips: 0
 	}
 };
 
 // ゲームストアを作成
 export function createGameStore() {
 	// メインストア
-	const gameStore: Writable<GameState> = writable(initialState);
+	const stateStore: Writable<GameState> = writable(initialState);
 
 	// タイマー更新用のインターバル
 	let timerInterval: ReturnType<typeof setInterval> | null = null;
@@ -141,12 +152,12 @@ export function createGameStore() {
 
 	// 派生ストア: 現在のカード
 	const currentCardStore: Readable<KarutaCard | null> = derived(
-		gameStore,
+		stateStore,
 		($game) => $game.cards.current
 	);
 
 	// 派生ストア: 進捗
-	const progressStore: Readable<GameProgress> = derived(gameStore, ($game) => {
+	const progressStore: Readable<GameProgress> = derived(stateStore, ($game) => {
 		const total = $game.session?.totalCards || 0;
 		const completed = $game.cards.completed.length;
 		const percentage = total > 0 ? (completed / total) * 100 : 0;
@@ -159,10 +170,10 @@ export function createGameStore() {
 	});
 
 	// 派生ストア: スコア
-	const scoreStore: Readable<GameScore> = derived(gameStore, ($game) => $game.score);
+	const scoreStore: Readable<GameScore> = derived(stateStore, ($game) => $game.score);
 
 	// 派生ストア: 統計情報（練習モードと同様）
-	const statisticsStore: Readable<any> = derived(gameStore, ($game) => {
+	const statisticsStore: Readable<any> = derived(stateStore, ($game) => {
 		// WPM計算
 		const elapsedMinutes = $game.timer.elapsedTime / 60000;
 		const words = $game.statistics.correctKeystrokes / 5;
@@ -192,10 +203,17 @@ export function createGameStore() {
 	) {
 		if (cards.length === 0) return;
 
-		// ランダムモードの場合はカードをシャッフル
 		let gameCards = [...cards];
+		let allCards = cards; // 元の全カードを保持
+
+		// モードごとの処理
 		if (mode === 'random') {
+			// ランダムモードの場合はカードをシャッフル
 			gameCards = shuffleArray(gameCards);
+		} else if (mode === 'timeattack') {
+			// タイムアタックモードの場合は10枚をランダム選択
+			const shuffled = shuffleArray([...cards]);
+			gameCards = shuffled.slice(0, 10);
 		}
 
 		// 画像を優先度付きでプリロード（最初の5枚を優先）
@@ -204,11 +222,11 @@ export function createGameStore() {
 		const sessionId = generateSessionId();
 		const startTime = new Date();
 
-		// プラクティスモード以外は60秒の制限時間を設定 TODO: 今後の方針として、制限時間をゲーム難易度によって動的に設定する
+		// タイムアタックとプラクティスモードは制限時間なし、それ以外は60秒
 		const timeLimitTime = 60000;
-		const timeLimit = mode === 'practice' ? null : timeLimitTime;
+		const timeLimit = mode === 'practice' || mode === 'timeattack' ? null : timeLimitTime;
 
-		gameStore.update((state) => ({
+		stateStore.update((state) => ({
 			...state,
 			session: {
 				id: sessionId,
@@ -222,7 +240,10 @@ export function createGameStore() {
 				current: gameCards[0],
 				currentIndex: 0,
 				remaining: gameCards.slice(1),
-				completed: []
+				completed: [],
+				wasSkipped: false,
+				allCards: mode === 'timeattack' ? allCards : undefined,
+				selectedCards: mode === 'timeattack' ? gameCards : undefined
 			},
 			input: {
 				current: '',
@@ -248,19 +269,22 @@ export function createGameStore() {
 				pauseCount: 0,
 				totalPauseTime: 0,
 				timeLimit,
-				remainingTime: timeLimit || 0
+				remainingTime: timeLimit || 0,
+				penalty: 0,
+				finalTime: null
 			},
 			statistics: {
 				totalKeystrokes: 0,
 				correctKeystrokes: 0,
 				mistakes: 0,
 				currentCombo: 0,
-				maxCombo: 0
+				maxCombo: 0,
+				skips: 0
 			}
 		}));
 
 		// InputValidatorにターゲットを設定（スペースを除去）
-		const state = get(gameStore);
+		const state = get(stateStore);
 		if (state.input.validator && state.cards.current) {
 			// 初心者モードの場合はhiraganaShortを使用
 			const hiraganaText =
@@ -282,11 +306,26 @@ export function createGameStore() {
 
 	// スキップ（完了扱いにしない）
 	function skipCard() {
-		const state = get(gameStore);
+		const state = get(stateStore);
 
 		// セッション未開始またはカードがない場合は何もしない
 		if (!state.session?.isActive || !state.cards.current) {
 			return;
+		}
+
+		// タイムアタックモードの場合はペナルティを追加
+		if (state.session.mode === 'timeattack') {
+			stateStore.update((s) => ({
+				...s,
+				timer: {
+					...s.timer,
+					penalty: s.timer.penalty + 10000 // 10秒のペナルティ
+				},
+				statistics: {
+					...s.statistics,
+					skips: s.statistics.skips + 1
+				}
+			}));
 		}
 
 		// データ不整合の検出と修正
@@ -299,7 +338,7 @@ export function createGameStore() {
 			return;
 		}
 
-		gameStore.update((s) => {
+		stateStore.update((s) => {
 			// 全てのカードが処理された場合
 			if (s.cards.remaining.length === 0) {
 				console.log('All cards processed. Ending session.');
@@ -353,7 +392,7 @@ export function createGameStore() {
 
 	// 次のカードへ
 	function nextCard() {
-		const state = get(gameStore);
+		const state = get(stateStore);
 
 		// セッション未開始またはカードがない場合は何もしない
 		if (!state.session?.isActive || !state.cards.current) {
@@ -363,7 +402,7 @@ export function createGameStore() {
 		// データ不整合の検出と修正
 		if (state.cards.currentIndex >= state.session.totalCards) {
 			// インデックスが範囲外の場合は修正
-			gameStore.update((s) => ({
+			stateStore.update((s) => ({
 				...s,
 				cards: {
 					...s.cards,
@@ -398,7 +437,7 @@ export function createGameStore() {
 			accuracy: calculateAccuracy(state.input.position, state.input.mistakes)
 		};
 
-		gameStore.update((s) => {
+		stateStore.update((s) => {
 			const newCompleted = [...s.cards.completed, completedCard];
 
 			// 履歴を最大100件に制限
@@ -467,7 +506,7 @@ export function createGameStore() {
 
 	// キーストロークを処理（練習モードと同様の実装）
 	function processKeystroke(isCorrect: boolean) {
-		gameStore.update((state) => {
+		stateStore.update((state) => {
 			const newState = { ...state };
 			newState.statistics = { ...state.statistics };
 			newState.score = { ...state.score };
@@ -496,7 +535,7 @@ export function createGameStore() {
 
 	// 入力更新
 	function updateInput(input: string) {
-		const state = get(gameStore);
+		const state = get(stateStore);
 
 		// セッション未開始または無効な状態
 		if (!state.session?.isActive || !state.input.validator || !state.cards.current) {
@@ -528,7 +567,7 @@ export function createGameStore() {
 
 		if (result.isValid) {
 			// 正しい入力
-			gameStore.update((s) => ({
+			stateStore.update((s) => ({
 				...s,
 				input: {
 					...s.input,
@@ -543,7 +582,7 @@ export function createGameStore() {
 			}
 		} else if (inputDiff > 0) {
 			// 誤入力の場合（新しい入力があった場合のみ）
-			gameStore.update((s) => ({
+			stateStore.update((s) => ({
 				...s,
 				input: {
 					...s.input,
@@ -560,7 +599,7 @@ export function createGameStore() {
 
 	// スコア更新（WPM計算に変更）
 	function updateScore() {
-		gameStore.update((state) => {
+		stateStore.update((state) => {
 			// 精度（0..1）
 			const accuracy =
 				state.statistics.totalKeystrokes > 0
@@ -601,7 +640,7 @@ export function createGameStore() {
 
 	// セッションを保存
 	function saveSession() {
-		const state = get(gameStore);
+		const state = get(stateStore);
 		if (!storageService || !state.session?.isActive || !state.timer.startTime) return;
 
 		const elapsedTime = state.timer.elapsedTime;
@@ -673,7 +712,7 @@ export function createGameStore() {
 
 	// 一時停止
 	function pauseGame() {
-		gameStore.update((state) => ({
+		stateStore.update((state) => ({
 			...state,
 			timer: {
 				...state.timer,
@@ -695,7 +734,7 @@ export function createGameStore() {
 
 	// 再開
 	function resumeGame() {
-		const state = get(gameStore);
+		const state = get(stateStore);
 
 		if (!state.timer.isPaused || !state.timer.pauseStartTime) {
 			return;
@@ -723,9 +762,15 @@ export function createGameStore() {
 
 	// セッション終了
 	function endSession(isManualExit = false) {
-		const state = get(gameStore);
+		const state = get(stateStore);
 
 		if (!state.session) return;
+
+		// タイムアタックモードの場合は最終タイムを計算
+		let finalTime = null;
+		if (state.session.mode === 'timeattack' && !isManualExit) {
+			finalTime = state.timer.elapsedTime + state.timer.penalty;
+		}
 
 		// 最後にセッションを保存
 		saveSession();
@@ -742,7 +787,8 @@ export function createGameStore() {
 				: null,
 			timer: {
 				...s.timer,
-				isPaused: false
+				isPaused: false,
+				finalTime: finalTime
 			}
 		}));
 
@@ -772,12 +818,12 @@ export function createGameStore() {
 		// 自動保存停止
 		stopAutoSave();
 
-		gameStore.set(initialState);
+		stateStore.set(initialState);
 	}
 
 	// タイマー更新
 	function updateTimer() {
-		const state = get(gameStore);
+		const state = get(stateStore);
 
 		if (!state.session?.isActive || state.timer.isPaused) {
 			return;
@@ -800,7 +846,7 @@ export function createGameStore() {
 			}
 		}
 
-		gameStore.update((s) => ({
+		stateStore.update((s) => ({
 			...s,
 			timer: {
 				...s.timer,
@@ -824,7 +870,7 @@ export function createGameStore() {
 
 	// ゲーム実際の開始（カウントダウン後）
 	function startGameAfterCountdown() {
-		const state = get(gameStore);
+		const state = get(stateStore);
 
 		if (!state.session?.isActive) {
 			return;
@@ -904,7 +950,7 @@ export function createGameStore() {
 	}
 
 	return {
-		gameStore,
+		gameStore: stateStore,
 		currentCardStore,
 		progressStore,
 		scoreStore,
