@@ -7,11 +7,21 @@
 		isOpen: boolean;
 		score: number;
 		difficulty?: RandomModeDifficulty;
+		gameMode?: string;
+		time?: number;
 		onClose: () => void;
 		onSuccess?: (nickName: string) => void;
 	}
 
-	let { isOpen, score, difficulty = 'standard', onClose, onSuccess }: Props = $props();
+	let {
+		isOpen,
+		score,
+		difficulty = 'standard',
+		gameMode,
+		time,
+		onClose,
+		onSuccess
+	}: Props = $props();
 
 	let nickName = $state('');
 	let loading = $state(false);
@@ -38,8 +48,8 @@
 		try {
 			const nameToSave = nickName.trim() || '名無しの挑戦者';
 
-			// スコアを保存（難易度付き）
-			const result = await saveScore(nameToSave, score, difficulty);
+			// スコアを保存（ゲームモードと時間も含めて）
+			const result = await saveScore(nameToSave, score, difficulty, gameMode, time);
 
 			if (result.success) {
 				// 名前をLocalStorageに保存
@@ -140,11 +150,20 @@
 				>
 					<div class="flex items-center justify-between">
 						<div>
-							<p class="mb-1 text-sm text-gray-600">あなたのスコア</p>
+							<p class="mb-1 text-sm text-gray-600">
+								{gameMode === 'timeattack' ? 'クリアタイム' : 'あなたのスコア'}
+							</p>
 							<p
 								class="bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-4xl font-bold text-transparent"
 							>
-								{score.toLocaleString()}
+								{#if gameMode === 'timeattack' && time}
+									{Math.floor(time / 1000)}.{String(Math.floor((time % 1000) / 10)).padStart(
+										2,
+										'0'
+									)}秒
+								{:else}
+									{score.toLocaleString()}
+								{/if}
 							</p>
 						</div>
 						<div class="text-right">

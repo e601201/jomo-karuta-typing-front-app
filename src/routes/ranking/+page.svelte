@@ -1,22 +1,27 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getTopScoresByDifficulty } from '$lib/services/supabaseService';
-	import { ArrowLeft, Trophy, Medal, Award } from 'lucide-svelte';
+	import { getTopScoresByDifficulty, getTopTimesByDifficulty } from '$lib/services/supabaseService';
+	import { ArrowLeft, Trophy, Medal, Award, Timer, Zap } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import type { RandomModeDifficulty } from '$lib/types';
+
+	type GameModeType = 'random' | 'timeattack';
 
 	interface RankingEntry {
 		id: number;
 		nick_name: string;
-		score: number;
+		score?: number | null;
+		time?: number | null;
 		created_at: string;
 		difficulty?: RandomModeDifficulty;
+		game_mode?: string | null;
 	}
 
 	let rankings = $state<RankingEntry[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let selectedDifficulty = $state<RandomModeDifficulty>('standard');
+	let selectedGameMode = $state<GameModeType>('random');
 
 	onMount(async () => {
 		await loadRankings();
@@ -27,7 +32,13 @@
 			loading = true;
 			error = null;
 			let data;
-			data = await getTopScoresByDifficulty(selectedDifficulty, 100);
+
+			if (selectedGameMode === 'timeattack') {
+				data = await getTopTimesByDifficulty(selectedDifficulty, 100);
+			} else {
+				data = await getTopScoresByDifficulty(selectedDifficulty, 100);
+			}
+
 			rankings = data as RankingEntry[];
 		} catch (err) {
 			error = 'ランキングの読み込みに失敗しました';
@@ -40,6 +51,17 @@
 	async function handleDifficultyChange(difficulty: RandomModeDifficulty) {
 		selectedDifficulty = difficulty;
 		await loadRankings();
+	}
+
+	async function handleGameModeChange(mode: GameModeType) {
+		selectedGameMode = mode;
+		await loadRankings();
+	}
+
+	function formatTime(ms: number): string {
+		const seconds = Math.floor(ms / 1000);
+		const milliseconds = Math.floor((ms % 1000) / 10);
+		return `${seconds}.${milliseconds.toString().padStart(2, '0')}`;
 	}
 
 	function getRankIcon(rank: number) {
@@ -76,7 +98,37 @@
 				<Trophy class="h-10 w-10 text-yellow-500" />
 				ランキング
 			</h1>
-			<p class="text-gray-600">ランダムモード TOP100</p>
+			<p class="text-gray-600">
+				{selectedGameMode === 'timeattack' ? 'タイムアタック' : 'ランダムモード'} TOP100
+			</p>
+		</div>
+
+		<!-- ゲームモード切り替え -->
+		<div class="mb-4 flex justify-center">
+			<div class="inline-flex overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm">
+				<button
+					onclick={() => handleGameModeChange('random')}
+					class={`flex items-center gap-2 px-6 py-3 font-medium transition-colors ${
+						selectedGameMode === 'random'
+							? 'bg-linear-to-r from-blue-500 to-purple-500 text-white'
+							: 'text-gray-700 hover:bg-gray-50'
+					}`}
+				>
+					<Zap class="h-4 w-4" />
+					ランダムモード
+				</button>
+				<button
+					onclick={() => handleGameModeChange('timeattack')}
+					class={`flex items-center gap-2 border-l border-gray-300 px-6 py-3 font-medium transition-colors ${
+						selectedGameMode === 'timeattack'
+							? 'bg-linear-to-r from-orange-500 to-red-500 text-white'
+							: 'text-gray-700 hover:bg-gray-50'
+					}`}
+				>
+					<Timer class="h-4 w-4" />
+					タイムアタック
+				</button>
+			</div>
 		</div>
 
 		<!-- 難易度タブ -->
@@ -157,7 +209,9 @@
 								<tr>
 									<th class="px-6 py-4 text-left font-semibold text-gray-700">順位</th>
 									<th class="px-6 py-4 text-left font-semibold text-gray-700">プレイヤー</th>
-									<th class="px-6 py-4 text-right font-semibold text-gray-700">スコア</th>
+									<th class="px-6 py-4 text-right font-semibold text-gray-700">
+										{selectedGameMode === 'timeattack' ? 'タイム' : 'スコア'}
+									</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -186,15 +240,27 @@
 											{entry.nick_name || '名無しの挑戦者'}
 										</td>
 										<td class="px-6 py-4 text-right">
-											{#if rank <= 3}
+											{#if selectedGameMode === 'timeattack'}
+												{#if rank <= 3}
+													<span
+														class="bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-2xl font-bold text-transparent"
+													>
+														{entry.time ? `${formatTime(entry.time)}秒` : '-'}
+													</span>
+												{:else}
+													<span class="text-xl font-bold text-gray-700">
+														{entry.time ? `${formatTime(entry.time)}秒` : '-'}
+													</span>
+												{/if}
+											{:else if rank <= 3}
 												<span
 													class="bg-linear-to-r from-yellow-500 to-orange-500 bg-clip-text text-2xl font-bold text-transparent"
 												>
-													{entry.score.toLocaleString()}
+													{entry.score ? entry.score.toLocaleString() : '-'}
 												</span>
 											{:else}
 												<span class="text-xl font-bold text-gray-700">
-													{entry.score.toLocaleString()}
+													{entry.score ? entry.score.toLocaleString() : '-'}
 												</span>
 											{/if}
 										</td>

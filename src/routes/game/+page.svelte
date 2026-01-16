@@ -58,6 +58,7 @@
 	let timeAttackMistakes = $state(0);
 	let timeAttackSkips = $state(0);
 	let timeAttackIsCompleted = $state(false);
+	let timeAttackFinalTime = $derived(timeAttackElapsedTime + timeAttackPenalty);
 
 	// ストアからのゲーム状態
 	let currentCard = $state<KarutaCard | null>(null);
@@ -1553,6 +1554,8 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習' : 
 	isOpen={showRankingModal}
 	score={score.total || 0}
 	difficulty={gameMode === 'random' || gameMode === 'timeattack' ? currentDifficulty : undefined}
+	gameMode={gameMode || undefined}
+	time={gameMode === 'timeattack' ? timeAttackFinalTime : undefined}
 	onClose={() => {
 		showRankingModal = false;
 	}}
