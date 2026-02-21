@@ -187,6 +187,12 @@
 						}
 
 						previousCardId = currentCard.id;
+
+						// 新しいカードの読み上げを再生
+						if (soundManager && gameStarted) {
+							soundManager.playCardReading(currentCard.id);
+						}
+
 						validator = new InputValidator();
 						// タイピング検証用にひらがなテキストからスペースのみを削除（読点は残す）
 						// 初心者モードの場合はhiraganaShortを使用
@@ -210,12 +216,14 @@
 					// ゲームが完了したかチェック
 					if (state.cards.completed.length === totalCards && state.session?.isActive) {
 						isGameComplete = true;
+						soundManager?.stopCardReading();
 						soundManager?.playGameEnd();
 						soundManager?.stopBGM();
 					}
 					// 時間切れでゲームが終了したかチェック（セッションが非アクティブになった場合）
 					if (state.session && !state.session.isActive && state.session.endTime) {
 						isGameComplete = true;
+						soundManager?.stopCardReading();
 						// 手動終了の場合は音を再生しない
 						if (!state.session.isManualExit) {
 							soundManager?.playGameEnd();
@@ -313,6 +321,7 @@
 				// ゲームが完了したかチェック（全カードが処理された）
 				if (state.currentIndex >= state.cards.length && state.cards.length > 0) {
 					isGameComplete = true;
+					soundManager?.stopCardReading();
 					soundManager?.playGameEnd();
 					soundManager?.stopBGM();
 					practiceModeStore.complete();
@@ -364,6 +373,11 @@
 
 				// カードが変更された場合はバリデータを更新（内容とインデックス両方をチェック）
 				if (currentCard && cardIndexChanged) {
+					// 新しいカードの読み上げを再生
+					if (soundManager && gameStarted) {
+						soundManager.playCardReading(currentCard.id);
+					}
+
 					// スペースのみを削除（読点は残す）
 					// 練習モードではhiraganaをそのまま使用
 					displayHiragana = currentCard.hiragana; // 表示用に保存
@@ -1098,9 +1112,10 @@
 			}
 		} else {
 			gameStore.pauseGame();
-			// BGMを一時停止
+			// BGMと読み上げを一時停止
 			if (soundManager) {
 				soundManager.pauseBGM();
+				soundManager.stopCardReading();
 			}
 		}
 	}
@@ -1126,8 +1141,9 @@
 			romajiStates = new Array(romajiGuide.length).fill('pending');
 		}
 
-		// スキップ時に札を弾く音を再生
+		// スキップ時に読み上げを停止して札を弾く音を再生
 		if (soundManager) {
+			soundManager.stopCardReading();
 			soundManager.playFlickCard();
 		}
 
@@ -1146,6 +1162,7 @@
 
 	function confirmExit() {
 		gameStore.endSession(true);
+		soundManager?.stopCardReading();
 		soundManager?.stopBGM();
 		goto('/');
 	}
@@ -1187,6 +1204,10 @@
 		// BGMを開始
 		if (soundManager) {
 			soundManager.startBGM();
+			// 最初のカードの読み上げを再生
+			if (currentCard) {
+				soundManager.playCardReading(currentCard.id);
+			}
 		}
 
 		// カウントダウン後にゲームタイマーを開始
