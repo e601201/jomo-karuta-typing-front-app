@@ -131,20 +131,30 @@ export class TypingSoundManager {
 		this.stopCardReading();
 
 		try {
-			const audio = new Audio(`/sounds/voice/${cardId}.mp3`);
-			audio.volume = this.effectsVolume;
-			audio.playbackRate = this.voiceSpeed;
-			this.currentVoice = audio;
+			let playCount = 0;
+			const playOnce = () => {
+				const audio = new Audio(`/sounds/voice/${cardId}.mp3`);
+				audio.volume = this.effectsVolume;
+				audio.playbackRate = this.voiceSpeed;
+				this.currentVoice = audio;
 
-			audio.addEventListener('ended', () => {
-				if (this.currentVoice === audio) {
+				audio.addEventListener('ended', () => {
+					if (this.currentVoice !== audio) return;
+					playCount++;
+					// 読み上げは2回再生する
+					if (playCount < 2) {
+						playOnce();
+					} else {
+						this.currentVoice = null;
+					}
+				});
+
+				audio.play().catch(() => {
 					this.currentVoice = null;
-				}
-			});
+				});
+			};
 
-			audio.play().catch(() => {
-				this.currentVoice = null;
-			});
+			playOnce();
 		} catch (error) {
 			console.error('Error playing card reading:', error);
 		}
