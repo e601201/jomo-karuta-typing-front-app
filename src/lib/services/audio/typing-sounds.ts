@@ -11,9 +11,12 @@ export class TypingSoundManager {
 	private typingSoundEnabled: boolean = true;
 	private effectsEnabled: boolean = true;
 	private bgmEnabled: boolean = true;
+	private voiceEnabled: boolean = false;
 	private typingSoundVolume: number = 0.5;
 	private effectsVolume: number = 0.5;
 	private bgmVolume: number = 0.3;
+	private voiceSpeed: number = 1.0;
+	private currentVoice: HTMLAudioElement | null = null;
 	private unsubscribe: (() => void) | null = null;
 
 	constructor() {
@@ -122,6 +125,54 @@ export class TypingSoundManager {
 		}
 	}
 
+	public playCardReading(cardId: string) {
+		if (!this.voiceEnabled) return;
+
+		this.stopCardReading();
+
+		try {
+			let playCount = 0;
+			const playOnce = () => {
+				const audio = new Audio(`/sounds/voice/${cardId}.mp3`);
+				audio.volume = this.effectsVolume;
+				audio.playbackRate = this.voiceSpeed;
+				this.currentVoice = audio;
+
+				audio.addEventListener('ended', () => {
+					if (this.currentVoice !== audio) return;
+					playCount++;
+					// 読み上げは2回再生する
+					if (playCount < 2) {
+						playOnce();
+					} else {
+						this.currentVoice = null;
+					}
+				});
+
+				audio.play().catch(() => {
+					this.currentVoice = null;
+				});
+			};
+
+			playOnce();
+		} catch (error) {
+			console.error('Error playing card reading:', error);
+		}
+	}
+
+	public stopCardReading() {
+		if (this.currentVoice) {
+			try {
+				this.currentVoice.pause();
+				this.currentVoice.currentTime = 0;
+				this.currentVoice.src = '';
+				this.currentVoice = null;
+			} catch {
+				this.currentVoice = null;
+			}
+		}
+	}
+
 	public async startBGM() {
 		if (!this.bgmEnabled || !this.bgmTypingSound) return;
 
@@ -225,6 +276,8 @@ export class TypingSoundManager {
 		this.effectsVolume = settings.sound.effectsVolume / 100;
 		this.bgmEnabled = settings.sound.bgmEnabled;
 		this.bgmVolume = settings.sound.bgmVolume / 100;
+		this.voiceEnabled = settings.sound.voiceEnabled;
+		this.voiceSpeed = settings.sound.voiceSpeed;
 
 		// 既存の音声要素に適用
 		if (this.correctSound) {
@@ -261,6 +314,13 @@ export class TypingSoundManager {
 			this.typingSoundEnabled = newTypingSoundEnabled;
 			this.effectsEnabled = newEffectsEnabled;
 			this.bgmEnabled = newBGMEnabled;
+			this.voiceEnabled = settings.sound.voiceEnabled;
+			this.voiceSpeed = settings.sound.voiceSpeed;
+
+			// 再生中の読み上げ音声の速度を更新
+			if (this.currentVoice) {
+				this.currentVoice.playbackRate = this.voiceSpeed;
+			}
 
 			// いずれかの音量が変わったときのみ一度だけ適用
 			const typingChanged = this.typingSoundVolume !== newTypingSoundVolume;
@@ -274,6 +334,8 @@ export class TypingSoundManager {
 	}
 
 	public destroy() {
+		// 読み上げ音声を停止
+		this.stopCardReading();
 		// BGMを停止
 		this.stopBGM();
 

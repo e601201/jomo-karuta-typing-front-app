@@ -361,7 +361,7 @@
 					{/if}
 
 					<SettingItem
-						label="読み上げ音声（準備中）"
+						label="読み上げ音声"
 						type="toggle"
 						value={settings.sound.voiceEnabled}
 						onChange={(value) => settingsStore.updateSetting('sound.voiceEnabled', value)}
