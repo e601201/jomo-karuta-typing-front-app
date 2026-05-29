@@ -99,3 +99,17 @@ Stores use a factory pattern (e.g., `createGameStore()`) returning singleton ins
 - Setup: `src/test/setup.ts` mocks `$app/navigation` and `$app/stores`
 - Pattern: `*.spec.ts` files co-located with source files
 - Test library: `@testing-library/svelte` with `@testing-library/jest-dom` matchers
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked as GitHub issues via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage roles using default label strings. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.

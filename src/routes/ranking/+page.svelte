@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getTopScoresByDifficulty, getTopTimesByDifficulty } from '$lib/services/supabaseService';
-	import { ArrowLeft, Trophy, Medal, Award, Timer, Zap } from 'lucide-svelte';
+	import { ArrowLeft, Trophy, Medal, Award, Timer, Zap } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import type { RandomModeDifficulty } from '$lib/types';
 

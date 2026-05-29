@@ -171,7 +171,7 @@ export class IndexedDBService {
 			this.initialized = true;
 		} catch (error) {
 			console.error('Failed to initialize IndexedDB:', error);
-			throw new Error('IndexedDB is not available');
+			throw new Error('IndexedDB is not available', { cause: error });
 		}
 	}
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { saveScore } from '$lib/services/supabaseService';
-	import { X, Trophy, Send } from 'lucide-svelte';
+	import { X, Trophy, Send } from '@lucide/svelte';
 	import type { GameMode, RandomModeDifficulty } from '$lib/types';
 
 	interface Props {
