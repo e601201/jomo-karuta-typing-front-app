@@ -3,44 +3,66 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { goto } from '$app/navigation';
 import Page from './+page.svelte';
+import type { GameState } from '$lib/stores/game';
 
 // Mock the navigation module
 vi.mock('$app/navigation');
+
+// 現在の GameState 形状に沿った最小限の初期状態
+const createInitialGameState = (): GameState => ({
+	session: null,
+	cards: {
+		current: null,
+		currentIndex: 0,
+		remaining: [],
+		completed: []
+	},
+	input: {
+		current: '',
+		position: 0,
+		mistakes: 0,
+		validator: null
+	},
+	score: {
+		total: 0,
+		accuracy: 100,
+		speed: 0,
+		combo: 0,
+		maxCombo: 0
+	},
+	timer: {
+		startTime: null,
+		elapsedTime: 0,
+		cardStartTime: null,
+		cardElapsedTime: 0,
+		isPaused: false,
+		pausedDuration: 0,
+		pauseStartTime: null,
+		pauseCount: 0,
+		totalPauseTime: 0,
+		timeLimit: null,
+		remainingTime: 0,
+		penalty: 0,
+		finalTime: null
+	},
+	statistics: {
+		totalKeystrokes: 0,
+		correctKeystrokes: 0,
+		mistakes: 0,
+		currentCombo: 0,
+		maxCombo: 0,
+		skips: 0
+	}
+});
 
 // Mock game store
 vi.mock('$lib/stores/game', () => ({
 	gameStore: {
 		subscribe: vi.fn((callback) => {
-			callback({
-				currentMode: null,
-				isLoading: false,
-				error: null,
-				settings: {
-					soundEnabled: true,
-					showFurigana: true,
-					highlightNextInput: true,
-					fontSize: 'medium',
-					colorScheme: 'default',
-					keyboardLayout: 'qwerty',
-					showHints: true,
-					autoAdvance: false,
-					practiceMode: {
-						cardOrder: 'sequential',
-						repeatFailedCards: false,
-						showProgress: true
-					},
-					gameMode: {
-						enablePartialInput: false,
-						partialInputLength: 5,
-						showTimer: true,
-						pauseEnabled: true
-					}
-				}
-			});
+			callback(createInitialGameState());
 			return () => {};
 		}),
-		setMode: vi.fn(),
-		initializeGame: vi.fn()
+		startSession: vi.fn()
 	}
 }));
 
@@ -84,12 +106,7 @@ describe('MainMenu Page', () => {
 			// Mock loading state
 			const { gameStore } = await import('$lib/stores/game');
 			vi.mocked(gameStore.subscribe).mockImplementation((callback) => {
-				callback({
-					currentMode: null,
-					isLoading: true,
-					error: null,
-					settings: {} as any
-				});
+				callback(createInitialGameState());
 				return () => {};
 			});
 
@@ -180,12 +197,7 @@ describe('MainMenu Page', () => {
 			// Mock error state
 			const { gameStore } = await import('$lib/stores/game');
 			vi.mocked(gameStore.subscribe).mockImplementation((callback) => {
-				callback({
-					currentMode: null,
-					isLoading: false,
-					error: 'データの読み込みに失敗しました',
-					settings: {} as any
-				});
+				callback(createInitialGameState());
 				return () => {};
 			});
 
@@ -288,7 +300,7 @@ describe('MainMenu Page', () => {
 			render(Page);
 
 			await waitFor(() => {
-				expect(gameStore.initializeGame).toHaveBeenCalled();
+				expect(gameStore.startSession).toHaveBeenCalled();
 			});
 		});
 

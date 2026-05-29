@@ -12,7 +12,6 @@ describe('PauseOverlay Component', () => {
 		totalCards: 44,
 		elapsedTime: 30000,
 		pauseCount: 2,
-		totalPauseTime: 5000,
 		score: 1500,
 		accuracy: 95.5
 	};
@@ -352,7 +351,6 @@ describe('PauseOverlay Component', () => {
 						totalCards: 0,
 						elapsedTime: 0,
 						pauseCount: 0,
-						totalPauseTime: 0,
 						score: 0,
 						accuracy: 0
 					},

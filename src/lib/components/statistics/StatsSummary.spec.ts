@@ -44,7 +44,6 @@ describe('StatsSummary Component', () => {
 			render(StatsSummary, {
 				props: {
 					stats: defaultStats,
-					compareWith: 'yesterday',
 					previousStats: {
 						...defaultStats,
 						averageWPM: 50,
