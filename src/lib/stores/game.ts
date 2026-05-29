@@ -222,9 +222,10 @@ export function createGameStore() {
 		const sessionId = generateSessionId();
 		const startTime = new Date();
 
-		// タイムアタックとプラクティスモードは制限時間なし、それ以外は60秒
+		// 練習・特定札・タイムアタックは制限時間なし、それ以外（ランダム）は60秒
 		const timeLimitTime = 60000;
-		const timeLimit = mode === 'practice' || mode === 'timeattack' ? null : timeLimitTime;
+		const timeLimit =
+			mode === 'practice' || mode === 'specific' || mode === 'timeattack' ? null : timeLimitTime;
 
 		stateStore.update((state) => ({
 			...state,

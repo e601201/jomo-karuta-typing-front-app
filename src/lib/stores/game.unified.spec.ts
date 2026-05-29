@@ -79,6 +79,28 @@ describe('統一エンジン: 練習/特定札の難易度・スコアリング'
 	});
 });
 
+describe('統一エンジン: 制限時間', () => {
+	it('練習モードは制限時間なし（timeLimit=null）', async () => {
+		await gameStore.startSession('practice', twoCards);
+		expect(get(gameStore.gameStore).timer.timeLimit).toBeNull();
+	});
+
+	it('特定札モードは制限時間なし（従来の練習経由と同じ挙動を維持）', async () => {
+		await gameStore.startSession('specific', twoCards);
+		expect(get(gameStore.gameStore).timer.timeLimit).toBeNull();
+	});
+
+	it('タイムアタックモードは制限時間なし', async () => {
+		await gameStore.startSession('timeattack', twoCards);
+		expect(get(gameStore.gameStore).timer.timeLimit).toBeNull();
+	});
+
+	it('ランダムモードのみ60秒の制限時間が付く', async () => {
+		await gameStore.startSession('random', twoCards);
+		expect(get(gameStore.gameStore).timer.timeLimit).toBe(60000);
+	});
+});
+
 describe('統一エンジン: 全文ひらがなで検証（hiraganaShort を使わない）', () => {
 	it('練習モードは hiraganaShort を無視して全文を検証対象にする', async () => {
 		await gameStore.startSession('practice', [cardWithShort]);
