@@ -4,8 +4,6 @@ import { getKarutaCards } from '$lib/data/karuta-cards';
 
 export const load: PageLoad = async ({ url }) => {
 	const mode = url.searchParams.get('mode') || 'practice';
-	const resume = url.searchParams.get('resume') === 'true';
-	const isFromSpecific = url.searchParams.get('specific') === 'true';
 	const difficulty = url.searchParams.get('difficulty') as RandomModeDifficulty | null;
 
 	// Validate mode
@@ -14,8 +12,6 @@ export const load: PageLoad = async ({ url }) => {
 			error: '無効なゲームモードです',
 			mode: null,
 			cards: [],
-			resume: false,
-			isFromSpecific: false,
 			difficulty: null
 		};
 	}
@@ -24,28 +20,20 @@ export const load: PageLoad = async ({ url }) => {
 
 	// モードに応じて札を準備
 	switch (mode) {
-		case 'practice':
-			// 練習モード
-			if (isFromSpecific) {
-				// 特定札練習モードから来た場合は、カードを空配列にする
-				// (practiceModeStoreに既に設定済みのため)
-				cards = [];
-			} else {
-				// 通常の練習モード: 全札を順番に
-				cards = getKarutaCards();
-			}
-			break;
-
-		case 'specific':
-			// 特定札モード: 選択された札のみ
-			const selectedIds = url.searchParams.get('cards')?.split(',') || [];
-			cards = getKarutaCards().filter((card) => selectedIds.includes(card.id));
+		case 'specific': {
+			// 特定札モード: 選択された札のID配列（繰り返し・シャッフル順を保持）
+			const selectedIds = url.searchParams.get('cards')?.split(',').filter(Boolean) || [];
+			const byId = new Map(getKarutaCards().map((card) => [card.id, card]));
+			// URLの並び順・重複をそのまま再現する
+			cards = selectedIds.map((id) => byId.get(id)).filter((card): card is KarutaCard => !!card);
 			if (cards.length === 0) {
 				cards = getKarutaCards(); // フォールバック
 			}
 			break;
+		}
 
 		default:
+			// 練習 / ランダム / タイムアタック: 全44札を順番に
 			cards = getKarutaCards();
 			break;
 	}
@@ -53,9 +41,7 @@ export const load: PageLoad = async ({ url }) => {
 	return {
 		mode: mode as GameMode,
 		cards,
-		resume,
 		error: null,
-		isFromSpecific,
 		difficulty: difficulty || 'standard'
 	};
 };

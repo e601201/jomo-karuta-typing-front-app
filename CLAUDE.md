@@ -29,6 +29,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Environment Variables
 
 Required in `.env` (copy from `.env.example`):
+
 - `PUBLIC_SUPABASE_URL` - Supabase project URL
 - `PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
 
@@ -36,14 +37,16 @@ Required in `.env` (copy from `.env.example`):
 
 ### Game Modes
 
-| Mode | Route | Cards | Description |
-|------|-------|-------|-------------|
-| Practice | `/game?mode=practice` | All 44 sequential | Full walkthrough |
-| Specific | `/practice/specific` → `/game` | User-selected | Focused training |
-| Random | `/game?mode=random` | All 44 shuffled | 3 difficulty levels |
-| Time Attack | `/game?mode=timeattack` | 10 random | Time-based scoring, 10s skip penalty |
+| Mode        | Route                                        | Cards             | Description                          |
+| ----------- | -------------------------------------------- | ----------------- | ------------------------------------ |
+| Practice    | `/game?mode=practice`                        | All 44 sequential | Full walkthrough                     |
+| Specific    | `/practice/specific` → `/game?mode=specific` | User-selected     | Focused training                     |
+| Random      | `/game?mode=random`                          | All 44 shuffled   | 3 difficulty levels                  |
+| Time Attack | `/game?mode=timeattack`                      | 10 random         | Time-based scoring, 10s skip penalty |
 
-Difficulty levels (beginner/standard/advanced) affect scoring parameters and display mode.
+All modes run through the single `gameStore` engine (`src/lib/stores/game.ts`). The specific-card route passes its (repeat/shuffle-expanded) selection to the game as an ordered, duplicate-preserving `cards` URL param. Practice/specific pass `difficulty=undefined`, so they always use full hiragana and standard scoring and show no ranking modal.
+
+Difficulty levels (beginner/standard/advanced) affect scoring parameters and display mode (random mode only).
 
 ### Data Flow
 
@@ -59,7 +62,7 @@ User Keystroke → InputValidator (romaji↔hiragana mapping)
 ### Key Directories
 
 - `src/lib/data/karuta-cards.ts` - 44-card dataset with hiragana, romaji, categories, difficulty
-- `src/lib/services/game/` - Game orchestration: `game-manager.ts`, `practice-mode.ts`, `random-mode.ts`, `score.ts`
+- `src/lib/services/game/` - `score.ts` (`calcTypingScore`, difficulty-aware scoring). Card sequencing/shuffle/timer/scoring all live in `gameStore`.
 - `src/lib/services/typing/` - `input-validator.ts` (100+ romaji mappings), `partial-input-processor.ts`
 - `src/lib/services/storage/` - `local-storage.ts` (settings/session), `indexed-db.ts` (Dexie: history/stats), `favorites-service.ts`
 - `src/lib/stores/` - Svelte stores: `game.ts` (main game state + derived stores), `settings.ts`, `statistics.ts`, `auth.ts`

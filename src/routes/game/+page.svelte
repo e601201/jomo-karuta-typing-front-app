@@ -3,21 +3,16 @@
 	import { goto } from '$app/navigation';
 	import { get } from 'svelte/store';
 	import { gameStore } from '$lib/stores/game';
-	import { practiceModeStore } from '$lib/stores/practice-mode';
 	import { InputValidator } from '$lib/services/typing/input-validator';
-	import { LocalStorageService } from '$lib/services/storage/local-storage';
 	import { TypingSoundManager } from '$lib/services/audio/typing-sounds';
 	import type { GameMode, KarutaCard, RandomModeDifficulty } from '$lib/types';
-	import { calcTypingScore } from '$lib/services/game/score';
 
 	// +page.tsからのページデータ
 	interface Props {
 		data: {
 			mode: GameMode;
 			cards: KarutaCard[];
-			resume: boolean;
 			error: string | null;
-			isFromSpecific?: boolean;
 			difficulty?: RandomModeDifficulty;
 		};
 	}
@@ -35,8 +30,6 @@
 
 	// 状態
 	let gameMode: GameMode | null = $state(null);
-	let shouldContinue = $state(false);
-	let isFromSpecificMode = $state(false);
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
 	let showExitConfirm = $state(false);
@@ -74,9 +67,6 @@
 	let hasTimeLimit = $state(false);
 	let wasSkipped = $state(false);
 
-	// カード変更を検出するための前回のカードインデックスを追跡
-	let previousCardIndex = -1;
-
 	// 入力検証
 	let validator: InputValidator | null = null;
 	let romajiGuide = $state('');
@@ -106,28 +96,16 @@
 
 			// +page.tsからのデータを使用
 			gameMode = data.mode;
-			shouldContinue = data.resume;
 			currentDifficulty = data.difficulty || 'standard';
-			console.log(
-				'Game initialized with difficulty:',
-				currentDifficulty,
-				'from data.difficulty:',
-				data.difficulty
-			);
 
-			// 特定モード選択から来たかどうかをチェック
-			isFromSpecificMode = data.isFromSpecific || false;
-
-			// 特定モードから来た場合はdata.cardsからtotalCardsを設定しない
-			if (!isFromSpecificMode) {
-				totalCards = data.cards?.length || 0;
-			}
+			// タイムアタックは10枚固定、それ以外は配布された札数
+			totalCards = gameMode === 'timeattack' ? 10 : data.cards?.length || 0;
 
 			// ゲームを初期化
 			await initializeGame();
 
-			// ストアにサブスクライブ
-			if (gameMode !== 'practice') {
+			// 全モード共通でゲームストアにサブスクライブ
+			{
 				let previousCardId: string | null = null;
 
 				unsubscribe = gameStore.gameStore.subscribe((state) => {
@@ -213,22 +191,25 @@
 						completedHiraganaCount = 0;
 					}
 
-					// ゲームが完了したかチェック
-					if (state.cards.completed.length === totalCards && state.session?.isActive) {
-						isGameComplete = true;
-						soundManager?.stopCardReading();
-						soundManager?.playGameEnd();
-						soundManager?.stopBGM();
-					}
-					// 時間切れでゲームが終了したかチェック（セッションが非アクティブになった場合）
-					if (state.session && !state.session.isActive && state.session.endTime) {
-						isGameComplete = true;
-						soundManager?.stopCardReading();
-						// 手動終了の場合は音を再生しない
-						if (!state.session.isManualExit) {
-							soundManager?.playGameEnd();
+					// ゲーム完了の判定（冪等: 既に完了済みなら終了音を再生しない）
+					if (!isGameComplete) {
+						const allCardsCompleted =
+							state.cards.completed.length === totalCards && state.session?.isActive;
+						const sessionEnded = !!(
+							state.session &&
+							!state.session.isActive &&
+							state.session.endTime
+						);
+
+						if (allCardsCompleted || sessionEnded) {
+							isGameComplete = true;
+							soundManager?.stopCardReading();
+							// 手動終了の場合は終了音を再生しない
+							if (!state.session?.isManualExit) {
+								soundManager?.playGameEnd();
+							}
+							soundManager?.stopBGM();
 						}
-						soundManager?.stopBGM();
 					}
 				});
 			}
@@ -267,162 +248,33 @@
 	});
 
 	async function initializeGame() {
-		// 特定モード選択から来たかどうかをチェック
-		const isFromSpecificMode = data.isFromSpecific || false;
-
 		// ページデータからカードを使用
 		const cards = data.cards;
 
-		// モードに基づいて初期化
-		if (gameMode === 'practice') {
-			// 練習モードストアを使用
-			const storage = new LocalStorageService();
-			storage.initialize();
-
-			// 練習モードストアにすでにカードがあるかチェック（特定モード選択から）
-			const currentState = get(practiceModeStore);
-			const hasExistingCards = currentState.cards && currentState.cards.length > 0;
-
-			if (isFromSpecificMode && hasExistingCards) {
-				// 再初期化しない、カードはすでに特定モードから設定されている
-				totalCards = currentState.cards.length; // 総カード数を更新
-			} else if (shouldContinue) {
-				// 再開のためにカードが必要（全カードであるべき）
-				if (!cards || cards.length === 0) {
-					// 再開用に全カードをロード
-					const { getKarutaCards } = await import('$lib/data/karuta-cards');
-					const allCards = getKarutaCards();
-					await practiceModeStore.resumeFromSession(allCards, storage);
-					totalCards = allCards.length;
-				} else {
-					await practiceModeStore.resumeFromSession(cards, storage);
-					totalCards = cards.length;
-				}
-			} else if (!isFromSpecificMode) {
-				// 特定モードからでない場合のみ全カードで初期化
-				if (!cards || cards.length === 0) {
-					console.error('No cards available');
-					error = 'カードデータの読み込みに失敗しました';
-					isLoading = false;
-					return;
-				}
-				practiceModeStore.initialize(cards, storage);
-				totalCards = cards.length;
-			} else {
-				// 特定モードから来たが既存のカードがない - これはエラー
-				console.error('From specific mode but no cards in store');
-				error = '特定札が選択されていません';
-				isLoading = false;
-				return;
-			}
-
-			// 練習モードストアにサブスクライブ
-			unsubscribe = practiceModeStore.subscribe((state) => {
-				// ゲームが完了したかチェック（全カードが処理された）
-				if (state.currentIndex >= state.cards.length && state.cards.length > 0) {
-					isGameComplete = true;
-					soundManager?.stopCardReading();
-					soundManager?.playGameEnd();
-					soundManager?.stopBGM();
-					practiceModeStore.complete();
-					return;
-				}
-
-				// 状態値を更新
-				const newCard = state.cards?.[state.currentIndex] || null;
-
-				// カードインデックスが変更されたかチェック（同じカード内容でも）
-				const cardIndexChanged = state.currentIndex !== previousCardIndex;
-
-				// 全状態値を更新 - 非同期操作なしで直接割り当て
-				if (newCard) {
-					currentCard = newCard;
-				}
-				cardIndex = state.currentIndex;
-				previousCardIndex = state.currentIndex;
-
-				// カードがある場合のみtotalCardsを更新
-				if (state.cards && state.cards.length > 0) {
-					totalCards = state.cards.length;
-				}
-				mistakes = state.statistics?.mistakes || 0;
-				// calcTypingScore を用いたスコア算出（練習モード表示用）
-				const accuracy =
-					state.statistics.totalKeystrokes > 0
-						? state.statistics.correctKeystrokes / state.statistics.totalKeystrokes
-						: 1;
-				const wpm = practiceModeStore.calculateWPM();
-				const Q = state.completedCards.size;
-				completedCardsCount = Q;
-				const totalScore = calcTypingScore(
-					{
-						Q,
-						accuracy,
-						wpm,
-						maxCombo: state.statistics.maxCombo
-					},
-					undefined
-				); // 練習モードではデフォルト（標準）のスコアリングを使用
-				score = {
-					total: totalScore,
-					accuracy: Math.round(accuracy * 100 * 100) / 100,
-					speed: wpm,
-					combo: state.statistics.currentCombo,
-					maxCombo: state.statistics.maxCombo
-				};
-
-				// カードが変更された場合はバリデータを更新（内容とインデックス両方をチェック）
-				if (currentCard && cardIndexChanged) {
-					// 新しいカードの読み上げを再生
-					if (soundManager && gameStarted) {
-						soundManager.playCardReading(currentCard.id);
-					}
-
-					// スペースのみを削除（読点は残す）
-					// 練習モードではhiraganaをそのまま使用
-					displayHiragana = currentCard.hiragana; // 表示用に保存
-					const targetText = displayHiragana.replace(/\s/g, '');
-
-					// テキストが変更された場合はバリデータをリセット
-					if (!validator || validator.getTarget() !== targetText) {
-						validator = new InputValidator();
-						validator.setTarget(targetText);
-					}
-
-					// カードインデックスが変更されたときは常にこれらをリセット
-					updateRomajiGuide();
-					initializeInputStates();
-
-					// 入力追跡変数をリセット
-					currentInput = '';
-					completedHiraganaCount = 0;
-				}
-
-				// 全値を更新後、ローディングをfalseにしてカウントダウンを表示
-				if (state.cards && state.cards.length > 0) {
-					isLoading = false;
-					if (!gameStarted) {
-						showCountdown = true;
-					}
-				}
-			});
-		} else {
-			// 他のモードでは通常のゲームストアを使用（async関数なのでawait）
-			// ランダムモードの場合は難易度を渡す
-			const difficulty = gameMode === 'random' ? data.difficulty : undefined;
-			if (difficulty) {
-				currentDifficulty = difficulty; // 難易度を保存
-			}
-
-			// タイムアタックモードの場合はカウントダウンを表示
-			if (gameMode === 'timeattack') {
-				showCountdown = true;
-				gameStarted = false;
-				totalCards = 10; // タイムアタックは10枚固定
-			}
-
-			await gameStore.startSession(gameMode!, cards, difficulty);
+		if (!cards || cards.length === 0) {
+			console.error('No cards available');
+			error =
+				gameMode === 'specific'
+					? '特定札が選択されていません'
+					: 'カードデータの読み込みに失敗しました';
+			isLoading = false;
+			return;
 		}
+
+		// ランダムモードのみ難易度を反映（練習・特定・タイムアタックは標準扱い）
+		const difficulty = gameMode === 'random' ? data.difficulty : undefined;
+		if (difficulty) {
+			currentDifficulty = difficulty;
+		}
+
+		// タイムアタックモードの場合はカウントダウンを表示
+		if (gameMode === 'timeattack') {
+			showCountdown = true;
+			gameStarted = false;
+		}
+
+		// 全モード共通のゲームエンジン（gameStore）でセッションを開始
+		await gameStore.startSession(gameMode!, cards, difficulty);
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -647,15 +499,8 @@
 				romajiStates[i] = 'pending';
 			}
 
-			// モードに基づいてストアを更新
-			if (gameMode === 'practice') {
-				practiceModeStore.processKeystroke(true);
-				if (result.isComplete) {
-					handleCardComplete();
-				}
-			} else {
-				gameStore.updateInput(newInput);
-			}
+			// ゲームストアを更新（完全一致時はストア側で自動的に次の札へ進む）
+			gameStore.updateInput(newInput);
 
 			// 正しい入力の音を再生
 			soundManager?.playCorrect();
@@ -698,24 +543,19 @@
 			// 間違った入力の音を再生
 			soundManager?.playIncorrect();
 
-			// モードに基づいてストアを更新
-			if (gameMode === 'practice') {
-				practiceModeStore.processKeystroke(false);
-			} else {
-				// 誤入力をシミュレートするために一時的に文字を追加してから元に戻す
-				const tempInput = currentInput + char;
-				gameStore.updateInput(tempInput);
+			// 誤入力をストアに反映（ミスとしてカウント、現在入力は更新しない）
+			const tempInput = currentInput + char;
+			gameStore.updateInput(tempInput);
 
-				// タイムアタックモードの場合はペナルティを追加
-				if (gameMode === 'timeattack') {
-					gameStore.update((s) => ({
-						...s,
-						timer: {
-							...s.timer,
-							penalty: s.timer.penalty + 2000 // 2秒のペナルティ
-						}
-					}));
-				}
+			// タイムアタックモードの場合はミスごとにペナルティを追加
+			if (gameMode === 'timeattack') {
+				gameStore.update((s) => ({
+					...s,
+					timer: {
+						...s.timer,
+						penalty: s.timer.penalty + 2000 // 2秒のペナルティ
+					}
+				}));
 			}
 
 			// 500ms後にエラーインジケータをリセット
@@ -838,36 +678,9 @@
 				romajiStates[i] = 'pending';
 			}
 
-			if (gameMode === 'practice') {
-				// バックスペースのために練習モードストアを更新する必要はない
-			} else {
-				// バックスペース後の入力を更新
-				gameStore.updateInput(currentInput);
-			}
+			// バックスペース後の入力をストアへ反映（バックスペースはコンボを崩さない）
+			gameStore.updateInput(currentInput);
 			updateInputProgress();
-		}
-	}
-
-	function handleCardComplete() {
-		// 次のカードに移る前に入力状態をリセット
-		currentInput = '';
-		completedHiraganaCount = 0;
-
-		// 緑色のハイライトをクリアするため入力状態配列をリセット
-		if (currentCard) {
-			const targetText = displayHiragana.replace(/\s/g, '');
-			const hiraganaUnits = parseHiraganaUnits(targetText);
-			inputStates = new Array(hiraganaUnits.length).fill('pending');
-			romajiStates = new Array(romajiGuide.length).fill('pending');
-		}
-
-		// タイピング完了後、次の札表示前に正解音を再生
-		if (soundManager) {
-			soundManager.playComplete();
-		}
-
-		if (gameMode === 'practice') {
-			practiceModeStore.nextCard(true);
 		}
 	}
 
@@ -1147,13 +960,9 @@
 			soundManager.playFlickCard();
 		}
 
-		if (gameMode === 'practice') {
-			// 練習モードでカードをスキップ（falseを渡すことで完了扱いにしない）
-			practiceModeStore.nextCard(false);
-		} else if (cardIndex < totalCards - 1) {
-			// 通常モードではskipCard関数を使用（完了扱いにしない）
-			gameStore.skipCard();
-		}
+		// 全モード共通でカードをスキップ（完了扱いにしない）。
+		// 最後の札のスキップやデッキ終端、タイムアタックのペナルティはstore側で処理される。
+		gameStore.skipCard();
 	}
 
 	function handleExit() {
@@ -1210,14 +1019,8 @@
 			}
 		}
 
-		// カウントダウン後にゲームタイマーを開始
-		if (gameMode === 'practice') {
-			// 練習モードは独自のタイマー管理
-			practiceModeStore.resume();
-		} else {
-			// その他のモードはカウントダウン後にタイマー開始
-			gameStore.startGameAfterCountdown();
-		}
+		// カウントダウン後にゲームタイマーを開始（全モード共通）
+		gameStore.startGameAfterCountdown();
 	}
 </script>
 
@@ -1250,7 +1053,7 @@
 					<span
 						class="inline-block rounded-full bg-blue-100 px-4 py-2 text-sm font-medium text-blue-800"
 					>
-						{#if isFromSpecificMode}
+						{#if gameMode === 'specific'}
 							特定札練習
 						{:else if gameMode === 'practice'}
 							練習
@@ -1342,7 +1145,7 @@
 						<button
 							onclick={() => {
 								const shareText = `【上毛かるたタイピング】
-${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習' : 'ランダム'} ${gameMode === 'random' ? (currentDifficulty === 'beginner' ? '初心者モード' : currentDifficulty === 'standard' ? '標準モード' : '上級モード') : ''}で${score.total.toLocaleString()}点獲得！
+${gameMode === 'specific' ? '特定札練習' : gameMode === 'practice' ? '練習' : 'ランダム'} ${gameMode === 'random' ? (currentDifficulty === 'beginner' ? '初心者モード' : currentDifficulty === 'standard' ? '標準モード' : '上級モード') : ''}で${score.total.toLocaleString()}点獲得！
 
 📊 ゲーム結果
 ・正解した札: ${completedCardsCount}枚
@@ -1369,13 +1172,12 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習' : 
 							}
 
 							// 特定札練習モードの場合は特定札選択画面に戻る
-							if (isFromSpecificMode) {
+							if (gameMode === 'specific') {
 								goto('/practice/specific');
 							} else {
 								// その他のモードは同じモードで再プレイ
 								const url = new URL(window.location.href);
 								url.searchParams.delete('continue'); // continueパラメータを削除
-								url.searchParams.delete('specific'); // specificパラメータも削除
 								// modeパラメータを確実に設定
 								if (gameMode) {
 									url.searchParams.set('mode', gameMode);
@@ -1385,7 +1187,7 @@ ${isFromSpecificMode ? '特定札練習' : gameMode === 'practice' ? '練習' : 
 						}}
 						class="rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
 					>
-						{isFromSpecificMode ? '札を選び直す' : 'もう一度遊ぶ'}
+						{gameMode === 'specific' ? '札を選び直す' : 'もう一度遊ぶ'}
 					</button>
 					<button
 						onclick={() => goto('/')}

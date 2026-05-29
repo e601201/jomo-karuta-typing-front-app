@@ -4,7 +4,6 @@
 	import CardSelector from '$lib/components/specific/CardSelector.svelte';
 	import FavoritesManager from '$lib/components/specific/FavoritesManager.svelte';
 	import { specificCardsStore, canStartPractice } from '$lib/stores/specific-cards-store';
-	import { practiceModeStore } from '$lib/stores/practice-mode';
 	import { getKarutaCards } from '$lib/data/karuta-cards';
 	import type { KarutaCard } from '$lib/types';
 
@@ -40,14 +39,12 @@
 			return;
 		}
 
-		// 選択された札で練習用リストを生成
+		// 選択された札で練習用リストを生成（繰り返し回数・シャッフル順を含む）
 		const practiceCards = specificCardsStore.generatePracticeCards(cards);
 
-		// 練習モードストアを初期化
-		practiceModeStore.initialize(practiceCards);
-
-		// ゲーム画面へ遷移（specific=trueフラグを追加）
-		await goto('/game?mode=practice&specific=true');
+		// 札の並び（重複・順序）を保持したままURLで特定札モードへ遷移
+		const cardIds = practiceCards.map((card) => card.id).join(',');
+		await goto(`/game?mode=specific&cards=${encodeURIComponent(cardIds)}`);
 	}
 
 	function goBack() {
