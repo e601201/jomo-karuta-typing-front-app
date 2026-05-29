@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { saveScore } from '$lib/services/supabaseService';
 	import { X, Trophy, Send } from 'lucide-svelte';
-	import type { RandomModeDifficulty } from '$lib/types';
+	import type { GameMode, RandomModeDifficulty } from '$lib/types';
 
 	interface Props {
 		isOpen: boolean;
 		score: number;
 		difficulty?: RandomModeDifficulty;
-		gameMode?: string;
+		gameMode?: GameMode;
 		time?: number;
 		onClose: () => void;
 		onSuccess?: (nickName: string) => void;
@@ -48,8 +48,12 @@
 		try {
 			const nameToSave = nickName.trim() || '名無しの挑戦者';
 
+			// ランキング対象モードはランダム/タイムアタックのみ。それ以外はランダム扱い
+			const rankingMode: 'random' | 'timeattack' =
+				gameMode === 'timeattack' ? 'timeattack' : 'random';
+
 			// スコアを保存（ゲームモードと時間も含めて）
-			const result = await saveScore(nameToSave, score, difficulty, gameMode, time);
+			const result = await saveScore(nameToSave, score, difficulty, rankingMode, time);
 
 			if (result.success) {
 				// 名前をLocalStorageに保存

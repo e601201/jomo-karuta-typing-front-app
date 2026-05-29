@@ -3,7 +3,8 @@
  * TASK-302: 特定札練習モードのお気に入り機能
  */
 
-import { db } from './indexed-db';
+import type { UpdateSpec } from 'dexie';
+import { db, type FavoriteData } from './indexed-db';
 import type { Favorite } from '$lib/stores/specific-cards-store';
 
 export class FavoritesService {
@@ -56,7 +57,7 @@ export class FavoritesService {
 	 */
 	async updateFavorite(favoriteId: string, updates: Partial<Favorite>): Promise<void> {
 		try {
-			const updateData: Record<string, unknown> = {
+			const updateData: UpdateSpec<FavoriteData> = {
 				updatedAt: new Date().toISOString()
 			};
 

@@ -131,10 +131,8 @@ describe('Game Page', () => {
 			// Mock URL with continue parameter
 			vi.mocked(page.subscribe).mockImplementation((callback) => {
 				callback({
-					url: {
-						searchParams: new URLSearchParams('?mode=practice&continue=true')
-					}
-				});
+					url: new URL('http://localhost/game?mode=practice&continue=true')
+				} as unknown as import('@sveltejs/kit').Page);
 				return () => {};
 			});
 
@@ -155,10 +153,8 @@ describe('Game Page', () => {
 			// Mock URL with invalid mode
 			vi.mocked(page.subscribe).mockImplementation((callback) => {
 				callback({
-					url: {
-						searchParams: new URLSearchParams('?mode=invalid')
-					}
-				});
+					url: new URL('http://localhost/game?mode=invalid')
+				} as unknown as import('@sveltejs/kit').Page);
 				return () => {};
 			});
 

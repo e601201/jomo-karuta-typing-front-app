@@ -297,7 +297,9 @@ describe('Settings Store', () => {
 
 			validations.forEach(({ path, invalid, expected }) => {
 				settingsStore.updateSetting(path, invalid);
-				const value = path.split('.').reduce((obj, key) => obj[key], get(settingsStore));
+				const value = path
+					.split('.')
+					.reduce<unknown>((obj, key) => (obj as Record<string, unknown>)[key], get(settingsStore));
 				expect(value).toBe(expected);
 			});
 		});

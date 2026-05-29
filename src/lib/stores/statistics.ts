@@ -497,14 +497,13 @@ function createStatisticsStore() {
 			} catch (error) {
 				throw new Error(`Failed to import data: ${error}`);
 			}
-		}
+		},
 
 		// Public methods for calculations
-		// TODO: These functions are defined outside and need to be imported or defined
-		// calculateLevel,
-		// calculateRank,
-		// calculateLevelProgress,
-		// calculateTrends
+		calculateLevel,
+		calculateRank,
+		calculateLevelProgress,
+		calculateTrends
 	};
 }
 
