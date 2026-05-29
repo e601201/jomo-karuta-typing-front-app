@@ -729,5 +729,4 @@ export class IndexedDBService {
 	}
 }
 
-export const indexedDBService = new IndexedDBService();
 export const db = new JomoKarutaDB();

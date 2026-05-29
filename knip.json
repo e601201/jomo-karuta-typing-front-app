@@ -1,0 +1,10 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"ignoreExportsUsedInFile": true,
+	"ignore": [
+		"src/lib/index.ts",
+		"src/lib/data/validate-karuta-data.ts",
+		"src/lib/database.types.ts",
+		"src/lib/types/multiplayer.ts"
+	]
+}
