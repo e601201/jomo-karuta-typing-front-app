@@ -1,18 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { IndexedDBService } from '$lib/services/storage/indexed-db';
 	import type { GameMode, RandomModeDifficulty } from '$lib/types';
 	import type { PageData } from './$types';
-
-	const db = new IndexedDBService();
 
 	// Components
 	import Header from '$lib/components/layout/Header.svelte';
 	import GameModeCard from '$lib/components/main-menu/GameModeCard.svelte';
 	import LoadingSpinner from '$lib/components/main-menu/LoadingSpinner.svelte';
 	import ErrorDisplay from '$lib/components/main-menu/ErrorDisplay.svelte';
-	import ContinueProgress from '$lib/components/main-menu/ContinueProgress.svelte';
 	import KarutaSlideshow from '$lib/components/main-menu/KarutaSlideshow.svelte';
 	import PracticeModeModal from '$lib/components/main-menu/PracticeModeModal.svelte';
 	import HowToPlayModal from '$lib/components/main-menu/HowToPlayModal.svelte';
@@ -29,8 +25,6 @@
 	// State
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
-	let hasProgress = $state(false);
-	let progressInfo = $state<{ completedCards: number; totalCards: number } | null>(null);
 	let showPracticeModeModal = $state(false);
 	let showHowToPlayModal = $state(false);
 	let showDifficultyModal = $state(false);
@@ -63,22 +57,9 @@
 	// Functions
 	async function initializeApp() {
 		try {
-			await db.init();
-			await checkExistingProgress();
 			isLoading = false;
 		} catch (err) {
 			handleError(err);
-		}
-	}
-
-	async function checkExistingProgress() {
-		const latestSession = await db.getLatestSession();
-		if (latestSession && latestSession.completedCards < latestSession.totalCards) {
-			hasProgress = true;
-			progressInfo = {
-				completedCards: latestSession.completedCards,
-				totalCards: latestSession.totalCards
-			};
 		}
 	}
 
@@ -120,12 +101,7 @@
 		goto(`/game?${params.toString()}`);
 	}
 
-	function handleContinue() {
-		if (isLoading || error || !hasProgress) return;
-		navigateToGame('practice', true);
-	}
-
-	function navigateToGame(mode: GameMode, continueGame = false) {
+	function navigateToGame(mode: GameMode) {
 		// 特定札練習モードは専用ページへ
 		if (mode === 'specific') {
 			goto('/practice/specific');
@@ -133,7 +109,6 @@
 		}
 
 		const params = new URLSearchParams({ mode });
-		if (continueGame) params.append('continue', 'true');
 		goto(`/game?${params.toString()}`);
 	}
 
@@ -202,14 +177,6 @@
 		{:else if error}
 			<ErrorDisplay {error} onretry={handleRetry} />
 		{:else}
-			<!-- Continue Progress -->
-			{#if hasProgress && progressInfo}
-				<ContinueProgress
-					completedCards={progressInfo.completedCards}
-					totalCards={progressInfo.totalCards}
-					oncontinue={handleContinue}
-				/>
-			{/if}
 			<div class="m-3 text-center text-gray-500 text-xl">モード選択</div>
 
 			<!-- Game Modes -->
