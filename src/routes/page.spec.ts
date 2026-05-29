@@ -288,7 +288,10 @@ describe('MainMenu Page', () => {
 	});
 
 	describe('Store Integration', () => {
-		it('TC-016: should load game settings from storage', async () => {
+		// NOTE: +page.svelte（メインメニュー）は gameStore を呼ばず、/game への遷移のみ行う。
+		// startSession はゲーム画面（routes/game/+page.svelte）の責務であり、メインメニューでは
+		// 呼ばれないためこの期待は成立しない（統一前のストア連携設計の名残）。
+		it.skip('TC-016: should load game settings from storage', async () => {
 			const { gameStore } = await import('$lib/stores/game');
 
 			render(Page);
@@ -298,7 +301,9 @@ describe('MainMenu Page', () => {
 			});
 		});
 
-		it('TC-017: should display continue option when progress exists', async () => {
+		// NOTE: 「続きから」進捗表示（ContinueProgress）は commit 3c37d6a で削除済み。
+		// 現在のメインメニューにこの UI はなく、このテストは到達不能なためスキップ。
+		it.skip('TC-017: should display continue option when progress exists', async () => {
 			// Mock existing progress
 			const { IndexedDBService } = await import('$lib/services/storage/indexed-db');
 			const mockInstance = new IndexedDBService();
