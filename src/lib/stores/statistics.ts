@@ -109,7 +109,7 @@ function createStatisticsStore() {
 			(a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
 		);
 
-		let currentStreak = 0;
+		let currentStreak: number;
 		let longestStreak = 0;
 		let tempStreak = 1;
 		let lastDate = new Date(sortedSessions[0].timestamp);
@@ -495,7 +495,7 @@ function createStatisticsStore() {
 					throw new Error('CSV import not yet implemented');
 				}
 			} catch (error) {
-				throw new Error(`Failed to import data: ${error}`);
+				throw new Error(`Failed to import data: ${error}`, { cause: error });
 			}
 		},
 

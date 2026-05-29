@@ -16,7 +16,7 @@ export const load: PageLoad = async ({ url }) => {
 		};
 	}
 
-	let cards: KarutaCard[] = [];
+	let cards: KarutaCard[];
 
 	// モードに応じて札を準備
 	switch (mode) {

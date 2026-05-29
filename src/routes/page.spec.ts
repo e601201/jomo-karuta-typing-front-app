@@ -68,11 +68,15 @@ vi.mock('$lib/stores/game', () => ({
 
 // Mock IndexedDB service
 vi.mock('$lib/services/storage/indexed-db', () => ({
-	IndexedDBService: vi.fn().mockImplementation(() => ({
-		init: vi.fn(),
-		getLatestSession: vi.fn(),
-		hasProgress: vi.fn()
-	}))
+	// vitest 4 では new でモックを呼ぶと implementation を constructor として扱う
+	// (Reflect.construct)。アロー関数は constructor になれないため通常の関数式にする。
+	IndexedDBService: vi.fn().mockImplementation(function () {
+		return {
+			init: vi.fn(),
+			getLatestSession: vi.fn(),
+			hasProgress: vi.fn()
+		};
+	})
 }));
 
 // Mock karuta cards data
