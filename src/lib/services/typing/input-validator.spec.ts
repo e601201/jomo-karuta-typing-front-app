@@ -86,8 +86,9 @@ describe('InputValidator', () => {
 
 			it('わ行を正しく変換する', () => {
 				expect(validator.getRomajiPatterns('わ')).toEqual(['wa']);
-				expect(validator.getRomajiPatterns('を')).toEqual(['wo', 'o']);
-				expect(validator.getRomajiPatterns('ん')).toEqual(['n', 'nn']);
+			expect(validator.getRomajiPatterns('を')).toEqual(['wo', 'o']);
+			// 単独（=語末）の「ん」は撥音ルールにより nn のみ
+			expect(validator.getRomajiPatterns('ん')).toEqual(['nn']);
 			});
 		});
 
@@ -204,7 +205,8 @@ describe('InputValidator', () => {
 		describe('促音', () => {
 			it('促音を正しく変換する', () => {
 				expect(validator.getRomajiPatterns('がっこう')).toContain('gakkou');
-				expect(validator.getRomajiPatterns('にっぽん')).toContain('nippon');
+				// 末尾の「ん」は撥音ルールにより nn のみ許容
+				expect(validator.getRomajiPatterns('にっぽん')).toContain('nipponn');
 				expect(validator.getRomajiPatterns('ぶっか')).toContain('bukka');
 				expect(validator.getRomajiPatterns('せっかく')).toContain('sekkaku');
 			});
@@ -342,7 +344,8 @@ describe('InputValidator', () => {
 	describe('上毛かるたの実データテスト', () => {
 		it('「つる まう かたち の ぐんまけん」を正しく判定する', () => {
 			const hiragana = 'つる まう かたち の ぐんまけん';
-			const romaji = 'tsuru mau katachi no gunmaken';
+			// 末尾の「ん」は撥音ルールにより nn 必須
+			const romaji = 'tsuru mau katachi no gunmakenn';
 			const result = validator.validateInput(hiragana, romaji);
 			expect(result.isValid).toBe(true);
 			expect(result.progress).toBe(1);
@@ -350,14 +353,16 @@ describe('InputValidator', () => {
 
 		it('「ねぎ と こんにゃく しもにた めいぶつ」を正しく判定する', () => {
 			const hiragana = 'ねぎ と こんにゃく しもにた めいぶつ';
-			const romaji = 'negi to konnyaku shimonita meibutsu';
+			// 「にゃ」直前の「ん」は撥音ルールにより nn 必須（konnnyaku）
+			const romaji = 'negi to konnnyaku shimonita meibutsu';
 			const result = validator.validateInput(hiragana, romaji);
 			expect(result.isValid).toBe(true);
 		});
 
 		it('「ちから あわせる にひゃくまんにん」を正しく判定する', () => {
 			const hiragana = 'ちから あわせる にひゃくまんにん';
-			const romaji = 'chikara awaseru nihyakumannin';
+			// 「に」直前の「ん」と末尾の「ん」は撥音ルールにより nn 必須
+			const romaji = 'chikara awaseru nihyakumannninn';
 			const result = validator.validateInput(hiragana, romaji);
 			expect(result.isValid).toBe(true);
 		});

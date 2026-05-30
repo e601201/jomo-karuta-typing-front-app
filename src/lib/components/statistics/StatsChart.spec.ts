@@ -69,8 +69,9 @@ describe('StatsChart Component', () => {
 				}
 			});
 
+			// data-point-2 は値 55（[50,52,55,...] の index 2）
 			await waitFor(() => {
-				const dataPoint = screen.getByTestId('data-point-3');
+				const dataPoint = screen.getByTestId('data-point-2');
 				dataPoint.dispatchEvent(new MouseEvent('mouseenter'));
 			});
 
@@ -176,7 +177,8 @@ describe('StatsChart Component', () => {
 				}
 			});
 
-			expect(screen.getByText('データがありません')).toBeInTheDocument();
+			// 空メッセージは表示用 <p> とスクリーンリーダー用 sr-only の2箇所に出る
+			expect(screen.getAllByText('データがありません').length).toBeGreaterThan(0);
 			expect(screen.queryByTestId('line-chart')).not.toBeInTheDocument();
 		});
 
@@ -194,7 +196,7 @@ describe('StatsChart Component', () => {
 				}
 			});
 
-			expect(screen.getByText('まだプレイ記録がありません')).toBeInTheDocument();
+			expect(screen.getAllByText('まだプレイ記録がありません').length).toBeGreaterThan(0);
 		});
 	});
 
@@ -230,9 +232,10 @@ describe('StatsChart Component', () => {
 				}
 			});
 
+			// stroke は SVG 属性として設定される（インラインスタイルではない）
 			await waitFor(() => {
 				const line = screen.getByTestId('chart-line');
-				expect(line).toHaveStyle({ stroke: '#EF4444' });
+				expect(line).toHaveAttribute('stroke', '#EF4444');
 			});
 		});
 	});

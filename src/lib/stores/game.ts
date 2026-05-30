@@ -752,7 +752,7 @@ export function createGameStore() {
 
 		const pauseDuration = Date.now() - state.timer.pauseStartTime.getTime();
 
-		gameStore.update((s) => ({
+		stateStore.update((s) => ({
 			...s,
 			timer: {
 				...s.timer,
@@ -785,7 +785,7 @@ export function createGameStore() {
 		// 最後にセッションを保存
 		saveSession();
 
-		gameStore.update((s) => ({
+		stateStore.update((s) => ({
 			...s,
 			session: s.session
 				? {
@@ -888,7 +888,7 @@ export function createGameStore() {
 
 		// 開始時刻をリセット（カウントダウン後の現在時刻に）
 		const now = new Date();
-		gameStore.update((s) => ({
+		stateStore.update((s) => ({
 			...s,
 			timer: {
 				...s.timer,
@@ -928,7 +928,7 @@ export function createGameStore() {
 
 	// WPMを計算
 	function calculateWPM(): number {
-		const state = get(gameStore);
+		const state = get(stateStore);
 		if (!state.timer.startTime) return 0;
 
 		const elapsedMinutes = state.timer.elapsedTime / 60000;
@@ -940,7 +940,7 @@ export function createGameStore() {
 
 	// 正確率を計算（キーストロークベース）
 	function calculateKeystrokeAccuracy(): number {
-		const state = get(gameStore);
+		const state = get(stateStore);
 		if (state.statistics.totalKeystrokes === 0) return 100;
 
 		return Math.round(

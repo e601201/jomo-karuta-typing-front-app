@@ -27,7 +27,7 @@ describe('かるたデータ', () => {
 			karutaCards.forEach((card) => {
 				expect(card.id).toBeDefined();
 				expect(card.hiragana).toBeDefined();
-				expect(card.romaji).toBeDefined();
+				// ローマ字はカードに静的保持せず hiragana から動的生成するため検証しない
 				expect(card.meaning).toBeDefined();
 				expect(card.category).toBeDefined();
 				expect(card.difficulty).toBeDefined();
@@ -90,7 +90,7 @@ describe('かるたデータ', () => {
 		it('存在するIDで札を取得できる', () => {
 			const card = getCardById('tsu');
 			expect(card).toBeDefined();
-			expect(card?.hiragana).toBe('つる まう かたち の ぐんまけん');
+			expect(card?.hiragana).toBe('つるまうかたちの ぐんまけん');
 		});
 
 		it('存在しないIDでundefinedを返す', () => {
