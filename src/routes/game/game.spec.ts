@@ -105,6 +105,7 @@ vi.mock('$lib/services/typing/input-validator', () => ({
 // プリローダ・async な startSession など新フローに刷新され、この統合テストは
 // 旧フローを前提としているため全面的に書き換えが必要（多くが waitFor タイムアウト）。
 // __testmocks__/Countdown.svelte を含めた再設計を別タスクで行うまで一時的にスキップする。
+// 追跡 issue: #28
 describe.skip('Game Page', () => {
 	const user = userEvent.setup();
 

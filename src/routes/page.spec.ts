@@ -96,6 +96,7 @@ vi.mock('$lib/data/karuta-cards.json', () => ({
 //  - data prop 必須（Header user={data.user}）/ モード選択はモーダル化
 //  - ボタン名・遷移先・レイアウトが変更（練習/ランダム/タイムアタック, /ranking, /statistics 等）
 // 新アーキテクチャに合わせた再設計を別タスクで行うまで一時的にスキップする。
+// 追跡 issue: #27
 describe.skip('MainMenu Page', () => {
 	const user = userEvent.setup();
 
