@@ -86,9 +86,9 @@ describe('InputValidator', () => {
 
 			it('わ行を正しく変換する', () => {
 				expect(validator.getRomajiPatterns('わ')).toEqual(['wa']);
-			expect(validator.getRomajiPatterns('を')).toEqual(['wo', 'o']);
-			// 単独（=語末）の「ん」は撥音ルールにより nn のみ
-			expect(validator.getRomajiPatterns('ん')).toEqual(['nn']);
+				expect(validator.getRomajiPatterns('を')).toEqual(['wo', 'o']);
+				// 単独（=語末）の「ん」は撥音ルールにより nn のみ
+				expect(validator.getRomajiPatterns('ん')).toEqual(['nn']);
 			});
 		});
 

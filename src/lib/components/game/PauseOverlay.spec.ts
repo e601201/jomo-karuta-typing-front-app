@@ -312,9 +312,7 @@ describe('PauseOverlay Component', () => {
 			expect(document.activeElement).toBe(resumeButton);
 
 			const buttons = screen.getAllByRole('button');
-			const order = buttons.filter((b) =>
-				[resumeButton, settingsButton, exitButton].includes(b)
-			);
+			const order = buttons.filter((b) => [resumeButton, settingsButton, exitButton].includes(b));
 			expect(order).toEqual([resumeButton, settingsButton, exitButton]);
 		});
 
