@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import type { ResolvedPathname } from '$app/types';
 	import { onMount } from 'svelte';
 	import CardSelector from '$lib/components/specific/CardSelector.svelte';
 	import FavoritesManager from '$lib/components/specific/FavoritesManager.svelte';
@@ -44,11 +46,13 @@
 
 		// 札の並び（重複・順序）を保持したままURLで特定札モードへ遷移
 		const cardIds = practiceCards.map((card) => card.id).join(',');
-		await goto(`/game?mode=specific&cards=${encodeURIComponent(cardIds)}`);
+		await goto(
+			`${resolve('/game')}?mode=specific&cards=${encodeURIComponent(cardIds)}` as ResolvedPathname
+		);
 	}
 
 	function goBack() {
-		goto('/');
+		goto(resolve('/'));
 	}
 </script>
 

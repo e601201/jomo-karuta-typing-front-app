@@ -2,10 +2,10 @@
  * ゲーム状態管理ストアのテスト
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { get } from 'svelte/store';
-import { createGameStore, type GameState, type GameSession } from './game';
-import type { KarutaCard, GameMode } from '$lib/types';
+import { createGameStore } from './game';
+import type { KarutaCard } from '$lib/types';
 import { InputValidator } from '../services/typing/input-validator';
 
 // モックデータ
@@ -632,13 +632,17 @@ describe('GameStore - パフォーマンス', () => {
 
 		startSession('practice', mockCards);
 
-		const initialMemory = (performance as any).memory?.usedJSHeapSize || 0;
+		const initialMemory =
+			(performance as Performance & { memory?: { usedJSHeapSize: number } }).memory
+				?.usedJSHeapSize || 0;
 
 		for (let i = 0; i < 100; i++) {
 			updateInput(`test${i}`);
 		}
 
-		const finalMemory = (performance as any).memory?.usedJSHeapSize || 0;
+		const finalMemory =
+			(performance as Performance & { memory?: { usedJSHeapSize: number } }).memory
+				?.usedJSHeapSize || 0;
 		const memoryIncrease = finalMemory - initialMemory;
 
 		// メモリ増加が妥当な範囲内であることを確認

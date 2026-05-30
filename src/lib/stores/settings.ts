@@ -1,12 +1,5 @@
 import { writable, get } from 'svelte/store';
-import type {
-	UserSettings,
-	DisplaySettings,
-	SoundSettings,
-	PracticeSettings,
-	KeyboardSettings,
-	AccessibilitySettings
-} from '$lib/types/game';
+import type { UserSettings } from '$lib/types/game';
 
 // Default settings
 const defaultSettings: UserSettings = {
@@ -98,21 +91,25 @@ const difficultyPresets = {
 function createSettingsStore() {
 	const { subscribe, set, update } = writable<UserSettings>(defaultSettings);
 
-	let savedSettings: UserSettings = { ...defaultSettings };
 	let changedPaths = new Set<string>();
 
 	// Helper function to get nested property
-	function getNestedProperty(obj: any, path: string): any {
-		return path.split('.').reduce((current, key) => current?.[key], obj);
+	function getNestedProperty(obj: Record<string, unknown>, path: string): unknown {
+		return path
+			.split('.')
+			.reduce<unknown>(
+				(current, key) => (current as Record<string, unknown> | undefined)?.[key],
+				obj
+			);
 	}
 
 	// Helper function to set nested property
-	function setNestedProperty(obj: any, path: string, value: any): void {
+	function setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): void {
 		const keys = path.split('.');
 		const lastKey = keys.pop()!;
-		const target = keys.reduce((current, key) => {
+		const target = keys.reduce<Record<string, unknown>>((current, key) => {
 			if (!current[key]) current[key] = {};
-			return current[key];
+			return current[key] as Record<string, unknown>;
 		}, obj);
 		target[lastKey] = value;
 	}
@@ -122,7 +119,7 @@ function createSettingsStore() {
 		return Math.max(min, Math.min(max, value));
 	}
 
-	function validateValue(path: string, value: any): any {
+	function validateValue(path: string, value: unknown): unknown {
 		// Numeric range validations
 		const rangeValidations: Record<string, { min: number; max: number }> = {
 			partialLength: { min: 3, max: 10 },
@@ -135,7 +132,7 @@ function createSettingsStore() {
 
 		if (rangeValidations[path]) {
 			const { min, max } = rangeValidations[path];
-			return validateRange(value, min, max);
+			return validateRange(value as number, min, max);
 		}
 
 		// Enum validations
@@ -149,9 +146,9 @@ function createSettingsStore() {
 			'keyboard.inputMethod': ['romaji', 'kana']
 		};
 
-		if (enumValidations[path] && !enumValidations[path].includes(value)) {
+		if (enumValidations[path] && !enumValidations[path].includes(value as string)) {
 			// Return current value if invalid
-			return getNestedProperty(get({ subscribe }), path);
+			return getNestedProperty(get({ subscribe }) as unknown as Record<string, unknown>, path);
 		}
 
 		return value;
@@ -164,12 +161,12 @@ function createSettingsStore() {
 		getDefaults: () => defaultSettings,
 
 		// Update a specific setting
-		updateSetting: (path: string, value: any) => {
+		updateSetting: (path: string, value: unknown) => {
 			const validatedValue = validateValue(path, value);
 
 			update((settings) => {
 				const newSettings = { ...settings };
-				setNestedProperty(newSettings, path, validatedValue);
+				setNestedProperty(newSettings as unknown as Record<string, unknown>, path, validatedValue);
 				changedPaths.add(path);
 				return newSettings;
 			});
@@ -205,7 +202,6 @@ function createSettingsStore() {
 			const settings = get({ subscribe });
 			try {
 				localStorage.setItem('userSettings', JSON.stringify(settings));
-				savedSettings = { ...settings };
 				changedPaths.clear();
 			} catch (error) {
 				console.error('Failed to save settings:', error);
@@ -237,7 +233,6 @@ function createSettingsStore() {
 						accessibility: { ...defaultSettings.accessibility, ...parsed.accessibility }
 					};
 					set(merged);
-					savedSettings = { ...merged };
 				}
 			} catch (error) {
 				console.error('Failed to load settings:', error);
@@ -248,7 +243,6 @@ function createSettingsStore() {
 		// Reset all settings to default
 		reset: () => {
 			set(defaultSettings);
-			savedSettings = { ...defaultSettings };
 			changedPaths.clear();
 		},
 
@@ -261,7 +255,9 @@ function createSettingsStore() {
 
 				if (section in defaultSettings) {
 					// For top-level properties
-					(newSettings as any)[section] = (defaultSettings as any)[section];
+					(newSettings as unknown as Record<string, unknown>)[section] = (
+						defaultSettings as unknown as Record<string, unknown>
+					)[section];
 				} else {
 					// For nested sections
 					switch (section) {
@@ -334,7 +330,6 @@ function createSettingsStore() {
 				};
 
 				set(merged);
-				savedSettings = { ...merged };
 				changedPaths.clear();
 			} catch (error) {
 				console.error('Failed to import settings:', error);

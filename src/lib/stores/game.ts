@@ -89,6 +89,15 @@ export interface GameProgress {
 	percentage: number;
 }
 
+export interface GameStatisticsSummary {
+	wpm: number;
+	accuracy: number;
+	combo: number;
+	maxCombo: number;
+	totalKeystrokes: number;
+	mistakes: number;
+}
+
 // 初期状態
 const initialState: GameState = {
 	session: null,
@@ -173,7 +182,7 @@ export function createGameStore() {
 	const scoreStore: Readable<GameScore> = derived(stateStore, ($game) => $game.score);
 
 	// 派生ストア: 統計情報（練習モードと同様）
-	const statisticsStore: Readable<any> = derived(stateStore, ($game) => {
+	const statisticsStore: Readable<GameStatisticsSummary> = derived(stateStore, ($game) => {
 		// WPM計算
 		const elapsedMinutes = $game.timer.elapsedTime / 60000;
 		const words = $game.statistics.correctKeystrokes / 5;
@@ -204,7 +213,7 @@ export function createGameStore() {
 		if (cards.length === 0) return;
 
 		let gameCards = [...cards];
-		let allCards = cards; // 元の全カードを保持
+		const allCards = cards; // 元の全カードを保持
 
 		// モードごとの処理
 		if (mode === 'random') {

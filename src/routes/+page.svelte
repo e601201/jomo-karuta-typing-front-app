@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import type { ResolvedPathname } from '$app/types';
 	import type { GameMode, RandomModeDifficulty } from '$lib/types';
 	import type { PageData } from './$types';
 
@@ -98,22 +100,22 @@
 			mode: gameMode,
 			difficulty
 		});
-		goto(`/game?${params.toString()}`);
+		goto(`${resolve('/game')}?${params.toString()}` as ResolvedPathname);
 	}
 
 	function navigateToGame(mode: GameMode) {
 		// 特定札練習モードは専用ページへ
 		if (mode === 'specific') {
-			goto('/practice/specific');
+			goto(resolve('/practice/specific'));
 			return;
 		}
 
 		const params = new URLSearchParams({ mode });
-		goto(`/game?${params.toString()}`);
+		goto(`${resolve('/game')}?${params.toString()}` as ResolvedPathname);
 	}
 
-	function handleNavigation(path: string) {
-		goto(path);
+	function handleNavigation(path: '/ranking' | '/settings' | '/statistics') {
+		goto(resolve(path));
 	}
 
 	function handleRetry() {
@@ -206,7 +208,7 @@
 					<span>遊び方</span>
 				</button>
 				<a
-					href="/ranking"
+					href={resolve('/ranking')}
 					onclick={(e) => {
 						e.preventDefault();
 						handleNavigation('/ranking');
@@ -217,7 +219,7 @@
 					<span>ランキング</span>
 				</a>
 				<a
-					href="/settings"
+					href={resolve('/settings')}
 					onclick={(e) => {
 						e.preventDefault();
 						handleNavigation('/settings');
@@ -228,7 +230,7 @@
 					<span>設定</span>
 				</a>
 				<a
-					href="/statistics"
+					href={resolve('/statistics')}
 					onclick={(e) => {
 						e.preventDefault();
 						handleNavigation('/statistics');

@@ -3,6 +3,8 @@
  * ゲームデータの永続化を管理
  */
 
+import type { KarutaCard } from '$lib/types/game';
+
 // 型定義
 export interface GameSettings {
 	display: {
@@ -52,10 +54,10 @@ export interface SavedSession {
 	mode: string;
 	startTime: string;
 	cards: {
-		current: any;
+		current: Partial<KarutaCard> | null;
 		currentIndex: number;
-		remaining: any[];
-		completed: any[];
+		remaining: unknown[];
+		completed: unknown[];
 	};
 	score: {
 		total: number;
@@ -67,6 +69,24 @@ export interface SavedSession {
 	timer: {
 		elapsedTime: number;
 		pausedDuration: number;
+	};
+}
+
+/**
+ * saveSession が受け取りうる入力形状
+ * SavedSession 互換のフラットな形状と、GameState 由来のネストした形状の両方を許容する
+ */
+export interface SaveSessionInput {
+	id?: string;
+	mode?: string;
+	startTime?: string;
+	cards?: Partial<SavedSession['cards']>;
+	score?: SavedSession['score'];
+	timer?: SavedSession['timer'];
+	session?: {
+		id?: string;
+		mode?: string;
+		startTime?: string;
 	};
 }
 
@@ -103,7 +123,7 @@ const CURRENT_VERSION = '1.0.0';
  * ローカルストレージサービスクラス
  */
 export class LocalStorageService {
-	private memoryStorage: Map<string, any> = new Map();
+	private memoryStorage: Map<string, string> = new Map();
 	private useMemoryFallback = false;
 
 	constructor() {
@@ -308,14 +328,14 @@ export class LocalStorageService {
 	/**
 	 * セッションを保存
 	 */
-	saveSession(session: SavedSession | any): void {
+	saveSession(session: SaveSessionInput): void {
 		// GameStateから必要な情報のみ抽出
 		const savedSession: SavedSession = {
-			id: session.id || session.session?.id,
-			mode: session.mode || session.session?.mode,
-			startTime: session.startTime || session.session?.startTime,
-			cards: session.cards || {
-				current: session.cards?.current,
+			id: (session.id || session.session?.id) as string,
+			mode: (session.mode || session.session?.mode) as string,
+			startTime: (session.startTime || session.session?.startTime) as string,
+			cards: (session.cards as SavedSession['cards']) || {
+				current: session.cards?.current ?? null,
 				currentIndex: session.cards?.currentIndex || 0,
 				remaining: session.cards?.remaining || [],
 				completed: session.cards?.completed || []
@@ -723,30 +743,32 @@ export class LocalStorageService {
 	/**
 	 * ディープマージ
 	 */
-	private deepMerge(target: any, source: any): any {
-		const output = { ...target };
+	private deepMerge<T>(target: T, source: unknown): T {
+		const output = { ...target } as Record<string, unknown>;
 
 		if (isObject(target) && isObject(source)) {
-			Object.keys(source).forEach((key) => {
-				if (isObject(source[key])) {
-					if (!(key in target)) {
-						Object.assign(output, { [key]: source[key] });
+			const targetObj = target as Record<string, unknown>;
+			const sourceObj = source as Record<string, unknown>;
+			Object.keys(sourceObj).forEach((key) => {
+				if (isObject(sourceObj[key])) {
+					if (!(key in targetObj)) {
+						Object.assign(output, { [key]: sourceObj[key] });
 					} else {
-						output[key] = this.deepMerge(target[key], source[key]);
+						output[key] = this.deepMerge(targetObj[key], sourceObj[key]);
 					}
 				} else {
-					Object.assign(output, { [key]: source[key] });
+					Object.assign(output, { [key]: sourceObj[key] });
 				}
 			});
 		}
 
-		return output;
+		return output as T;
 	}
 }
 
 /**
  * オブジェクトかどうかチェック
  */
-function isObject(item: any): boolean {
-	return item && typeof item === 'object' && !Array.isArray(item);
+function isObject(item: unknown): boolean {
+	return Boolean(item) && typeof item === 'object' && !Array.isArray(item);
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -10,7 +11,7 @@
 			<div class="flex items-center justify-between mb-6">
 				<h1 class="text-3xl font-bold text-gray-800">プロフィール</h1>
 				<div class="flex gap-4">
-					<a href="/auth/logout" class="text-red-600 hover:text-red-700 font-medium">
+					<a href={resolve('/auth/logout')} class="text-red-600 hover:text-red-700 font-medium">
 						ログアウト
 					</a>
 				</div>
@@ -27,7 +28,7 @@
 						<div>
 							<p class="text-sm text-gray-500">ニックネーム</p>
 							<p class="text-gray-800">
-								{(data.profile as any)?.nickname || data.user?.email?.split('@')[0]}
+								{data.profile?.nickname || data.user?.email?.split('@')[0]}
 							</p>
 						</div>
 						<div>
@@ -102,7 +103,7 @@
 
 		<div class="mt-8 text-center">
 			<a
-				href="/"
+				href={resolve('/')}
 				class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors"
 			>
 				ホームに戻る

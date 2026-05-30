@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { goto } from '$app/navigation';
 import { page } from '$app/stores';
-import { get } from 'svelte/store';
+import { writable } from 'svelte/store';
 import Page from './+page.svelte';
 
 // Mock modules
@@ -23,7 +23,6 @@ vi.mock('$app/stores', () => ({
 
 // Mock game store
 vi.mock('$lib/stores/game', () => {
-	const { writable } = require('svelte/store');
 	const mockGameStore = writable({
 		session: null,
 		cards: {
@@ -117,8 +116,8 @@ describe('Game Page', () => {
 		it('TC-001: should get game mode from URL parameters', async () => {
 			render(Page);
 
-			await waitFor(() => {
-				const { gameStore } = require('$lib/stores/game');
+			await waitFor(async () => {
+				const { gameStore } = await import('$lib/stores/game');
 				expect(gameStore.startSession).toHaveBeenCalledWith(
 					expect.objectContaining({
 						mode: 'practice'
@@ -138,8 +137,8 @@ describe('Game Page', () => {
 
 			render(Page);
 
-			await waitFor(() => {
-				const { gameStore } = require('$lib/stores/game');
+			await waitFor(async () => {
+				const { gameStore } = await import('$lib/stores/game');
 				expect(gameStore.startSession).toHaveBeenCalledWith(
 					expect.objectContaining({
 						mode: 'practice',

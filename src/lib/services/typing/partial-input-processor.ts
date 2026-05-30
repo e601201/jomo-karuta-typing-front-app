@@ -1,9 +1,4 @@
-import type {
-	PartialInputConfig,
-	PartialInputMode,
-	PartialInputRange,
-	PartialInputPreset
-} from '$lib/types';
+import type { PartialInputConfig, PartialInputRange, PartialInputPreset } from '$lib/types';
 
 /**
  * 部分入力モードの処理を管理するクラス
