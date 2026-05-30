@@ -223,16 +223,19 @@ describe('SpecificCardsStore', () => {
 
 			const practiceCards = specificCardsStore.generatePracticeCards(mockCards);
 
-			// 10回繰り返しても同じ順序にならないことを確認
-			const firstThree = practiceCards
-				.slice(0, 3)
-				.map((c) => c.id)
-				.join(',');
-			const secondThree = practiceCards
-				.slice(3, 6)
-				.map((c) => c.id)
-				.join(',');
-			expect(firstThree).not.toBe(secondThree);
+			// 10回分のブロックを取り出し、出題順がシャッフルされている
+			// (= 複数の異なる順序が現れる) ことを確認する。
+			// 個々のブロック同士の比較は約 1/6 の確率で偶然一致するため flaky になる。
+			// 全 10 ブロックが偶然すべて同じ順序になる確率は (1/6)^9 でほぼ 0。
+			const orderings = new Set<string>();
+			for (let i = 0; i < 10; i++) {
+				const block = practiceCards
+					.slice(i * 3, i * 3 + 3)
+					.map((c) => c.id)
+					.join(',');
+				orderings.add(block);
+			}
+			expect(orderings.size).toBeGreaterThan(1);
 		});
 	});
 
