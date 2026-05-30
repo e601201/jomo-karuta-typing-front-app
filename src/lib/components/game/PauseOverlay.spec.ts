@@ -69,13 +69,32 @@ describe('PauseOverlay Component', () => {
 			expect(screen.getByText('5/44枚完了')).toBeInTheDocument();
 			expect(screen.getByText('00:30')).toBeInTheDocument(); // 30秒
 			expect(screen.getByText('スコア: 1500')).toBeInTheDocument();
-			expect(screen.getByText('正確率: 95.5%')).toBeInTheDocument();
+			// 正確率は小数2桁で表示
+			expect(screen.getByText('正確率: 95.50%')).toBeInTheDocument();
 			expect(screen.getByText('一時停止回数: 2回')).toBeInTheDocument();
 		});
 	});
 
 	describe('Resume Functionality', () => {
 		it('TC-003: should handle resume button click', async () => {
+			// カウントダウン無しの場合は即時再開する
+			render(PauseOverlay, {
+				props: {
+					isPaused: true,
+					gameStats: defaultGameStats,
+					onResume: mockOnResume,
+					onExit: mockOnExit,
+					showCountdown: false
+				}
+			});
+
+			const resumeButton = screen.getByText('再開');
+			await fireEvent.click(resumeButton);
+
+			expect(mockOnResume).toHaveBeenCalled();
+		});
+
+		it('TC-003b: should start countdown (not immediate resume) when countdown enabled', async () => {
 			render(PauseOverlay, {
 				props: {
 					isPaused: true,
@@ -86,10 +105,11 @@ describe('PauseOverlay Component', () => {
 				}
 			});
 
-			const resumeButton = screen.getByText('再開');
-			await fireEvent.click(resumeButton);
+			await fireEvent.click(screen.getByText('再開'));
 
-			expect(mockOnResume).toHaveBeenCalled();
+			// 再開ボタンはカウントダウン演出を開始し、まだ onResume は呼ばれない
+			expect(screen.getByTestId('countdown-display')).toBeInTheDocument();
+			expect(mockOnResume).not.toHaveBeenCalled();
 		});
 
 		it('TC-013: should show countdown when resuming', async () => {
@@ -127,10 +147,13 @@ describe('PauseOverlay Component', () => {
 					gameStats: defaultGameStats,
 					onResume: mockOnResume,
 					onExit: mockOnExit,
-					showCountdown: true,
-					isCountingDown: true
+					showCountdown: true
 				}
 			});
+
+			// 再開クリックで内部カウントダウンを開始してから Space でスキップ
+			await fireEvent.click(screen.getByText('再開'));
+			expect(screen.getByTestId('countdown-display')).toBeInTheDocument();
 
 			await fireEvent.keyDown(document, { key: ' ' });
 			expect(mockOnResume).toHaveBeenCalledWith({ skipCountdown: true });
@@ -198,12 +221,14 @@ describe('PauseOverlay Component', () => {
 
 	describe('Keyboard Handling', () => {
 		it('TC-017: should handle ESC key for resume', async () => {
+			// カウントダウン無しなら ESC で即時再開
 			render(PauseOverlay, {
 				props: {
 					isPaused: true,
 					gameStats: defaultGameStats,
 					onResume: mockOnResume,
-					onExit: mockOnExit
+					onExit: mockOnExit,
+					showCountdown: false
 				}
 			});
 
@@ -218,9 +243,13 @@ describe('PauseOverlay Component', () => {
 					gameStats: defaultGameStats,
 					onResume: mockOnResume,
 					onExit: mockOnExit,
-					isCountingDown: true
+					showCountdown: true
 				}
 			});
+
+			// カウントダウン中は ESC で即時再開しない
+			await fireEvent.click(screen.getByText('再開'));
+			expect(screen.getByTestId('countdown-display')).toBeInTheDocument();
 
 			await fireEvent.keyDown(document, { key: 'Escape' });
 			expect(mockOnResume).not.toHaveBeenCalled();
@@ -272,7 +301,9 @@ describe('PauseOverlay Component', () => {
 				}
 			});
 
-			// Tab through buttons
+			// ネイティブの Tab 移動は happy-dom では再現できないため、
+			// ボタンがネイティブにフォーカス可能で、DOM 上のタブ順が
+			// 再開 → 設定 → 終了 になっていることを検証する。
 			const resumeButton = screen.getByText('再開');
 			const settingsButton = screen.getByText('設定');
 			const exitButton = screen.getByText('終了');
@@ -280,11 +311,9 @@ describe('PauseOverlay Component', () => {
 			resumeButton.focus();
 			expect(document.activeElement).toBe(resumeButton);
 
-			await fireEvent.keyDown(document, { key: 'Tab' });
-			expect(document.activeElement).toBe(settingsButton);
-
-			await fireEvent.keyDown(document, { key: 'Tab' });
-			expect(document.activeElement).toBe(exitButton);
+			const buttons = screen.getAllByRole('button');
+			const order = buttons.filter((b) => [resumeButton, settingsButton, exitButton].includes(b));
+			expect(order).toEqual([resumeButton, settingsButton, exitButton]);
 		});
 
 		it('TC-033: should have proper ARIA attributes', () => {

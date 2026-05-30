@@ -107,8 +107,10 @@ function createSettingsStore() {
 	function setNestedProperty(obj: Record<string, unknown>, path: string, value: unknown): void {
 		const keys = path.split('.');
 		const lastKey = keys.pop()!;
+		// 各階層をクローンしてから降りる。元の共有オブジェクト（defaultSettings 等）を
+		// 破壊的に書き換えないようにするため。
 		const target = keys.reduce<Record<string, unknown>>((current, key) => {
-			if (!current[key]) current[key] = {};
+			current[key] = { ...((current[key] as Record<string, unknown>) ?? {}) };
 			return current[key] as Record<string, unknown>;
 		}, obj);
 		target[lastKey] = value;

@@ -4,9 +4,18 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { get } from 'svelte/store';
-import { createGameStore } from './game';
 import type { KarutaCard } from '$lib/types';
 import { InputValidator } from '../services/typing/input-validator';
+
+// 画像プリロードは即座に解決させる（happy-dom で実画像を読み込まないため）。
+// startSession は ImagePreloader.preloadWithPriority を await してから状態を更新する。
+vi.mock('$lib/utils/image-preloader', () => ({
+	ImagePreloader: {
+		preloadWithPriority: vi.fn().mockResolvedValue(undefined)
+	}
+}));
+
+import { createGameStore } from './game';
 
 // モックデータ
 const mockCards: KarutaCard[] = [
@@ -35,6 +44,10 @@ const mockCards: KarutaCard[] = [
 		difficulty: 'easy'
 	}
 ];
+
+// 検証ターゲットはスペースを除去した全文ひらがな。撥音ルールにより末尾「ん」は nn 必須。
+// 「つる まう かたち の ぐんまけん」→ 'つるまうかたちのぐんまけん' → 'tsurumaukatachinogunmakenn'
+const fullRomajiTsu = 'tsurumaukatachinogunmakenn';
 
 describe('GameStore - 初期化', () => {
 	it('初期状態が正しく設定される', () => {
@@ -68,10 +81,10 @@ describe('GameStore - セッション管理', () => {
 		vi.clearAllMocks();
 	});
 
-	it('練習モードでセッションを開始できる', () => {
+	it('練習モードでセッションを開始できる', async () => {
 		const { gameStore, startSession } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 		const state = get(gameStore);
 
 		expect(state.session).not.toBeNull();
@@ -84,11 +97,11 @@ describe('GameStore - セッション管理', () => {
 		expect(state.input.validator).toBeInstanceOf(InputValidator);
 	});
 
-	it('特定札モードでセッションを開始できる', () => {
+	it('特定札モードでセッションを開始できる', async () => {
 		const { gameStore, startSession } = store;
 		const selectedCards = [mockCards[0], mockCards[2]];
 
-		startSession('specific', selectedCards);
+		await startSession('specific', selectedCards);
 		const state = get(gameStore);
 
 		expect(state.session?.mode).toBe('specific');
@@ -97,20 +110,20 @@ describe('GameStore - セッション管理', () => {
 		expect(state.cards.current).toEqual(selectedCards[0]);
 	});
 
-	it('ランダムモードでセッションを開始できる', () => {
+	it('ランダムモードでセッションを開始できる', async () => {
 		const { gameStore, startSession } = store;
 
-		startSession('random', mockCards);
+		await startSession('random', mockCards);
 		const state = get(gameStore);
 
 		expect(state.session?.mode).toBe('random');
 		expect(state.cards.remaining.length + 1).toBe(mockCards.length);
 	});
 
-	it('セッション終了時に状態が更新される', () => {
+	it('セッション終了時に状態が更新される', async () => {
 		const { gameStore, startSession, endSession } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 		endSession();
 		const state = get(gameStore);
 
@@ -119,10 +132,10 @@ describe('GameStore - セッション管理', () => {
 		expect(state.timer.isPaused).toBe(false);
 	});
 
-	it('セッションをリセットできる', () => {
+	it('セッションをリセットできる', async () => {
 		const { gameStore, startSession, resetSession } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 		resetSession();
 		const state = get(gameStore);
 
@@ -142,10 +155,10 @@ describe('GameStore - カード進行', () => {
 		vi.clearAllMocks();
 	});
 
-	it('次のカードに進める', () => {
+	it('次のカードに進める', async () => {
 		const { gameStore, startSession, nextCard } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 		const firstCard = get(gameStore).cards.current;
 
 		nextCard();
@@ -164,7 +177,7 @@ describe('GameStore - カード進行', () => {
 	it('最後のカードで完了処理される', async () => {
 		const { gameStore, startSession, nextCard } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		// 最後のカードまで進める
 		nextCard(); // 2枚目
@@ -194,10 +207,10 @@ describe('GameStore - カード進行', () => {
 		expect(stateAfter).toEqual(stateBefore);
 	});
 
-	it('カード完了時にデータが記録される', () => {
+	it('カード完了時にデータが記録される', async () => {
 		const { gameStore, startSession, completeCard } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 		const firstCard = get(gameStore).cards.current;
 
 		// ミスを2回記録
@@ -224,10 +237,10 @@ describe('GameStore - 入力管理', () => {
 		vi.clearAllMocks();
 	});
 
-	it('正しい入力で状態が更新される', () => {
+	it('正しい入力で状態が更新される', async () => {
 		const { gameStore, startSession, updateInput } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 		updateInput('tsu');
 
 		const state = get(gameStore);
@@ -236,10 +249,10 @@ describe('GameStore - 入力管理', () => {
 		expect(state.input.mistakes).toBe(0);
 	});
 
-	it('誤った入力でミスカウントが増える', () => {
+	it('誤った入力でミスカウントが増える', async () => {
 		const { gameStore, startSession, updateInput } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 		const mistakesBefore = get(gameStore).input.mistakes;
 
 		updateInput('x');
@@ -249,13 +262,13 @@ describe('GameStore - 入力管理', () => {
 		expect(state.input.current).toBe(''); // 誤入力は記録されない
 	});
 
-	it('完全一致で札が完了する', () => {
+	it('完全一致で札が完了する', async () => {
 		const { gameStore, startSession, updateInput } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
-		// 完全な入力
-		updateInput('tsuru mau katachi no gunmaken');
+		// 完全な入力（検証ターゲットはスペース除去＋撥音ルールで末尾 nn）
+		updateInput(fullRomajiTsu);
 
 		const state = get(gameStore);
 		expect(state.cards.currentIndex).toBe(1); // 次の札へ
@@ -263,15 +276,16 @@ describe('GameStore - 入力管理', () => {
 		expect(state.cards.completed).toHaveLength(1);
 	});
 
-	it('部分入力が正しく判定される', () => {
+	it('部分入力が正しく判定される', async () => {
 		const { gameStore, startSession, updateInput } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
-		updateInput('tsuru m');
+		// 'つるまう' の途中まで（スペースなし）
+		updateInput('tsuruma');
 
 		const state = get(gameStore);
-		expect(state.input.current).toBe('tsuru m');
+		expect(state.input.current).toBe('tsuruma');
 		expect(state.input.position).toBe(7);
 	});
 });
@@ -284,10 +298,10 @@ describe('GameStore - スコア計算', () => {
 		vi.clearAllMocks();
 	});
 
-	it('正確率が正しく計算される', () => {
+	it('正確率が正しく計算される', async () => {
 		const { gameStore, startSession } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		// 10文字入力、2ミス - 直接スコアを計算する
 		gameStore.update((s) => {
@@ -305,10 +319,10 @@ describe('GameStore - スコア計算', () => {
 		expect(state.score.accuracy).toBeCloseTo(83.3, 1);
 	});
 
-	it('タイピング速度が計算される', () => {
+	it('タイピング速度が計算される', async () => {
 		const { gameStore, startSession } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		// 30秒後に60文字入力をシミュレート
 		gameStore.update((s) => {
@@ -327,33 +341,30 @@ describe('GameStore - スコア計算', () => {
 		expect(state.score.speed).toBeCloseTo(120, 0);
 	});
 
-	it('コンボが正しく更新される', () => {
-		const { gameStore, startSession, completeCard } = store;
+	it('コンボが正しく更新される', async () => {
+		const { gameStore, startSession, updateInput } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
-		// 3札連続正解
-		completeCard();
-		expect(get(gameStore).score.combo).toBe(1);
+		// コンボは「正しいキーストロークごと」に加算される（札完了単位ではない）
+		updateInput('t');
+		expect(get(gameStore).statistics.currentCombo).toBe(1);
 
-		completeCard();
-		expect(get(gameStore).score.combo).toBe(2);
+		updateInput('ts');
+		expect(get(gameStore).statistics.currentCombo).toBe(2);
 
-		completeCard();
+		updateInput('tsu');
 		const state1 = get(gameStore);
-		expect(state1.score.combo).toBe(3);
-		expect(state1.score.maxCombo).toBe(3);
+		expect(state1.statistics.currentCombo).toBe(3);
+		expect(state1.statistics.maxCombo).toBe(3);
+		expect(state1.score.combo).toBe(3); // score にもミラーされる
 
-		// ミスでリセット - コンボもリセットする
-		gameStore.update((s) => ({
-			...s,
-			input: { ...s.input, mistakes: s.input.mistakes + 1 },
-			score: { ...s.score, combo: 0 }
-		}));
+		// 誤入力でコンボがリセットされる
+		updateInput('tsux');
 
 		const state2 = get(gameStore);
-		expect(state2.score.combo).toBe(0);
-		expect(state2.score.maxCombo).toBe(3); // 最大値は保持
+		expect(state2.statistics.currentCombo).toBe(0);
+		expect(state2.statistics.maxCombo).toBe(3); // 最大値は保持
 	});
 });
 
@@ -368,10 +379,13 @@ describe('GameStore - タイマー', () => {
 	it('経過時間が正しく計測される', async () => {
 		const { gameStore, startSession, updateTimer } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
-		// 100ms待って時間経過をシミュレート
-		await new Promise((resolve) => setTimeout(resolve, 100));
+		// タイマーはカウントダウン後に開始されるため、明示的に開始時刻を設定
+		gameStore.update((s) => ({
+			...s,
+			timer: { ...s.timer, startTime: new Date(Date.now() - 100), isPaused: false }
+		}));
 		updateTimer();
 
 		const state = get(gameStore);
@@ -381,7 +395,7 @@ describe('GameStore - タイマー', () => {
 	it('一時停止で時間が止まる', async () => {
 		const { gameStore, startSession, pauseGame } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		// 1秒経過をシミュレート
 		gameStore.update((s) => ({
@@ -401,10 +415,10 @@ describe('GameStore - タイマー', () => {
 		expect(state.timer.elapsedTime).toBe(timeBefore); // 時間が増えない
 	});
 
-	it('再開で時間計測が再開される', () => {
+	it('再開で時間計測が再開される', async () => {
 		const { gameStore, startSession, pauseGame, resumeGame } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		pauseGame();
 		// 1秒停止をシミュレート
@@ -423,10 +437,10 @@ describe('GameStore - タイマー', () => {
 		expect(state.timer.pausedDuration).toBeGreaterThanOrEqual(1000);
 	});
 
-	it('カード毎の時間が記録される', () => {
+	it('カード毎の時間が記録される', async () => {
 		const { gameStore, startSession, completeCard } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		// 5秒経過をシミュレート
 		gameStore.update((s) => ({
@@ -451,10 +465,10 @@ describe('GameStore - 派生ストア', () => {
 		vi.clearAllMocks();
 	});
 
-	it('progressStoreが進捗を正しく計算する', () => {
+	it('progressStoreが進捗を正しく計算する', async () => {
 		const { startSession, completeCard, progressStore } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		let progress = get(progressStore);
 		expect(progress.completed).toBe(0);
@@ -472,10 +486,10 @@ describe('GameStore - 派生ストア', () => {
 		expect(progress.percentage).toBeCloseTo(66.7, 1);
 	});
 
-	it('currentCardStoreが現在の札を提供する', () => {
+	it('currentCardStoreが現在の札を提供する', async () => {
 		const { gameStore, startSession, nextCard, currentCardStore } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		expect(get(currentCardStore)).toEqual(mockCards[0]);
 		expect(get(currentCardStore)).toEqual(get(gameStore).cards.current);
@@ -485,10 +499,10 @@ describe('GameStore - 派生ストア', () => {
 		expect(get(currentCardStore)).toEqual(get(gameStore).cards.current);
 	});
 
-	it('scoreStoreがスコア情報を提供する', () => {
+	it('scoreStoreがスコア情報を提供する', async () => {
 		const { gameStore, startSession, scoreStore } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		gameStore.update((s) => ({
 			...s,
@@ -522,21 +536,21 @@ describe('GameStore - エラーハンドリング', () => {
 		expect(get(gameStore)).toEqual(stateBefore);
 	});
 
-	it('空の札リストでセッション開始を防ぐ', () => {
+	it('空の札リストでセッション開始を防ぐ', async () => {
 		const { gameStore, startSession } = store;
 
 		const stateBefore = get(gameStore);
-		startSession('practice', []);
+		await startSession('practice', []);
 
 		const stateAfter = get(gameStore);
 		expect(stateAfter.session).toBeNull();
 		expect(stateAfter).toEqual(stateBefore);
 	});
 
-	it('データ不整合を検出して修正する', () => {
+	it('データ不整合を検出して修正する', async () => {
 		const { gameStore, startSession } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		// 不正な状態を強制的に作る
 		gameStore.update((s) => ({
@@ -565,10 +579,10 @@ describe('GameStore - InputValidator統合', () => {
 		vi.clearAllMocks();
 	});
 
-	it('InputValidatorの結果が反映される', () => {
+	it('InputValidatorの結果が反映される', async () => {
 		const { gameStore, startSession, updateInput } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 		const state = get(gameStore);
 
 		expect(state.input.validator).toBeInstanceOf(InputValidator);
@@ -579,7 +593,7 @@ describe('GameStore - InputValidator統合', () => {
 		expect(updatedState.input.current).toBe('tsu');
 	});
 
-	it('複数入力パターンに対応する', () => {
+	it('複数入力パターンに対応する', async () => {
 		const { gameStore, startSession, updateInput } = store;
 
 		// 「し」を含むカードでテスト
@@ -592,7 +606,7 @@ describe('GameStore - InputValidator統合', () => {
 			difficulty: 'hard'
 		};
 
-		startSession('practice', [shiCard]);
+		await startSession('practice', [shiCard]);
 
 		// 'shi'パターン
 		updateInput('shi');
@@ -615,10 +629,10 @@ describe('GameStore - パフォーマンス', () => {
 		vi.clearAllMocks();
 	});
 
-	it('入力更新が16ms以内に完了する', () => {
+	it('入力更新が16ms以内に完了する', async () => {
 		const { startSession, updateInput } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		const start = performance.now();
 		updateInput('test');
@@ -627,10 +641,10 @@ describe('GameStore - パフォーマンス', () => {
 		expect(end - start).toBeLessThan(16);
 	});
 
-	it('100回の連続更新でメモリリークがない', () => {
+	it('100回の連続更新でメモリリークがない', async () => {
 		const { startSession, updateInput } = store;
 
-		startSession('practice', mockCards);
+		await startSession('practice', mockCards);
 
 		const initialMemory =
 			(performance as Performance & { memory?: { usedJSHeapSize: number } }).memory
@@ -649,7 +663,7 @@ describe('GameStore - パフォーマンス', () => {
 		expect(memoryIncrease).toBeLessThan(1000000); // 1MB以下
 	});
 
-	it('履歴が最大100件に制限される', () => {
+	it('履歴が最大100件に制限される', async () => {
 		const { gameStore, startSession, completeCard } = store;
 
 		// 大量のカードを用意
@@ -658,7 +672,7 @@ describe('GameStore - パフォーマンス', () => {
 			id: `card-${i}`
 		}));
 
-		startSession('practice', manyCards);
+		await startSession('practice', manyCards);
 
 		// 150枚完了させる
 		for (let i = 0; i < 150; i++) {

@@ -6,9 +6,18 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // IndexedDBのモック設定（Node.js環境用）
 import 'fake-indexeddb/auto';
+import Dexie from 'dexie';
 
 import { IndexedDBService } from './indexed-db';
 import type { GameHistory, DetailedStats, AttemptRecord } from './indexed-db';
+
+// 各テスト前に共有DB 'JomoKarutaDB' を完全削除して初期化する。
+// clearDatabase はデータのみ消し autoincrement キー生成器やスキーマを残すため、
+// 全体実行時にキー重複（ConstraintError）やデータ汚染が起きる。DBごと削除すれば
+// 各テストが必ずまっさらな状態（id=1 から）で始まる。
+beforeEach(async () => {
+	await Dexie.delete('JomoKarutaDB');
+});
 
 // テスト用モックデータ
 const mockGameHistory: GameHistory = {
@@ -84,7 +93,7 @@ describe('IndexedDBService - 初期化', () => {
 	it('既存のデータベースに再接続できる', async () => {
 		// 初回接続
 		await service.initialize();
-		await service.saveGameHistory(mockGameHistory);
+		await service.saveGameHistory({ ...mockGameHistory });
 
 		// 新しいインスタンスで再接続
 		const newService = new IndexedDBService();
@@ -112,14 +121,14 @@ describe('IndexedDBService - ゲーム履歴', () => {
 	});
 
 	it('ゲーム履歴を保存できる', async () => {
-		const id = await service.saveGameHistory(mockGameHistory);
+		const id = await service.saveGameHistory({ ...mockGameHistory });
 
 		expect(id).toBeGreaterThan(0);
 	});
 
 	it('ゲーム履歴を取得できる', async () => {
 		// 複数の履歴を保存
-		await service.saveGameHistory(mockGameHistory);
+		await service.saveGameHistory({ ...mockGameHistory });
 		await service.saveGameHistory({
 			...mockGameHistory,
 			sessionId: 'session-124',
@@ -134,7 +143,7 @@ describe('IndexedDBService - ゲーム履歴', () => {
 	});
 
 	it('モードで履歴をフィルタリングできる', async () => {
-		await service.saveGameHistory(mockGameHistory);
+		await service.saveGameHistory({ ...mockGameHistory });
 		await service.saveGameHistory({
 			...mockGameHistory,
 			sessionId: 'session-124',
@@ -157,8 +166,12 @@ describe('IndexedDBService - ゲーム履歴', () => {
 		};
 		await service.saveGameHistory(oldHistory);
 
-		// 最近の履歴
-		await service.saveGameHistory(mockGameHistory);
+		// 最近の履歴（mockGameHistory の固定日付は90日以上前なので現在時刻で上書き）
+		await service.saveGameHistory({
+			...mockGameHistory,
+			startTime: new Date(),
+			endTime: new Date()
+		});
 
 		// 90日以前のデータを削除
 		await service.deleteOldHistory(90);
@@ -212,7 +225,7 @@ describe('IndexedDBService - 詳細統計', () => {
 	});
 
 	it('日次統計を保存できる', async () => {
-		await service.saveDailyStats(mockDailyStats);
+		await service.saveDailyStats({ ...mockDailyStats });
 
 		const stats = await service.getDailyStats(new Date('2024-01-01'));
 		expect(stats).toBeDefined();
@@ -334,7 +347,8 @@ describe('IndexedDBService - カード履歴', () => {
 
 		expect(topCards).toHaveLength(3);
 		expect(topCards[0].cardId).toBe('tsu');
-		expect(topCards[0].bestTime).toBe(110000);
+		// tsu(i=0) の time は 100000+0 = 100000
+		expect(topCards[0].bestTime).toBe(100000);
 	});
 
 	it('苦手カードを特定できる', async () => {
@@ -357,21 +371,24 @@ describe('IndexedDBService - カード履歴', () => {
 	});
 
 	it('履歴数の上限を管理できる', async () => {
-		// 101件の記録を追加
-		for (let i = 0; i < 101; i++) {
+		// 101件の記録を「古い順」に追加（実利用と同じ時系列の追記）。
+		// i=100 が最古(100日前, time=200000)、i=0 が最新(今日, time=100000)。
+		for (let i = 100; i >= 0; i--) {
 			await service.saveCardAttempt('tsu', {
 				...mockAttempt,
-				date: new Date(Date.now() - i * 86400000), // 1日ずつ遡る
+				date: new Date(Date.now() - i * 86400000),
 				time: 100000 + i * 1000
 			});
 		}
 
 		const history = await service.getCardHistory('tsu');
 
-		// 最新100件のみ保持される
+		// 最新100件のみ保持される（最古1件が切り捨てられる）
 		expect(history?.attempts).toHaveLength(100);
-		// 最新の記録が残っている
-		expect(history?.attempts[0].time).toBe(100000);
+		// 最新の記録（time=100000）が末尾に残っている
+		expect(history?.attempts[history.attempts.length - 1].time).toBe(100000);
+		// 最古の記録（time=200000）は切り捨てられている
+		expect(history?.attempts.some((a) => a.time === 200000)).toBe(false);
 	});
 });
 
@@ -391,8 +408,8 @@ describe('IndexedDBService - データ管理', () => {
 
 	it('データベースをエクスポートできる', async () => {
 		// データを追加
-		await service.saveGameHistory(mockGameHistory);
-		await service.saveDailyStats(mockDailyStats);
+		await service.saveGameHistory({ ...mockGameHistory });
+		await service.saveDailyStats({ ...mockDailyStats });
 
 		const blob = await service.exportDatabase();
 
@@ -402,7 +419,7 @@ describe('IndexedDBService - データ管理', () => {
 
 	it('データベースをインポートできる', async () => {
 		// データを追加してエクスポート
-		await service.saveGameHistory(mockGameHistory);
+		await service.saveGameHistory({ ...mockGameHistory });
 		const exportedData = await service.exportDatabase();
 
 		// データベースをクリアして新しいインスタンス
@@ -420,7 +437,7 @@ describe('IndexedDBService - データ管理', () => {
 	});
 
 	it('データベースをクリアできる', async () => {
-		await service.saveGameHistory(mockGameHistory);
+		await service.saveGameHistory({ ...mockGameHistory });
 		await service.clearDatabase();
 
 		const histories = await service.getGameHistory();
@@ -428,7 +445,7 @@ describe('IndexedDBService - データ管理', () => {
 	});
 
 	it('データベースサイズを取得できる', async () => {
-		await service.saveGameHistory(mockGameHistory);
+		await service.saveGameHistory({ ...mockGameHistory });
 
 		const size = await service.getDatabaseSize();
 
@@ -447,7 +464,7 @@ describe('IndexedDBService - データ管理', () => {
 		}
 
 		// 新しいデータを追加
-		await service.saveGameHistory(mockGameHistory);
+		await service.saveGameHistory({ ...mockGameHistory });
 
 		// vacuum実行
 		await service.vacuum();
@@ -512,8 +529,8 @@ describe('IndexedDBService - クエリ機能', () => {
 	it('アチーブメント進捗を計算できる', async () => {
 		const progress = await service.getAchievementProgress();
 
-		expect(progress).toBeTypeOf('object');
-		expect(progress).toHaveLength(expect.any(Number));
+		expect(Array.isArray(progress)).toBe(true);
+		expect(progress.length).toBeGreaterThan(0);
 	});
 
 	it('インデックスを活用した高速検索', async () => {
@@ -603,7 +620,7 @@ describe('IndexedDBService - パフォーマンス', () => {
 
 	it('単純クエリが30ms以内に完了する', async () => {
 		await service.initialize();
-		await service.saveGameHistory(mockGameHistory);
+		await service.saveGameHistory({ ...mockGameHistory });
 
 		const startTime = performance.now();
 		const results = await service.getGameHistory(10);

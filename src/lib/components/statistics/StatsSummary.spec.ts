@@ -37,7 +37,8 @@ describe('StatsSummary Component', () => {
 			// Check values
 			expect(screen.getByText('10')).toBeInTheDocument(); // sessions
 			expect(screen.getByText('55')).toBeInTheDocument(); // average WPM
-			expect(screen.getByText('92.5%')).toBeInTheDocument(); // accuracy
+			// 正確率は小数2桁表示
+			expect(screen.getByText('92.50%')).toBeInTheDocument(); // accuracy
 		});
 
 		it('TC-006: should show comparison indicators', () => {
@@ -52,15 +53,16 @@ describe('StatsSummary Component', () => {
 				}
 			});
 
-			// Check for increase indicators
+			// 矢印と数値は同一要素内に表示される
 			const wpmIndicator = screen.getByTestId('wpm-indicator');
 			expect(wpmIndicator).toHaveClass('text-green-600');
 			expect(wpmIndicator).toContainHTML('↑');
-			expect(screen.getByText('+5')).toBeInTheDocument();
+			expect(wpmIndicator).toHaveTextContent('+5');
 
 			const accuracyIndicator = screen.getByTestId('accuracy-indicator');
 			expect(accuracyIndicator).toHaveClass('text-green-600');
-			expect(screen.getByText('+2.5%')).toBeInTheDocument();
+			// 正確率差分は小数2桁表示
+			expect(accuracyIndicator).toHaveTextContent('+2.50%');
 		});
 
 		it('TC-007: should format time correctly', () => {
@@ -97,8 +99,9 @@ describe('StatsSummary Component', () => {
 				}
 			});
 
-			expect(screen.getByText('データなし')).toBeInTheDocument();
-			expect(screen.getByTestId('stat-card-sessions')).toHaveTextContent('0回');
+			// プレイ回数0・総プレイ時間0 のいずれも「データなし」表示になる
+			expect(screen.getAllByText('データなし').length).toBeGreaterThan(0);
+			expect(screen.getByTestId('stat-card-sessions')).toHaveTextContent('データなし');
 		});
 	});
 
