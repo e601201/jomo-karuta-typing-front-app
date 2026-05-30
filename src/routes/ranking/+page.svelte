@@ -3,6 +3,7 @@
 	import { getTopScoresByDifficulty, getTopTimesByDifficulty } from '$lib/services/supabaseService';
 	import { ArrowLeft, Trophy, Medal, Award, Timer, Zap } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import type { RandomModeDifficulty } from '$lib/types';
 
 	type GameModeType = 'random' | 'timeattack';
@@ -84,7 +85,7 @@
 		<!-- ヘッダー -->
 		<div class="mb-8 flex items-center justify-between">
 			<button
-				onclick={() => goto('/')}
+				onclick={() => goto(resolve('/'))}
 				class="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-700 transition-colors hover:bg-gray-100"
 			>
 				<ArrowLeft class="h-4 w-4" />
@@ -215,7 +216,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each rankings as entry, index}
+								{#each rankings as entry, index (entry.id)}
 									{@const rank = index + 1}
 									{@const Icon = getRankIcon(rank)}
 									<tr class="border-b border-gray-100 transition-colors hover:bg-gray-50">

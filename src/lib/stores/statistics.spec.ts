@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { get } from 'svelte/store';
 import { statisticsStore } from './statistics';
-import type { SessionStats, OverallStats, CardStats, FilterOptions } from '$lib/types/game';
+import type { SessionStats, FilterOptions } from '$lib/types/game';
 
 // Mock IndexedDB service
 vi.mock('$lib/services/storage/indexed-db', () => ({
@@ -218,27 +218,27 @@ describe('Statistics Store', () => {
 		});
 
 		it('TC-026: should load statistics from storage', async () => {
-			const mockStats = {
-				overall: {
-					totalSessions: 5,
-					totalPlayTime: 300000,
-					totalKeysTyped: 500,
-					totalCardsCompleted: 50,
-					averageWPM: 55,
-					maxWPM: 70,
-					averageAccuracy: 93,
-					maxAccuracy: 100,
-					currentStreak: 2,
-					longestStreak: 5,
-					totalScore: 5000,
-					level: 3,
-					rank: '中級'
-				},
-				sessions: [],
-				cardStats: new Map()
-			};
-
 			// TODO: Fix when getStatistics is implemented in IndexedDBService
+			// Once available, mock the resolved statistics like so:
+			// const mockStats = {
+			//   overall: {
+			//     totalSessions: 5,
+			//     totalPlayTime: 300000,
+			//     totalKeysTyped: 500,
+			//     totalCardsCompleted: 50,
+			//     averageWPM: 55,
+			//     maxWPM: 70,
+			//     averageAccuracy: 93,
+			//     maxAccuracy: 100,
+			//     currentStreak: 2,
+			//     longestStreak: 5,
+			//     totalScore: 5000,
+			//     level: 3,
+			//     rank: '中級'
+			//   },
+			//   sessions: [],
+			//   cardStats: new Map()
+			// };
 			// const { IndexedDBService } = await import('$lib/services/storage/indexed-db');
 			// const mockInstance = new IndexedDBService();
 			// vi.mocked(mockInstance.getStatistics).mockResolvedValue(mockStats);

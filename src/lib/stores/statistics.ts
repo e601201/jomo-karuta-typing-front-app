@@ -1,14 +1,11 @@
-import { writable, derived, get } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import type {
 	OverallStats,
 	SessionStats,
 	CardStats,
 	FilterOptions,
-	TrendData,
-	GameMode
+	TrendData
 } from '$lib/types/game';
-import { IndexedDBService } from '$lib/services/storage/indexed-db';
-
 interface StatisticsState {
 	overall: OverallStats;
 	sessions: SessionStats[];
@@ -23,7 +20,6 @@ interface FilteredStats {
 }
 
 function createStatisticsStore() {
-	const db = new IndexedDBService();
 	const initialState: StatisticsState = {
 		overall: {
 			totalSessions: 0,
@@ -298,7 +294,11 @@ function createStatisticsStore() {
 
 			try {
 				// TODO: Implement getStatistics in IndexedDBService
-				const data = null as any; // await db.getStatistics();
+				const data = null as {
+					sessions?: SessionStats[];
+					overall?: OverallStats;
+					cardStats?: Map<string, CardStats>;
+				} | null; // await db.getStatistics();
 				if (data) {
 					const overall = calculateOverallStats(data.sessions || []);
 					update((state) => ({
@@ -421,7 +421,6 @@ function createStatisticsStore() {
 			});
 
 			try {
-				const state = get({ subscribe });
 				// TODO: Implement updateCardStats in IndexedDBService
 				// await db.updateCardStats(cardId, state.cardStats.get(cardId)!);
 			} catch (error) {
@@ -460,15 +459,22 @@ function createStatisticsStore() {
 		importData: async (data: string, format: 'json' | 'csv') => {
 			try {
 				if (format === 'json') {
-					const parsed = JSON.parse(data);
-					const sessions = parsed.sessions.map((s: any) => ({
+					const parsed: {
+						overall?: OverallStats;
+						sessions: (Omit<SessionStats, 'timestamp'> & { timestamp: string | number | Date })[];
+						cardStats?: (Omit<CardStats, 'lastPlayed'> & {
+							id?: string;
+							lastPlayed: string | number | Date;
+						})[];
+					} = JSON.parse(data);
+					const sessions: SessionStats[] = parsed.sessions.map((s) => ({
 						...s,
 						timestamp: new Date(s.timestamp)
 					}));
 
-					const cardStats = new Map();
+					const cardStats = new Map<string, CardStats>();
 					if (parsed.cardStats) {
-						parsed.cardStats.forEach((stats: any) => {
+						parsed.cardStats.forEach((stats) => {
 							cardStats.set(stats.id || stats.cardId, {
 								...stats,
 								lastPlayed: new Date(stats.lastPlayed)

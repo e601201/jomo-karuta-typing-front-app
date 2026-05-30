@@ -1,7 +1,7 @@
 import { createSupabaseBrowserClient } from '$lib/supabase/browser';
 import type { LayoutLoad } from './$types';
 
-export const load: LayoutLoad = async ({ data, depends, fetch }) => {
+export const load: LayoutLoad = async ({ data, depends }) => {
 	depends('supabase:auth');
 
 	const supabase = createSupabaseBrowserClient();

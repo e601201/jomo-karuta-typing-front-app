@@ -1,6 +1,7 @@
 <!-- TODO: email passwordによる登録は一旦非表示 -->
 
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
@@ -172,11 +173,18 @@
 							class="mt-1 mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
 						/>
 						<span class="text-sm text-gray-600">
-							<a href="/terms" class="text-blue-600 hover:text-blue-700" target="_blank">利用規約</a
+							<a
+								href="/terms"
+								class="text-blue-600 hover:text-blue-700"
+								target="_blank"
+								rel="external">利用規約</a
 							>
 							および
-							<a href="/privacy" class="text-blue-600 hover:text-blue-700" target="_blank"
-								>プライバシーポリシー</a
+							<a
+								href="/privacy"
+								class="text-blue-600 hover:text-blue-700"
+								target="_blank"
+								rel="external">プライバシーポリシー</a
 							>
 							に同意します
 						</span>
@@ -194,7 +202,7 @@
 		{/if}
 
 		<div class="mt-6 text-center">
-			<a href="/auth/login" class="text-blue-600 hover:text-blue-700 text-sm">
+			<a href={resolve('/auth/login')} class="text-blue-600 hover:text-blue-700 text-sm">
 				既にアカウントをお持ちの方はこちら
 			</a>
 		</div>

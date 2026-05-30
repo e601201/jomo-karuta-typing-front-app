@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { settingsStore } from '$lib/stores/settings';
 	import SettingItem from '$lib/components/settings/SettingItem.svelte';
 
@@ -89,7 +90,7 @@
 				hasUnsavedChanges = false;
 			}
 		} else {
-			goto('/');
+			goto(resolve('/'));
 		}
 	}
 
@@ -100,7 +101,7 @@
 
 	function confirmReset() {
 		if (resetSection) {
-			settingsStore.resetSection(resetSection as any);
+			settingsStore.resetSection(resetSection as Parameters<typeof settingsStore.resetSection>[0]);
 		} else {
 			settingsStore.reset();
 		}
@@ -187,7 +188,7 @@
 	<div class="settings-content">
 		<!-- Sidebar -->
 		<nav class="settings-sidebar">
-			{#each sections as section}
+			{#each sections as section (section.id)}
 				<button
 					onclick={() => (activeSection = section.id)}
 					class="sidebar-item {activeSection === section.id ? 'active' : ''}"

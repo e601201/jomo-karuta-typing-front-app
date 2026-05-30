@@ -1,4 +1,7 @@
 import { supabase } from '$lib/supabaseClient';
+import type { Database } from '$lib/database.types';
+
+type ScoreInsert = Database['public']['Tables']['Score']['Insert'];
 
 export async function saveScore(
 	nickName: string,
@@ -7,7 +10,7 @@ export async function saveScore(
 	gameMode?: 'random' | 'timeattack',
 	time?: number
 ) {
-	const insertData: any = {
+	const insertData: ScoreInsert = {
 		nick_name: nickName,
 		difficulty: difficulty
 	};

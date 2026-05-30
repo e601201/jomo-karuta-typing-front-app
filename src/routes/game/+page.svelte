@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { SvelteSet } from 'svelte/reactivity';
 	import { get } from 'svelte/store';
-	import { gameStore } from '$lib/stores/game';
+	import { gameStore, type GameScore } from '$lib/stores/game';
 	import { InputValidator } from '$lib/services/typing/input-validator';
 	import { TypingSoundManager } from '$lib/services/audio/typing-sounds';
 	import type { GameMode, KarutaCard, RandomModeDifficulty } from '$lib/types';
@@ -58,8 +60,13 @@
 	let cardIndex = $state(0);
 	let totalCards = $state(44);
 	let completedCardsCount = $state(0);
-	let mistakes = $state(0);
-	let score = $state<any>({});
+	let score = $state<GameScore>({
+		total: 0,
+		accuracy: 100,
+		speed: 0,
+		combo: 0,
+		maxCombo: 0
+	});
 	let isPaused = $state(false);
 	let elapsedTime = $state(0);
 	let pauseCount = $state(0);
@@ -112,7 +119,6 @@
 					currentCard = state.cards.current;
 					cardIndex = state.cards.currentIndex;
 					completedCardsCount = state.cards.completed.length;
-					mistakes = state.input.mistakes;
 					score = state.score;
 					isPaused = state.timer.isPaused;
 					elapsedTime = state.timer.elapsedTime;
@@ -538,8 +544,6 @@
 				romajiStates[i] = 'pending';
 			}
 
-			mistakes++;
-
 			// 間違った入力の音を再生
 			soundManager?.playIncorrect();
 
@@ -688,7 +692,7 @@
 		if (!validator || !currentCard) return;
 		// displayHiraganaが空の場合は初期化
 		if (!displayHiragana) {
-			const state = get(gameStore.gameStore) as any;
+			const state = get(gameStore.gameStore);
 			const hiraganaText =
 				state.session?.difficulty === 'beginner' &&
 				'hiraganaShort' in currentCard &&
@@ -820,7 +824,7 @@
 								usedPattern = 'n';
 							} else {
 								const nextPatterns = validator.getRomajiPatterns(nextUnit);
-								const initials = new Set<string>();
+								const initials = new SvelteSet<string>();
 								nextPatterns.forEach((p) => {
 									if (p && p.length > 0) initials.add(p[0]);
 								});
@@ -973,7 +977,7 @@
 		gameStore.endSession(true);
 		soundManager?.stopCardReading();
 		soundManager?.stopBGM();
-		goto('/');
+		goto(resolve('/'));
 	}
 
 	function cancelExit() {
@@ -991,7 +995,7 @@
 		if (!currentCard) return;
 		// displayHiraganaが空の場合は初期化（最初のカード用）
 		if (!displayHiragana) {
-			const state = get(gameStore.gameStore) as any;
+			const state = get(gameStore.gameStore);
 			const hiraganaText =
 				state.session?.difficulty === 'beginner' &&
 				'hiraganaShort' in currentCard &&
@@ -1040,7 +1044,7 @@
 			<!-- エラー状態 -->
 			<div class="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
 				<p class="mb-4 text-red-600">{error}</p>
-				<a href="/" class="text-blue-600 hover:underline">メインメニューに戻る</a>
+				<a href={resolve('/')} class="text-blue-600 hover:underline">メインメニューに戻る</a>
 			</div>
 		{:else if isGameComplete}
 			<!-- 
@@ -1137,7 +1141,7 @@
 					{/if}
 					<div class="grid grid-cols-2 gap-3">
 						<button
-							onclick={() => goto('/ranking')}
+							onclick={() => goto(resolve('/ranking'))}
 							class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
 						>
 							🏆 ランキングを見る
@@ -1173,7 +1177,7 @@ ${gameMode === 'specific' ? '特定札練習' : gameMode === 'practice' ? '練�
 
 							// 特定札練習モードの場合は特定札選択画面に戻る
 							if (gameMode === 'specific') {
-								goto('/practice/specific');
+								goto(resolve('/practice/specific'));
 							} else {
 								// その他のモードは同じモードで再プレイ
 								const url = new URL(window.location.href);
@@ -1190,7 +1194,7 @@ ${gameMode === 'specific' ? '特定札練習' : gameMode === 'practice' ? '練�
 						{gameMode === 'specific' ? '札を選び直す' : 'もう一度遊ぶ'}
 					</button>
 					<button
-						onclick={() => goto('/')}
+						onclick={() => goto(resolve('/'))}
 						class="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
 					>
 						メインメニューに戻る

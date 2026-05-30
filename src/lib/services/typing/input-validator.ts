@@ -196,7 +196,7 @@ export class InputValidator {
 		}
 
 		// 非ひらがな文字はそのまま返す（長音記号も含む）
-		if (!/[\u3040-\u309F\u30FC\s　]/.test(hiragana)) {
+		if (!/[\u3040-\u309F\u30FC\s\u3000]/.test(hiragana)) {
 			return [hiragana];
 		}
 

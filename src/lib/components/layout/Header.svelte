@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import type { User } from '@supabase/supabase-js';
 
 	let { user }: { user: User | null } = $props();
@@ -8,7 +9,7 @@
 	<div class="mx-auto max-w-7xl px-8">
 		<div class="flex h-16 items-center justify-between">
 			<div class="flex">
-				<a href="/" class="-m-1.5 p-1.5 flex items-center">
+				<a href={resolve('/')} class="-m-1.5 p-1.5 flex items-center">
 					<span class="sr-only">上毛かるたタイピング</span>
 					<span class="ml-2 text-xl text-gray-600">上毛かるたタイピング</span>
 				</a>
@@ -16,7 +17,7 @@
 			<div class="flex justify-end">
 				{#if user}
 					<a
-						href="/profile"
+						href={resolve('/profile')}
 						class="text-xl font-semibold leading-6 text-gray-900 hover:text-gray-600"
 					>
 						プロフィール
@@ -24,7 +25,7 @@
 					</a>
 				{:else}
 					<a
-						href="/auth/login"
+						href={resolve('/auth/login')}
 						class="text-xl font-semibold leading-6 text-gray-900 hover:text-gray-600"
 					>
 						ログイン

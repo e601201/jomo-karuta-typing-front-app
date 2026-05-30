@@ -9,10 +9,12 @@ import type { GameSettings, UserProfile, SavedSession } from './local-storage';
 // Base64 polyfill for Node.js environment (test only)
 // Happy-dom v20 now provides btoa/atob, but keep as fallback
 if (typeof btoa === 'undefined' && typeof global !== 'undefined') {
-	(global as any).btoa = (str: string) => Buffer.from(str, 'utf-8').toString('base64');
+	(global as unknown as { btoa: (str: string) => string }).btoa = (str: string) =>
+		Buffer.from(str, 'utf-8').toString('base64');
 }
 if (typeof atob === 'undefined' && typeof global !== 'undefined') {
-	(global as any).atob = (str: string) => Buffer.from(str, 'base64').toString('utf-8');
+	(global as unknown as { atob: (str: string) => string }).atob = (str: string) =>
+		Buffer.from(str, 'base64').toString('utf-8');
 }
 
 // LocalStorageのモック
@@ -47,8 +49,11 @@ if (typeof window !== 'undefined') {
 } else {
 	// Node.js環境用
 	if (typeof global !== 'undefined') {
-		(global as any).localStorage = localStorageMock as Storage;
-		(global as any).window = { localStorage: localStorageMock } as any;
+		(global as unknown as { localStorage: Storage }).localStorage =
+			localStorageMock as unknown as Storage;
+		(global as unknown as { window: { localStorage: Storage } }).window = {
+			localStorage: localStorageMock as unknown as Storage
+		};
 	}
 }
 
@@ -119,7 +124,10 @@ describe('LocalStorageService - 初期化', () => {
 
 	it('ストレージが利用できない場合にフォールバックする', () => {
 		// LocalStorageを無効化
-		const globalObj: any = typeof global !== 'undefined' ? global : window;
+		const globalObj = (typeof global !== 'undefined' ? global : window) as unknown as {
+			localStorage: Storage | null;
+			window?: { localStorage: Storage | null };
+		};
 		const originalLocalStorage = globalObj.window?.localStorage || globalObj.localStorage;
 		if (globalObj.window) {
 			Object.defineProperty(globalObj.window, 'localStorage', {
@@ -127,7 +135,7 @@ describe('LocalStorageService - 初期化', () => {
 				writable: true
 			});
 		} else {
-			globalObj.localStorage = null as any;
+			globalObj.localStorage = null;
 		}
 
 		service = new LocalStorageService();
@@ -144,7 +152,7 @@ describe('LocalStorageService - 初期化', () => {
 				writable: true
 			});
 		} else {
-			globalObj.localStorage = originalLocalStorage as any;
+			globalObj.localStorage = originalLocalStorage;
 		}
 	});
 });
@@ -598,7 +606,9 @@ describe('LocalStorageService - パフォーマンス', () => {
 
 	it('大量データでもメモリリークしない', () => {
 		service.initialize();
-		const initialMemory = (performance as any).memory?.usedJSHeapSize || 0;
+		const initialMemory =
+			(performance as unknown as { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize ||
+			0;
 
 		// 1000回の読み書き
 		for (let i = 0; i < 1000; i++) {
@@ -609,7 +619,9 @@ describe('LocalStorageService - パフォーマンス', () => {
 			service.getSettings();
 		}
 
-		const finalMemory = (performance as any).memory?.usedJSHeapSize || 0;
+		const finalMemory =
+			(performance as unknown as { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize ||
+			0;
 		const memoryIncrease = finalMemory - initialMemory;
 
 		// メモリ増加が妥当な範囲内

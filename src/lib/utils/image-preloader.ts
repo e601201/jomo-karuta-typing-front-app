@@ -50,7 +50,7 @@ export class ImagePreloader {
 	 * カード画像をプリロード
 	 */
 	static async preloadCardImages(card: KarutaCard): Promise<void> {
-		const promises: Promise<any>[] = [];
+		const promises: Promise<unknown>[] = [];
 
 		if (card.images?.torifuda) {
 			promises.push(this.preloadImage(card.images.torifuda).catch(() => {}));

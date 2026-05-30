@@ -1,13 +1,13 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.ico';
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { settingsStore } from '$lib/stores/settings';
 	import { authStore } from '$lib/stores/auth';
 	import { invalidate } from '$app/navigation';
 	import type { LayoutData } from './$types';
 
-	let { children, data }: { children: any; data: LayoutData } = $props();
+	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
 	// アプリケーション起動時に設定を読み込む
 	onMount(() => {

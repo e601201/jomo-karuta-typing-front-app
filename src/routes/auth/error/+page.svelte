@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 
 	let countdown = $state(5);
 
@@ -45,7 +46,7 @@
 		</p>
 
 		<a
-			href="/auth/login"
+			href={resolve('/auth/login')}
 			class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors"
 		>
 			ログイン画面に戻る

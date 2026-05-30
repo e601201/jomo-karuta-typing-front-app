@@ -371,8 +371,8 @@ describe('InputValidator', () => {
 		});
 
 		it('nullやundefinedを処理する', () => {
-			expect(validator.getRomajiPatterns(null as any)).toEqual(['']);
-			expect(validator.getRomajiPatterns(undefined as any)).toEqual(['']);
+			expect(validator.getRomajiPatterns(null as unknown as string)).toEqual(['']);
+			expect(validator.getRomajiPatterns(undefined as unknown as string)).toEqual(['']);
 		});
 
 		it('非ひらがな文字を処理する', () => {

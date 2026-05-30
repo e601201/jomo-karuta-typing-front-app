@@ -60,7 +60,7 @@
 	async function applyFilters() {
 		const filters: FilterOptions = {
 			period: selectedPeriod === 'all' ? undefined : selectedPeriod,
-			mode: selectedMode === 'all' ? undefined : (selectedMode as any)
+			mode: selectedMode === 'all' ? undefined : selectedMode
 		};
 
 		const filtered = await statisticsStore.getFilteredStats(filters);
@@ -141,12 +141,12 @@
 	}
 
 	async function handlePeriodChange(event: Event) {
-		selectedPeriod = (event.target as HTMLSelectElement).value as any;
+		selectedPeriod = (event.target as HTMLSelectElement).value as typeof selectedPeriod;
 		await applyFilters();
 	}
 
 	async function handleModeChange(event: Event) {
-		selectedMode = (event.target as HTMLSelectElement).value as any;
+		selectedMode = (event.target as HTMLSelectElement).value as typeof selectedMode;
 		await applyFilters();
 	}
 
@@ -303,7 +303,7 @@
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-							{#each filteredStats.sessions.slice(0, 10) as session}
+							{#each filteredStats.sessions.slice(0, 10) as session (session.id)}
 								<tr>
 									<td class="px-6 py-4 text-sm whitespace-nowrap">
 										{new Date(session.timestamp).toLocaleDateString('ja-JP')}

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { goto } from '$app/navigation';
 import Page from './+page.svelte';
@@ -318,7 +318,7 @@ describe('MainMenu Page', () => {
 				startedAt: new Date(),
 				completedCards: 10,
 				totalCards: 44
-			} as any);
+			});
 
 			render(Page);
 
