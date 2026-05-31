@@ -80,6 +80,26 @@ const SAMPLE_CARDS: KarutaCard[] = [
 	}
 ];
 
+// #29 配線契約テスト用の短い決定論的 fixture（ん・拗音を避け、完了/進捗を素早く起こす）。
+const SHORT_CARDS: KarutaCard[] = [
+	{
+		id: 'kiku',
+		hiragana: 'きく',
+		romaji: 'kiku',
+		meaning: 'テスト用A',
+		category: 'culture',
+		difficulty: 'easy'
+	},
+	{
+		id: 'sake',
+		hiragana: 'さけ',
+		romaji: 'sake',
+		meaning: 'テスト用B',
+		category: 'culture',
+		difficulty: 'easy'
+	}
+];
+
 function makeData(overrides: Partial<GameData> = {}): GameData {
 	return {
 		mode: 'practice',
@@ -88,6 +108,16 @@ function makeData(overrides: Partial<GameData> = {}): GameData {
 		difficulty: 'standard',
 		...overrides
 	};
+}
+
+// 開始カウントダウン（スタブ）を越えてゲーム開始状態にする共通ヘルパ。
+async function startGame(data: GameData = makeData()) {
+	const user = userEvent.setup();
+	render(Page, { props: { data } });
+	await user.click(await screen.findByTestId('countdown-complete'));
+	// ゲートが外れ、ライブスコア（accuracy-display）が現れる＝開始済み。
+	await screen.findByTestId('accuracy-display');
+	return user;
 }
 
 describe('Game Page (routes/game/+page.svelte)', () => {
@@ -154,5 +184,85 @@ describe('Game Page (routes/game/+page.svelte)', () => {
 
 		expect(await screen.findByText('ゲーム終了！')).toBeInTheDocument();
 		expect(screen.getByTestId('final-score')).toBeInTheDocument();
+	});
+
+	// #29 / ADR 0003: route が守るのは「ルート↔ストアの配線」だけ。
+	// 文字色・オーバーレイ内容などの描画は InputHighlight.spec.ts / PauseOverlay.spec.ts が担保し、
+	// ここでは再アサートしない。観測は既存の子 testid＋ストア由来のライブスコアで行い、
+	// 500ms の赤フラッシュなど時間依存 DOM はアサートしない（ADR 0001 のフレーク回避）。
+	describe('ゲームプレイ配線契約 (#29 / ADR 0003)', () => {
+		it('正入力: 正しいキーで store のコンボが増え、ライブスコアに伝播する', async () => {
+			const user = await startGame(makeData({ cards: SHORT_CARDS }));
+			expect(screen.getByTestId('combo-display')).toHaveTextContent('0');
+
+			await user.keyboard('k'); // 「きく」への部分一致（未完了）
+
+			await waitFor(() => expect(screen.getByTestId('combo-display')).toHaveTextContent('1'));
+		});
+
+		it('誤入力: コンボが 0 に戻る（ライブスコアの即時シグナル）', async () => {
+			const user = await startGame(makeData({ cards: SHORT_CARDS }));
+
+			await user.keyboard('k');
+			await waitFor(() => expect(screen.getByTestId('combo-display')).toHaveTextContent('1'));
+
+			await user.keyboard('z'); // 「きく」に対し 'kz' は不正
+
+			// 誤入力の即時・確実な配線シグナルはコンボ 0 リセット。
+			// 正確率は store が誤入力時に updateScore へ到達せず（updateInput が早期 return）、
+			// 次の正打まで再計算されない遅延仕様のため、ここではアサートしない。
+			await waitFor(() => expect(screen.getByTestId('combo-display')).toHaveTextContent('0'));
+		});
+
+		it('完全一致: 札を打ち切ると completeCard→次札へ進み、進捗が前進する', async () => {
+			const user = await startGame(makeData({ cards: SHORT_CARDS }));
+			expect(screen.getByText('1 / 2')).toBeInTheDocument();
+
+			await user.keyboard('kiku'); // 「きく」を完成
+
+			await waitFor(() => expect(screen.getByText('2 / 2')).toBeInTheDocument());
+		});
+
+		it('ローマ字ガイド: standard では romaji-container が描画され、ガイドが伝播する', async () => {
+			await startGame(makeData({ cards: SHORT_CARDS }));
+
+			expect(await screen.findByTestId('romaji-container')).toBeInTheDocument();
+			// 「きく」→ kiku。先頭ローマ字は K。
+			expect(screen.getByTestId('romaji-char-0')).toHaveTextContent('K');
+		});
+
+		it('入力ハイライト: 正打で char-0 の状態プロップが correct に伝播する', async () => {
+			const user = await startGame(makeData({ cards: SHORT_CARDS }));
+			expect(screen.getByTestId('char-0')).toHaveAttribute('aria-label', 'き: 未入力');
+
+			await user.keyboard('ki'); // 1ユニット目「き」を確定（札は未完了）
+
+			await waitFor(() =>
+				expect(screen.getByTestId('char-0')).toHaveAttribute('aria-label', 'き: 正解')
+			);
+		});
+
+		it('一時停止/再開: ボタンで pauseGame→オーバーレイ表示、store resume で消滅する', async () => {
+			const user = await startGame(makeData({ cards: SHORT_CARDS }));
+
+			await user.click(screen.getByRole('button', { name: '一時停止' }));
+
+			expect(await screen.findByTestId('pause-overlay')).toBeInTheDocument();
+			expect(screen.getByText('一時停止中')).toBeInTheDocument();
+
+			// 再開の配線（store→UI）。再開カウントダウン内部は PauseOverlay 単体テストへ委譲。
+			gameStore.resumeGame();
+
+			await waitFor(() => expect(screen.queryByTestId('pause-overlay')).not.toBeInTheDocument());
+		});
+
+		it('スキップ: ボタンで skipCard→currentIndex が前進し、進捗が進む', async () => {
+			const user = await startGame(makeData({ cards: SHORT_CARDS }));
+			expect(screen.getByText('1 / 2')).toBeInTheDocument();
+
+			await user.click(screen.getByRole('button', { name: 'スキップ' }));
+
+			await waitFor(() => expect(screen.getByText('2 / 2')).toBeInTheDocument());
+		});
 	});
 });

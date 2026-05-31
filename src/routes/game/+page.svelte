@@ -684,7 +684,6 @@
 
 			// バックスペース後の入力をストアへ反映（バックスペースはコンボを崩さない）
 			gameStore.updateInput(currentInput);
-			updateInputProgress();
 		}
 	}
 
@@ -914,10 +913,6 @@
 		}
 
 		romajiGuide = newRomajiGuide;
-	}
-
-	function updateInputProgress() {
-		if (!currentCard || !romajiGuide) return;
 	}
 
 	function handlePause() {
