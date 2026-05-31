@@ -209,8 +209,7 @@ describe('Game Page (routes/game/+page.svelte)', () => {
 			await user.keyboard('z'); // 「きく」に対し 'kz' は不正
 
 			// 誤入力の即時・確実な配線シグナルはコンボ 0 リセット。
-			// 正確率は store が誤入力時に updateScore へ到達せず（updateInput が早期 return）、
-			// 次の正打まで再計算されない遅延仕様のため、ここではアサートしない。
+			// ライブ正確率の即時再計算は #37 で別途担保する（下部の回帰 describe を参照）。
 			await waitFor(() => expect(screen.getByTestId('combo-display')).toHaveTextContent('0'));
 		});
 
@@ -263,6 +262,35 @@ describe('Game Page (routes/game/+page.svelte)', () => {
 			await user.click(screen.getByRole('button', { name: 'スキップ' }));
 
 			await waitFor(() => expect(screen.getByText('2 / 2')).toBeInTheDocument());
+		});
+	});
+
+	// #37: 誤入力でライブ正確率（accuracy-display）が即時再計算される配線。
+	// 旧実装は updateInput の誤入力ブランチが updateScore() の手前で早期 return していたため、
+	// score.accuracy が次の正打まで陳腐化していた（コンボの 0 リセットは即時で正しい）。
+	// 観測は既存の accuracy-display / combo-display のみ。本番マークアップへ新フックは足さない。
+	// 時間依存 DOM（500ms 赤フラッシュ等）はアサートしない（ADR 0001 / 0003）。
+	describe('誤入力時のライブ正確率 (#37 / ADR 0003)', () => {
+		it('正打→誤打で accuracy-display が 100% 未満へ即時に下がり、コンボは 0 に戻る', async () => {
+			const user = await startGame(makeData({ cards: SHORT_CARDS }));
+
+			// 開始直後は誤入力ゼロ。正確率は 100.00%。
+			expect(screen.getByTestId('accuracy-display')).toHaveTextContent('100.00');
+
+			// 正打 1 つ（「きく」への部分一致）。正確率は 100% のまま、コンボ 1。
+			await user.keyboard('k');
+			await waitFor(() => expect(screen.getByTestId('combo-display')).toHaveTextContent('1'));
+			expect(screen.getByTestId('accuracy-display')).toHaveTextContent('100.00');
+
+			// 誤打 1 つ（'kz' は不正）。次の正打を待たずに正確率が再計算される。
+			await user.keyboard('z');
+
+			// ライブ正確率が 100% 未満へ即時に下がる（1/2 = 50.00%）。
+			await waitFor(() =>
+				expect(screen.getByTestId('accuracy-display')).not.toHaveTextContent('100.00')
+			);
+			// コンボの即時 0 リセットも維持されていること。
+			expect(screen.getByTestId('combo-display')).toHaveTextContent('0');
 		});
 	});
 });

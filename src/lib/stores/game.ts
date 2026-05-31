@@ -600,6 +600,11 @@ export function createGameStore() {
 					// currentは更新しない（誤入力を受け付けない）
 				}
 			}));
+			// 誤入力でも processKeystroke で totalKeystrokes / mistakes が増えるため、
+			// ライブ正確率（score.accuracy）を即時再計算する（#37）。早期 return すると
+			// 末尾の updateScore() に到達せず、次の正打まで accuracy が陳腐化していた。
+			// コンボの即時 0 リセットは processKeystroke 側で完了している。
+			updateScore();
 			return previousInput; // UI側で処理が必要
 		}
 
