@@ -53,7 +53,6 @@ describe('Main Menu Page (routes/+page.svelte)', () => {
 
 		expect(screen.getByRole('link', { name: /ランキング/ })).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: /設定/ })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /統計/ })).toBeInTheDocument();
 	});
 
 	it('練習 → モーダル →「全44札を順番に練習」で practice へ遷移する', async () => {
@@ -96,7 +95,7 @@ describe('Main Menu Page (routes/+page.svelte)', () => {
 		expect(goto).toHaveBeenCalledWith('/game?mode=timeattack&difficulty=standard');
 	});
 
-	it('ナビリンク: ランキング / 設定 / 統計 が正しい遷移先で goto を呼ぶ', async () => {
+	it('ナビリンク: ランキング / 設定 が正しい遷移先で goto を呼ぶ', async () => {
 		const user = userEvent.setup();
 		renderMenu();
 
@@ -105,8 +104,5 @@ describe('Main Menu Page (routes/+page.svelte)', () => {
 
 		await user.click(screen.getByRole('link', { name: /設定/ }));
 		expect(goto).toHaveBeenCalledWith('/settings');
-
-		await user.click(screen.getByRole('link', { name: /統計/ }));
-		expect(goto).toHaveBeenCalledWith('/statistics');
 	});
 });

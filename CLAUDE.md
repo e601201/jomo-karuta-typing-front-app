@@ -65,7 +65,7 @@ User Keystroke → InputValidator (romaji↔hiragana mapping)
 - `src/lib/services/game/` - `score.ts` (`calcTypingScore`, difficulty-aware scoring). Card sequencing/shuffle/timer/scoring all live in `gameStore`.
 - `src/lib/services/typing/` - `input-validator.ts` (100+ romaji mappings), `partial-input-processor.ts`
 - `src/lib/services/storage/` - `local-storage.ts` (settings/session), `indexed-db.ts` (Dexie: history/stats), `favorites-service.ts`
-- `src/lib/stores/` - Svelte stores: `game.ts` (main game state + derived stores), `settings.ts`, `statistics.ts`, `auth.ts`
+- `src/lib/stores/` - Svelte stores: `game.ts` (main game state + derived stores), `settings.ts`, `auth.ts`
 - `src/lib/types/` - TypeScript types: `game.ts` (core types), `storage.ts`, `database.ts`, `multiplayer.ts`
 - `src/lib/supabase/` - `browser.ts` (client-side), `server.ts` (SSR)
 
@@ -76,7 +76,6 @@ User Keystroke → InputValidator (romaji↔hiragana mapping)
 /game                - Game interface (mode via query params)
 /practice/specific   - Card selection UI for specific mode
 /ranking             - Leaderboards (random & time attack)
-/statistics          - Stats visualization
 /settings            - User preferences
 /profile             - User profile (OAuth)
 /auth/{login,signup,callback,logout,error} - Auth flows
