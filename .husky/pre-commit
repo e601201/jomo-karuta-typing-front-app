@@ -1,0 +1,1 @@
+bun --bun run lint && bun --bun run check && bun --bun run test && bun --bun run build
