@@ -1,558 +1,158 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+/**
+ * ゲーム画面（routes/game/+page.svelte）の統合テスト。
+ *
+ * 方針（docs/adr/0001-route-integration-tests.md）:
+ *  - 実 gameStore を駆動し、末端の副作用だけをモックする（旧来の「ストア丸ごとモック」=
+ *    ビューテストは廃止）。狙いはルート↔ストアの契約ズレの捕捉。
+ *  - 実タイマー(~3.8s)を持つ開始カウントダウンは __testmocks__/Countdown.svelte の
+ *    手動トリガ型スタブで越える（フェイクタイマーは happy-dom/userEvent と噛み合わず不安定）。
+ *
+ * スコープは最小4本（スモーク / 開始カウントダウン / エラー / ゲーム終了）。入力ハイライト・
+ * ローマ字ガイド・進捗バー・ライブスコア・一時停止/再開/スキップ等のゲームプレイ詳細は
+ * 検証フックの再導入が必要なため別 issue (#29) に切り出した。再開カウントダウン（用語集:
+ * ポーズ解除時の演出。PauseOverlay 内部）は PauseOverlay 単体テストで担保する。
+ */
+
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
-import { goto } from '$app/navigation';
-import { page } from '$app/stores';
-import { writable } from 'svelte/store';
 import Page from './+page.svelte';
+import { gameStore } from '$lib/stores/game';
+import type { GameMode, KarutaCard, RandomModeDifficulty } from '$lib/types';
 
-// Mock modules
-vi.mock('$app/navigation');
-vi.mock('$app/stores', () => ({
-	page: {
-		subscribe: vi.fn((callback) => {
-			callback({
-				url: {
-					searchParams: new URLSearchParams('?mode=practice')
-				}
-			});
-			return () => {};
-		})
+// 画像プリローダ: happy-dom では new Image() の load が発火せず、未モックだと
+// startSession（onMount で await）が解決せずハングする。
+vi.mock('$lib/utils/image-preloader', () => ({
+	ImagePreloader: {
+		preloadWithPriority: vi.fn().mockResolvedValue(undefined),
+		preloadCardImages: vi.fn().mockResolvedValue(undefined),
+		preloadMultipleCards: vi.fn().mockResolvedValue(undefined),
+		getLoadedImage: vi.fn()
 	}
 }));
 
-// Mock game store
-vi.mock('$lib/stores/game', () => {
-	const mockGameStore = writable({
-		session: null,
-		cards: {
-			current: null,
-			currentIndex: 0,
-			remaining: [],
-			completed: []
-		},
-		input: {
-			current: '',
-			position: 0,
-			mistakes: 0,
-			validator: null
-		},
-		score: {
-			total: 0,
-			accuracy: 100,
-			speed: 0,
-			combo: 0,
-			maxCombo: 0
-		},
-		timer: {
-			startTime: null,
-			elapsedTime: 0,
-			isPaused: false
-		}
-	});
+// 音声: new Audio()/play() 由来の未処理 reject を避けるため no-op 化。
+// アロー関数実装は new できない（Reflect.construct がコンストラクタを要求する）ため、
+// 構築可能なクラスとしてモックする。
+vi.mock('$lib/services/audio/typing-sounds', () => ({
+	TypingSoundManager: class {
+		playCorrect = vi.fn();
+		playIncorrect = vi.fn();
+		playComplete = vi.fn();
+		playCardReading = vi.fn();
+		stopCardReading = vi.fn();
+		playFlickCard = vi.fn();
+		playGameEnd = vi.fn();
+		startBGM = vi.fn();
+		stopBGM = vi.fn();
+		pauseBGM = vi.fn();
+		resumeBGM = vi.fn();
+		destroy = vi.fn();
+	}
+}));
 
+// 開始カウントダウン: 実タイマーを手動トリガ型スタブで越える。
+vi.mock('$lib/components/game/Countdown.svelte', () => import('./__testmocks__/Countdown.svelte'));
+
+type GameData = {
+	mode: GameMode;
+	cards: KarutaCard[];
+	error: string | null;
+	difficulty?: RandomModeDifficulty;
+};
+
+const SAMPLE_CARDS: KarutaCard[] = [
+	{
+		id: 'tsu',
+		hiragana: 'つるまうかたちのぐんまけん',
+		romaji: 'tsurumaukatachinogunmaken',
+		meaning: 'つる舞う形の群馬県',
+		category: 'geography',
+		difficulty: 'easy'
+	},
+	{
+		id: 'ne',
+		hiragana: 'ねぎとこんにゃくしものめいぶつ',
+		romaji: 'negitokonnyakushimonomeibutsu',
+		meaning: 'ねぎとこんにゃく下仁田名物',
+		category: 'culture',
+		difficulty: 'easy'
+	}
+];
+
+function makeData(overrides: Partial<GameData> = {}): GameData {
 	return {
-		gameStore: {
-			...mockGameStore,
-			startSession: vi.fn(),
-			nextCard: vi.fn(),
-			updateInput: vi.fn(),
-			completeCard: vi.fn(),
-			pauseGame: vi.fn(),
-			resumeGame: vi.fn(),
-			endSession: vi.fn(),
-			gameStore: mockGameStore
-		}
+		mode: 'practice',
+		cards: SAMPLE_CARDS,
+		error: null,
+		difficulty: 'standard',
+		...overrides
 	};
-});
+}
 
-// Mock karuta cards
-vi.mock('$lib/data/karuta-cards.json', () => ({
-	default: [
-		{
-			id: 'card-1',
-			hiragana: 'つるまうかたちのぐんまけん',
-			romaji: 'tsuru mau katachi no gunma ken',
-			meaning: 'つる舞う形の群馬県',
-			category: 'geography' as const,
-			difficulty: 'easy' as const
-		},
-		{
-			id: 'card-2',
-			hiragana: 'ちからあわせるにひゃくまん',
-			romaji: 'chikara awaseru nihyakuman',
-			meaning: '力あわせる二百万',
-			category: 'culture' as const,
-			difficulty: 'easy' as const
-		}
-	]
-}));
-
-// Mock InputValidator
-vi.mock('$lib/services/typing/input-validator', () => ({
-	InputValidator: vi.fn().mockImplementation(() => ({
-		validateInput: vi.fn((input, expected) => ({
-			isValid: input === expected,
-			isComplete: false,
-			progress: 0.5
-		})),
-		getRomajiPatterns: vi.fn(() => ['tsurumakatachinogumaken']),
-		getNextExpectedInputs: vi.fn(() => ['t'])
-	}))
-}));
-
-// SKIP: ゲーム画面(routes/game/+page.svelte)は再開カウントダウン演出・画像
-// プリローダ・async な startSession など新フローに刷新され、この統合テストは
-// 旧フローを前提としているため全面的に書き換えが必要（多くが waitFor タイムアウト）。
-// __testmocks__/Countdown.svelte を含めた再設計を別タスクで行うまで一時的にスキップする。
-// 追跡 issue: #28
-describe.skip('Game Page', () => {
-	const user = userEvent.setup();
-
+describe('Game Page (routes/game/+page.svelte)', () => {
 	beforeEach(() => {
+		// 実 gameStore は singleton のためテスト間で状態が漏れる。初期状態へ戻す。
+		gameStore.resetSession();
 		vi.clearAllMocks();
 	});
 
 	afterEach(() => {
-		vi.clearAllMocks();
+		// startGameAfterCountdown が張る実タイマーを止め、spy を復元する。
+		gameStore.resetSession();
+		vi.restoreAllMocks();
 	});
 
-	describe('Initialization and Routing', () => {
-		it('TC-001: should get game mode from URL parameters', async () => {
-			render(Page);
+	it('スモーク: 描画され、ローディング後に開始カウントダウンが表示される', async () => {
+		render(Page, { props: { data: makeData() } });
 
-			await waitFor(async () => {
-				const { gameStore } = await import('$lib/stores/game');
-				expect(gameStore.startSession).toHaveBeenCalledWith(
-					expect.objectContaining({
-						mode: 'practice'
-					})
-				);
-			});
-		});
+		// game-container は常に描画される。
+		expect(screen.getByTestId('game-container')).toBeInTheDocument();
 
-		it('TC-002: should handle continue parameter', async () => {
-			// Mock URL with continue parameter
-			vi.mocked(page.subscribe).mockImplementation((callback) => {
-				callback({
-					url: new URL('http://localhost/game?mode=practice&continue=true')
-				} as unknown as import('@sveltejs/kit').Page);
-				return () => {};
-			});
+		// onMount(async) 沈静化後、開始カウントダウン（スタブ）が出る。
+		expect(await screen.findByTestId('countdown-mock')).toBeInTheDocument();
 
-			render(Page);
-
-			await waitFor(async () => {
-				const { gameStore } = await import('$lib/stores/game');
-				expect(gameStore.startSession).toHaveBeenCalledWith(
-					expect.objectContaining({
-						mode: 'practice',
-						continue: true
-					})
-				);
-			});
-		});
-
-		it('TC-003: should handle invalid mode', async () => {
-			// Mock URL with invalid mode
-			vi.mocked(page.subscribe).mockImplementation((callback) => {
-				callback({
-					url: new URL('http://localhost/game?mode=invalid')
-				} as unknown as import('@sveltejs/kit').Page);
-				return () => {};
-			});
-
-			render(Page);
-
-			await waitFor(() => {
-				expect(screen.getByText(/無効なゲームモード/)).toBeInTheDocument();
-				expect(screen.getByRole('link', { name: /メインメニューに戻る/ })).toBeInTheDocument();
-			});
-		});
+		// カウントダウン中はゲームUI（スコア表示）がゲートされている。
+		expect(screen.queryByTestId('accuracy-display')).not.toBeInTheDocument();
 	});
 
-	describe('Card Display', () => {
-		it('TC-004: should display card information', async () => {
-			const { gameStore } = await import('$lib/stores/game');
+	it('開始カウントダウン: 完了でカウントダウンが消えゲームが開始される', async () => {
+		const startSpy = vi.spyOn(gameStore, 'startGameAfterCountdown');
+		const user = userEvent.setup();
 
-			// Set current card
-			gameStore.gameStore.update((state) => ({
-				...state,
-				cards: {
-					...state.cards,
-					current: {
-						id: 'card-1',
-						hiragana: 'つるまうかたちのぐんまけん',
-						romaji: 'tsuru mau katachi no gunma ken',
-						meaning: 'つる舞う形の群馬県',
-						category: 'geography',
-						difficulty: 'easy'
-					},
-					currentIndex: 0
-				},
-				session: {
-					id: 'test-session',
-					mode: 'practice',
-					totalCards: 44,
-					isActive: true,
-					startTime: new Date()
-				}
-			}));
+		render(Page, { props: { data: makeData() } });
 
-			render(Page);
+		const completeButton = await screen.findByTestId('countdown-complete');
+		await user.click(completeButton);
 
-			await waitFor(() => {
-				expect(screen.getByText('つる舞う形の群馬県')).toBeInTheDocument();
-				expect(screen.getByText('1 / 44')).toBeInTheDocument();
-				expect(screen.getByTestId('furigana')).toHaveTextContent('つるまうかたちのぐんまけん');
-			});
-		});
+		// ページの handleCountdownComplete 経由でゲーム開始が呼ばれる。
+		await waitFor(() => expect(startSpy).toHaveBeenCalled());
 
-		it('TC-005: should switch to next card', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			render(Page);
-
-			// Complete current card
-			await gameStore.completeCard();
-
-			await waitFor(() => {
-				expect(gameStore.nextCard).toHaveBeenCalled();
-			});
-		});
+		// カウントダウンが消え、ゲートされていたゲームUIが現れる。
+		expect(screen.queryByTestId('countdown-mock')).not.toBeInTheDocument();
+		expect(await screen.findByTestId('accuracy-display')).toBeInTheDocument();
 	});
 
-	describe('Input Processing', () => {
-		it('TC-006: should process correct input', async () => {
-			const { gameStore } = await import('$lib/stores/game');
+	it('エラー: data.error でエラー文言とメインメニューリンクを表示する', async () => {
+		render(Page, { props: { data: makeData({ error: '無効なゲームモードです' }) } });
 
-			// Set current card
-			gameStore.gameStore.update((state) => ({
-				...state,
-				cards: {
-					...state.cards,
-					current: {
-						id: 'card-1',
-						hiragana: 'つるまうかたちのぐんまけん',
-						romaji: 'tsuru mau katachi no gunma ken',
-						meaning: 'つる舞う形の群馬県',
-						category: 'geography',
-						difficulty: 'easy'
-					}
-				},
-				session: {
-					id: 'test-session',
-					mode: 'practice',
-					totalCards: 44,
-					isActive: true,
-					startTime: new Date()
-				}
-			}));
+		expect(await screen.findByText('無効なゲームモードです')).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: 'メインメニューに戻る' })).toBeInTheDocument();
 
-			render(Page);
-
-			// Type correct character
-			await user.keyboard('t');
-
-			await waitFor(() => {
-				expect(gameStore.updateInput).toHaveBeenCalledWith('t');
-				const highlight = screen.getByTestId('input-highlight-0');
-				expect(highlight).toHaveClass('text-green-600');
-			});
-		});
-
-		it('TC-007: should process incorrect input', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			// Set current card
-			gameStore.gameStore.update((state) => ({
-				...state,
-				cards: {
-					...state.cards,
-					current: {
-						id: 'card-1',
-						hiragana: 'つるまうかたちのぐんまけん',
-						romaji: 'tsuru mau katachi no gunma ken',
-						meaning: 'つる舞う形の群馬県',
-						category: 'geography',
-						difficulty: 'easy'
-					}
-				},
-				session: {
-					id: 'test-session',
-					mode: 'practice',
-					totalCards: 44,
-					isActive: true,
-					startTime: new Date()
-				}
-			}));
-
-			render(Page);
-
-			// Type incorrect character
-			await user.keyboard('x');
-
-			await waitFor(() => {
-				expect(gameStore.updateInput).toHaveBeenCalledWith('x');
-				const errorIndicator = screen.getByTestId('error-indicator');
-				expect(errorIndicator).toHaveClass('text-red-600');
-			});
-		});
-
-		it('TC-009: should handle backspace', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			render(Page);
-
-			// Type and then backspace
-			await user.keyboard('t');
-			await user.keyboard('{Backspace}');
-
-			await waitFor(() => {
-				expect(gameStore.updateInput).toHaveBeenCalledWith('');
-			});
-		});
+		// エラー時はカウントダウンへ進まない。
+		expect(screen.queryByTestId('countdown-mock')).not.toBeInTheDocument();
 	});
 
-	describe('Real-time Feedback', () => {
-		it('TC-010: should display romaji guide', async () => {
-			const { gameStore } = await import('$lib/stores/game');
+	it('ゲーム終了: セッション終了で終了画面と最終スコアを表示する', async () => {
+		render(Page, { props: { data: makeData() } });
 
-			// Set current card
-			gameStore.gameStore.update((state) => ({
-				...state,
-				cards: {
-					...state.cards,
-					current: {
-						id: 'card-1',
-						hiragana: 'つるまうかたちのぐんまけん',
-						romaji: 'tsuru mau katachi no gunma ken',
-						meaning: 'つる舞う形の群馬県',
-						category: 'geography',
-						difficulty: 'easy'
-					}
-				}
-			}));
+		// onMount 沈静化（startSession でセッション生成）を待つ。
+		await screen.findByTestId('countdown-mock');
 
-			render(Page);
+		// 実ストアでセッションを終了 → ページの sessionEnded 判定で完了画面へ。
+		gameStore.endSession();
 
-			await waitFor(() => {
-				const romajiGuide = screen.getByTestId('romaji-guide');
-				expect(romajiGuide).toHaveTextContent('tsurumakatachinogumaken');
-			});
-		});
-
-		it('TC-011: should update progress bar', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			// Set progress
-			gameStore.gameStore.update((state) => ({
-				...state,
-				input: {
-					...state.input,
-					position: 5,
-					current: 'tsuru'
-				}
-			}));
-
-			render(Page);
-
-			await waitFor(() => {
-				const progressBar = screen.getByTestId('input-progress');
-				expect(progressBar).toHaveAttribute('style', expect.stringContaining('width: 20%'));
-			});
-		});
-	});
-
-	describe('Score Calculation', () => {
-		it('TC-012: should calculate WPM', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			// Set score data
-			gameStore.gameStore.update((state) => ({
-				...state,
-				score: {
-					...state.score,
-					speed: 120
-				}
-			}));
-
-			render(Page);
-
-			await waitFor(() => {
-				expect(screen.getByTestId('wpm-display')).toHaveTextContent('120');
-			});
-		});
-
-		it('TC-013: should calculate accuracy', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			// Set accuracy data
-			gameStore.gameStore.update((state) => ({
-				...state,
-				score: {
-					...state.score,
-					accuracy: 83.3
-				}
-			}));
-
-			render(Page);
-
-			await waitFor(() => {
-				expect(screen.getByTestId('accuracy-display')).toHaveTextContent('83.3%');
-			});
-		});
-
-		it('TC-014: should track combo', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			// Set combo
-			gameStore.gameStore.update((state) => ({
-				...state,
-				score: {
-					...state.score,
-					combo: 5
-				}
-			}));
-
-			render(Page);
-
-			await waitFor(() => {
-				expect(screen.getByTestId('combo-display')).toHaveTextContent('5');
-			});
-		});
-	});
-
-	describe('Game Controls', () => {
-		it('TC-015: should pause game', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			render(Page);
-
-			const pauseButton = screen.getByRole('button', { name: /一時停止/ });
-			await user.click(pauseButton);
-
-			await waitFor(() => {
-				expect(gameStore.pauseGame).toHaveBeenCalled();
-				expect(screen.getByText('一時停止中')).toBeInTheDocument();
-			});
-		});
-
-		it('TC-016: should resume game', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			// Set paused state
-			gameStore.gameStore.update((state) => ({
-				...state,
-				timer: {
-					...state.timer,
-					isPaused: true
-				}
-			}));
-
-			render(Page);
-
-			const resumeButton = screen.getByRole('button', { name: /再開/ });
-			await user.click(resumeButton);
-
-			await waitFor(() => {
-				expect(gameStore.resumeGame).toHaveBeenCalled();
-			});
-		});
-
-		it('TC-017: should skip card', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			render(Page);
-
-			const skipButton = screen.getByRole('button', { name: /スキップ/ });
-			await user.click(skipButton);
-
-			await waitFor(() => {
-				expect(gameStore.nextCard).toHaveBeenCalled();
-			});
-		});
-	});
-
-	describe('Game End', () => {
-		it('TC-018: should handle all cards completed', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			// Set last card completed
-			gameStore.gameStore.update((state) => ({
-				...state,
-				cards: {
-					...state.cards,
-					currentIndex: 43,
-					completed: Array(44).fill({})
-				}
-			}));
-
-			render(Page);
-
-			await waitFor(() => {
-				expect(screen.getByText('ゲーム終了！')).toBeInTheDocument();
-				expect(screen.getByTestId('final-score')).toBeInTheDocument();
-			});
-		});
-
-		it('TC-019: should handle early exit', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			render(Page);
-
-			const exitButton = screen.getByRole('button', { name: /終了/ });
-			await user.click(exitButton);
-
-			// Confirm dialog
-			await waitFor(() => {
-				expect(screen.getByText('本当に終了しますか？')).toBeInTheDocument();
-			});
-
-			const confirmButton = screen.getByRole('button', { name: /はい/ });
-			await user.click(confirmButton);
-
-			await waitFor(() => {
-				expect(gameStore.endSession).toHaveBeenCalled();
-				expect(goto).toHaveBeenCalledWith('/');
-			});
-		});
-	});
-
-	describe('Responsive Design', () => {
-		it('TC-022: should display correctly on mobile', () => {
-			global.innerWidth = 375;
-			global.dispatchEvent(new Event('resize'));
-
-			render(Page);
-
-			const container = screen.getByTestId('game-container');
-			expect(container).toHaveClass('flex-col');
-		});
-
-		it('TC-024: should display correctly on desktop', () => {
-			global.innerWidth = 1280;
-			global.dispatchEvent(new Event('resize'));
-
-			render(Page);
-
-			const container = screen.getByTestId('game-container');
-			expect(container).toHaveClass('max-w-4xl');
-		});
-	});
-
-	describe('Performance', () => {
-		it('TC-025: should respond to input within 30ms', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			render(Page);
-
-			const startTime = performance.now();
-			await user.keyboard('t');
-			const endTime = performance.now();
-
-			expect(endTime - startTime).toBeLessThan(30);
-			expect(gameStore.updateInput).toHaveBeenCalled();
-		});
+		expect(await screen.findByText('ゲーム終了！')).toBeInTheDocument();
+		expect(screen.getByTestId('final-score')).toBeInTheDocument();
 	});
 });

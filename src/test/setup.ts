@@ -38,3 +38,14 @@ vi.mock('$app/stores', async () => {
 		navigating
 	};
 });
+
+// Mock SvelteKit's $app/paths
+// happy-dom 上のテスト環境では仮想モジュール $app/paths の resolve が動く保証がなく、
+// resolve('/') を描画時に評価するルートコンポーネント（routes/game・routes/ 等）が
+// 壊れる。passthrough モックで決定性を確保する。詳細は docs/adr/0001-route-integration-tests.md。
+vi.mock('$app/paths', () => ({
+	base: '',
+	assets: '',
+	resolve: (path: string) => path,
+	resolveRoute: (path: string) => path
+}));

@@ -58,7 +58,5 @@ temp/
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# claude
-.claude/
-
-docs/
+# Claude Code (local-only settings; machine-specific permissions etc.)
+.claude/settings.local.json
