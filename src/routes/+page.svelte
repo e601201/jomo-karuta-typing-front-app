@@ -114,7 +114,7 @@
 		goto(`${resolve('/game')}?${params.toString()}` as ResolvedPathname);
 	}
 
-	function handleNavigation(path: '/ranking' | '/settings' | '/statistics') {
+	function handleNavigation(path: '/ranking' | '/settings') {
 		goto(resolve(path));
 	}
 
@@ -228,17 +228,6 @@
 				>
 					<span class="text-xl">⚙️</span>
 					<span>設定</span>
-				</a>
-				<a
-					href={resolve('/statistics')}
-					onclick={(e) => {
-						e.preventDefault();
-						handleNavigation('/statistics');
-					}}
-					class="flex items-center gap-2 text-gray-600 transition-colors hover:text-green-600"
-				>
-					<span class="text-xl">📊</span>
-					<span>統計（工事中🙇）</span>
 				</a>
 			</nav>
 		{/if}
