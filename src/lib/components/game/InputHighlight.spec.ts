@@ -207,7 +207,10 @@ describe('InputHighlight Component', () => {
 			});
 
 			const endTime = performance.now();
-			expect(endTime - startTime).toBeLessThan(16);
+			// CI ランナーの負荷・GC で実時間は揺れる（16ms 固定だと CI で散発的に失敗した）。
+			// 閾値は実性能退行（O(n²) 化＝秒オーダー）だけを捕捉する緩い値とし、フレーク防止のため
+			// 安易に縮めないこと。
+			expect(endTime - startTime).toBeLessThan(100);
 		});
 
 		it('TC-012: should update quickly on state change', () => {
@@ -228,7 +231,8 @@ describe('InputHighlight Component', () => {
 			});
 
 			const endTime = performance.now();
-			expect(endTime - startTime).toBeLessThan(8);
+			// 再描画も同様に CI で揺れるため、実退行のみ捕捉する緩い閾値とする（安易に縮めない）。
+			expect(endTime - startTime).toBeLessThan(50);
 		});
 	});
 

@@ -1,342 +1,112 @@
+/**
+ * メインメニュー（routes/+page.svelte）の統合テスト。
+ *
+ * 方針（docs/adr/0002-store-less-route-tests.md / 0001）:
+ *  - メインメニューは gameStore を駆動しない。守る契約は「ナビゲーション配線 + data prop 描画」:
+ *    ① data prop で描画できる、② 各モードカードが正しいモーダルを開く、
+ *    ③ 各モーダル選択 / ナビリンクが正しい遷移先で goto を呼ぶ。
+ *  - 実モーダル（純粋なコールバック発火器）を駆動し、装飾リーフ KarutaSlideshow
+ *    （rAF + Math.random）は __testmocks__ のスタブで越える。
+ *  - goto / resolve / $app/stores は src/test/setup.ts の共有モックに依存。旧来の
+ *    gameStore / IndexedDB / カードデータのモックはメニュー経路で未使用のため持たない。
+ *
+ * スコープはナビ配線の退行検知に限定（6本）。a11y・レスポンシブ・ローディング/エラーは
+ * 対象外（到達不能 or 別関心）。
+ */
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { render, screen } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { goto } from '$app/navigation';
 import Page from './+page.svelte';
-import type { GameState } from '$lib/stores/game';
+import type { PageData } from './$types';
 
-// Mock the navigation module
-vi.mock('$app/navigation');
+// 装飾リーフ: rAF アニメ + Math.random + 176 装飾ノードを no-op スタブで越える。
+vi.mock(
+	'$lib/components/main-menu/KarutaSlideshow.svelte',
+	() => import('./__testmocks__/KarutaSlideshow.svelte')
+);
 
-// 現在の GameState 形状に沿った最小限の初期状態
-const createInitialGameState = (): GameState => ({
-	session: null,
-	cards: {
-		current: null,
-		currentIndex: 0,
-		remaining: [],
-		completed: []
-	},
-	input: {
-		current: '',
-		position: 0,
-		mistakes: 0,
-		validator: null
-	},
-	score: {
-		total: 0,
-		accuracy: 100,
-		speed: 0,
-		combo: 0,
-		maxCombo: 0
-	},
-	timer: {
-		startTime: null,
-		elapsedTime: 0,
-		cardStartTime: null,
-		cardElapsedTime: 0,
-		isPaused: false,
-		pausedDuration: 0,
-		pauseStartTime: null,
-		pauseCount: 0,
-		totalPauseTime: 0,
-		timeLimit: null,
-		remainingTime: 0,
-		penalty: 0,
-		finalTime: null
-	},
-	statistics: {
-		totalKeystrokes: 0,
-		correctKeystrokes: 0,
-		mistakes: 0,
-		currentCombo: 0,
-		maxCombo: 0,
-		skips: 0
-	}
-});
+// メニューは data.user しか参照しない。user の型だけ PageData に紐付けて保証し（PageData の
+// user 型が変われば型エラーで検知される）、描画に不要な Supabase クライアント等は持たず、
+// render 呼び出し側で PageData にキャストする。
+const PAGE_DATA = { user: null } satisfies Pick<PageData, 'user'>;
 
-// Mock game store
-vi.mock('$lib/stores/game', () => ({
-	gameStore: {
-		subscribe: vi.fn((callback) => {
-			callback(createInitialGameState());
-			return () => {};
-		}),
-		startSession: vi.fn()
-	}
-}));
+function renderMenu() {
+	return render(Page, { props: { data: PAGE_DATA as unknown as PageData } });
+}
 
-// Mock IndexedDB service
-vi.mock('$lib/services/storage/indexed-db', () => ({
-	// vitest 4 では new でモックを呼ぶと implementation を constructor として扱う
-	// (Reflect.construct)。アロー関数は constructor になれないため通常の関数式にする。
-	IndexedDBService: vi.fn().mockImplementation(function () {
-		return {
-			init: vi.fn(),
-			getLatestSession: vi.fn(),
-			hasProgress: vi.fn()
-		};
-	})
-}));
-
-// Mock karuta cards data
-vi.mock('$lib/data/karuta-cards.json', () => ({
-	default: Array(44)
-		.fill(null)
-		.map((_, i) => ({
-			id: `card-${i + 1}`,
-			yomifuda: `読み札${i + 1}`,
-			torifuda: `取り札${i + 1}`,
-			furigana: `ふりがな${i + 1}`
-		}))
-}));
-
-// SKIP: メインメニュー(+page.svelte)はアプリ構造が刷新され、この統合テストは
-// 旧構造を前提としているため全面的に書き換えが必要。
-//  - data prop 必須（Header user={data.user}）/ モード選択はモーダル化
-//  - ボタン名・遷移先・レイアウトが変更（練習/ランダム/タイムアタック, /ranking, /statistics 等）
-// 新アーキテクチャに合わせた再設計を別タスクで行うまで一時的にスキップする。
-// 追跡 issue: #27
-describe.skip('MainMenu Page', () => {
-	const user = userEvent.setup();
-
+describe('Main Menu Page (routes/+page.svelte)', () => {
 	beforeEach(() => {
+		// メニューは singleton ストアを持たないため、goto スパイのリセットだけでよい。
 		vi.clearAllMocks();
 	});
 
-	describe('Initial Display', () => {
-		it('TC-001: should display page title and header', () => {
-			render(Page);
+	it('スモーク: data 付きで描画され、3モードカードとナビが表示される', async () => {
+		renderMenu();
 
-			expect(screen.getByText('上毛かるたタイピング')).toBeInTheDocument();
-			expect(screen.getByText('群馬の郷土かるたでタイピング練習')).toBeInTheDocument();
-		});
+		// :else 分岐（ローディング解除後）でしか出ない要素 = 初期化完了の透過確認。
+		expect(await screen.findByText('モード選択')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: '練習モード' })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'ランダムモード' })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'タイムアタック' })).toBeInTheDocument();
 
-		// NOTE: ローディングは gameStore ではなくローカル state（isLoading）で制御される。
-		// onMount の initializeApp() が同期的に isLoading=false にするため、render 後には
-		// スピナーが残らず、ストアのモックでも制御できない（統一前のストア駆動設計の名残）。
-		// 実データ読み込み（中断可能な await）が入った時点で再有効化すること。
-		it.skip('TC-002: should show loading state when data is loading', () => {
-			render(Page);
-
-			expect(screen.getByText('読み込み中...')).toBeInTheDocument();
-			expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-		});
+		expect(screen.getByRole('link', { name: /ランキング/ })).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: /設定/ })).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: /統計/ })).toBeInTheDocument();
 	});
 
-	describe('Game Mode Selection', () => {
-		it('TC-003: should display and navigate to practice mode', async () => {
-			render(Page);
+	it('練習 → モーダル →「全44札を順番に練習」で practice へ遷移する', async () => {
+		const user = userEvent.setup();
+		renderMenu();
 
-			const practiceButton = screen.getByRole('button', { name: /練習モード/i });
-			expect(practiceButton).toBeInTheDocument();
-			expect(screen.getByText('全44札を順番に練習')).toBeInTheDocument();
+		await user.click(await screen.findByRole('button', { name: '練習モード' }));
+		await user.click(await screen.findByRole('button', { name: /全44札を順番に練習/ }));
 
-			await user.click(practiceButton);
-
-			expect(goto).toHaveBeenCalledWith('/game?mode=practice');
-		});
-
-		it('TC-004: should display and navigate to specific cards practice mode', async () => {
-			render(Page);
-
-			const specificButton = screen.getByRole('button', { name: /特定札練習/i });
-			expect(specificButton).toBeInTheDocument();
-			expect(screen.getByText('選択した札のみを練習')).toBeInTheDocument();
-
-			await user.click(specificButton);
-
-			expect(goto).toHaveBeenCalledWith('/game?mode=specific');
-		});
-
-		it('TC-005: should display and navigate to random mode', async () => {
-			render(Page);
-
-			const randomButton = screen.getByRole('button', { name: /ランダム出題/i });
-			expect(randomButton).toBeInTheDocument();
-			expect(screen.getByText('ランダムな順序で練習')).toBeInTheDocument();
-
-			await user.click(randomButton);
-
-			expect(goto).toHaveBeenCalledWith('/game?mode=random');
-		});
+		expect(goto).toHaveBeenCalledWith('/game?mode=practice');
 	});
 
-	describe('Navigation', () => {
-		it('TC-006: should navigate to settings page', async () => {
-			render(Page);
+	it('練習 → モーダル →「特定札で練習」で /practice/specific へ遷移する', async () => {
+		const user = userEvent.setup();
+		renderMenu();
 
-			const settingsLink = screen.getByRole('link', { name: /設定/i });
-			expect(settingsLink).toBeInTheDocument();
+		await user.click(await screen.findByRole('button', { name: '練習モード' }));
+		await user.click(await screen.findByRole('button', { name: /特定札で練習/ }));
 
-			await user.click(settingsLink);
-
-			expect(goto).toHaveBeenCalledWith('/settings');
-		});
-
-		it('TC-007: should navigate to stats page', async () => {
-			render(Page);
-
-			const statsLink = screen.getByRole('link', { name: /成績/i });
-			expect(statsLink).toBeInTheDocument();
-
-			await user.click(statsLink);
-
-			expect(goto).toHaveBeenCalledWith('/stats');
-		});
+		expect(goto).toHaveBeenCalledWith('/practice/specific');
 	});
 
-	describe('Data Loading', () => {
-		it('TC-008: should load karuta data successfully', async () => {
-			render(Page);
+	it('ランダム → 難易度モーダル → 標準 で random へ遷移する', async () => {
+		const user = userEvent.setup();
+		renderMenu();
 
-			await waitFor(() => {
-				expect(screen.queryByText('読み込み中...')).not.toBeInTheDocument();
-			});
+		await user.click(await screen.findByRole('button', { name: 'ランダムモード' }));
+		await user.click(await screen.findByRole('button', { name: /標準モード/ }));
 
-			// All game mode buttons should be enabled
-			expect(screen.getByRole('button', { name: /練習モード/i })).not.toBeDisabled();
-			expect(screen.getByRole('button', { name: /特定札練習/i })).not.toBeDisabled();
-			expect(screen.getByRole('button', { name: /ランダム出題/i })).not.toBeDisabled();
-		});
-
-		// NOTE: エラー表示もローカル state（error）で制御される。現状の initializeApp() には
-		// 失敗し得る処理がなく catch は到達不能なため、このエラーパスは発生しない。
-		// gameStore はこのコンポーネントで未使用でモックは無効。実データ読み込みを
-		// 追加し、失敗を注入できるようにした時点で再有効化すること。
-		it.skip('TC-009: should handle data loading error', () => {
-			render(Page);
-
-			expect(screen.getByText('データの読み込みに失敗しました')).toBeInTheDocument();
-			expect(screen.getByRole('button', { name: /再試行/i })).toBeInTheDocument();
-
-			// Game mode buttons should be disabled
-			expect(screen.getByRole('button', { name: /練習モード/i })).toBeDisabled();
-			expect(screen.getByRole('button', { name: /特定札練習/i })).toBeDisabled();
-			expect(screen.getByRole('button', { name: /ランダム出題/i })).toBeDisabled();
-		});
+		expect(goto).toHaveBeenCalledWith('/game?mode=random&difficulty=standard');
 	});
 
-	describe('Accessibility', () => {
-		it('TC-010: should support keyboard navigation', async () => {
-			render(Page);
+	it('タイムアタック → 難易度モーダル → 標準 で timeattack へ遷移する', async () => {
+		const user = userEvent.setup();
+		renderMenu();
 
-			const practiceButton = screen.getByRole('button', { name: /練習モード/i });
-			const specificButton = screen.getByRole('button', { name: /特定札練習/i });
-			const randomButton = screen.getByRole('button', { name: /ランダム出題/i });
+		await user.click(await screen.findByRole('button', { name: 'タイムアタック' }));
+		await user.click(await screen.findByRole('button', { name: /標準モード/ }));
 
-			// Tab through elements
-			await user.tab();
-			expect(practiceButton).toHaveFocus();
-
-			await user.tab();
-			expect(specificButton).toHaveFocus();
-
-			await user.tab();
-			expect(randomButton).toHaveFocus();
-
-			// Activate with Enter key
-			await user.keyboard('{Enter}');
-			expect(goto).toHaveBeenCalledWith('/game?mode=random');
-		});
-
-		it('TC-011: should have proper ARIA attributes', () => {
-			render(Page);
-
-			const practiceButton = screen.getByRole('button', { name: /練習モード/i });
-			expect(practiceButton).toHaveAttribute('aria-label');
-			expect(practiceButton).toHaveAttribute('aria-describedby');
-
-			const main = screen.getByRole('main');
-			expect(main).toBeInTheDocument();
-
-			const navigation = screen.getByRole('navigation');
-			expect(navigation).toBeInTheDocument();
-		});
+		expect(goto).toHaveBeenCalledWith('/game?mode=timeattack&difficulty=standard');
 	});
 
-	describe('Responsive Design', () => {
-		it('TC-012: should display correctly on mobile', () => {
-			// Set viewport to mobile size
-			global.innerWidth = 375;
-			global.dispatchEvent(new Event('resize'));
+	it('ナビリンク: ランキング / 設定 / 統計 が正しい遷移先で goto を呼ぶ', async () => {
+		const user = userEvent.setup();
+		renderMenu();
 
-			render(Page);
+		await user.click(await screen.findByRole('link', { name: /ランキング/ }));
+		expect(goto).toHaveBeenCalledWith('/ranking');
 
-			const container = screen.getByTestId('game-modes-container');
-			expect(container).toHaveClass('flex-col');
+		await user.click(screen.getByRole('link', { name: /設定/ }));
+		expect(goto).toHaveBeenCalledWith('/settings');
 
-			// Check touch target size
-			const buttons = screen.getAllByRole('button');
-			buttons.forEach((button) => {
-				const styles = getComputedStyle(button);
-				expect(parseInt(styles.minHeight)).toBeGreaterThanOrEqual(44);
-			});
-		});
-
-		it('TC-013: should display correctly on tablet', () => {
-			// Set viewport to tablet size
-			global.innerWidth = 768;
-			global.dispatchEvent(new Event('resize'));
-
-			render(Page);
-
-			const container = screen.getByTestId('game-modes-container');
-			expect(container).toHaveClass('sm:grid', 'sm:grid-cols-2');
-		});
-
-		it('TC-014: should display correctly on desktop', () => {
-			// Set viewport to desktop size
-			global.innerWidth = 1280;
-			global.dispatchEvent(new Event('resize'));
-
-			render(Page);
-
-			const container = screen.getByTestId('game-modes-container');
-			expect(container).toHaveClass('lg:grid-cols-3');
-		});
-	});
-
-	describe('Store Integration', () => {
-		// NOTE: +page.svelte（メインメニュー）は gameStore を呼ばず、/game への遷移のみ行う。
-		// startSession はゲーム画面（routes/game/+page.svelte）の責務であり、メインメニューでは
-		// 呼ばれないためこの期待は成立しない（統一前のストア連携設計の名残）。
-		it.skip('TC-016: should load game settings from storage', async () => {
-			const { gameStore } = await import('$lib/stores/game');
-
-			render(Page);
-
-			await waitFor(() => {
-				expect(gameStore.startSession).toHaveBeenCalled();
-			});
-		});
-
-		// NOTE: 「続きから」進捗表示（ContinueProgress）は commit 3c37d6a で削除済み。
-		// 現在のメインメニューにこの UI はなく、このテストは到達不能なためスキップ。
-		it.skip('TC-017: should display continue option when progress exists', async () => {
-			// Mock existing progress
-			const { IndexedDBService } = await import('$lib/services/storage/indexed-db');
-			const mockInstance = new IndexedDBService();
-			vi.mocked(mockInstance.hasProgress).mockResolvedValue(true);
-			vi.mocked(mockInstance.getLatestSession).mockResolvedValue({
-				id: 'session-1',
-				mode: 'practice',
-				startedAt: new Date(),
-				completedCards: 10,
-				totalCards: 44
-			});
-
-			render(Page);
-
-			await waitFor(() => {
-				expect(screen.getByText('続きから')).toBeInTheDocument();
-				expect(screen.getByText('10/44 完了')).toBeInTheDocument();
-			});
-
-			const continueButton = screen.getByRole('button', { name: /続きから/i });
-			await user.click(continueButton);
-
-			expect(goto).toHaveBeenCalledWith('/game?mode=practice&continue=true');
-		});
+		await user.click(screen.getByRole('link', { name: /統計/ }));
+		expect(goto).toHaveBeenCalledWith('/statistics');
 	});
 });
