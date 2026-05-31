@@ -1317,7 +1317,7 @@ ${gameMode === 'specific' ? '特定札練習' : gameMode === 'practice' ? '練�
 						<div>
 							<p class="text-sm text-gray-600">正確率</p>
 							<p data-testid="accuracy-display" class="text-xl font-bold">
-								{(score.accuracy || 100).toFixed(2)}%
+								{(score.accuracy ?? 100).toFixed(2)}%
 							</p>
 						</div>
 						<div>

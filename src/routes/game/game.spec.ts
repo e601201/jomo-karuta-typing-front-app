@@ -292,5 +292,28 @@ describe('Game Page (routes/game/+page.svelte)', () => {
 			// コンボの即時 0 リセットも維持されていること。
 			expect(screen.getByTestId('combo-display')).toHaveTextContent('0');
 		});
+
+		it('開始直後の初手ミス: random/standard で accuracy-display が 0.00% を表示する (#37)', async () => {
+			// ユーザー報告シナリオ: /game?mode=random&difficulty=standard で開始直後にミスタイプすると
+			// 正答率が 100% のまま。原因は2つ —
+			//  (1) 誤入力で updateInput が updateScore に到達せず accuracy が再計算されない（store 側）
+			//  (2) 表示が (score.accuracy || 100) で、正答 0 件の 0% を falsy 扱いして 100% に化けさせていた
+			// 修正は共通エンジン updateInput と共通の正答率表示にあるため全モード共通だが、報告に合わせ
+			// random/standard で固定する。
+			const user = await startGame(
+				makeData({ mode: 'random', difficulty: 'standard', cards: SHORT_CARDS })
+			);
+
+			expect(screen.getByTestId('accuracy-display').textContent?.trim()).toBe('100.00%');
+
+			// 最初のキーをいきなりミス（'z' は SHORT_CARDS のどの先頭札にも不正）。正答 0 / 総打鍵 1 = 0%。
+			await user.keyboard('z');
+
+			// 厳密一致で検証する: '100.00%'.includes('0.00%') が true のため部分一致では区別できない。
+			await waitFor(() =>
+				expect(screen.getByTestId('accuracy-display').textContent?.trim()).toBe('0.00%')
+			);
+			expect(screen.getByTestId('combo-display')).toHaveTextContent('0');
+		});
 	});
 });
