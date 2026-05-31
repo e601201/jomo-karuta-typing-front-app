@@ -27,12 +27,13 @@ vi.mock(
 	() => import('./__testmocks__/KarutaSlideshow.svelte')
 );
 
-// メニューは data.user しか参照しない。Supabase クライアント等は描画に不要なので、
-// 最小オブジェクトを PageData として渡す。
-const PAGE_DATA = { user: null } as unknown as PageData;
+// メニューは data.user しか参照しない。user の型だけ PageData に紐付けて保証し（PageData の
+// user 型が変われば型エラーで検知される）、描画に不要な Supabase クライアント等は持たず、
+// render 呼び出し側で PageData にキャストする。
+const PAGE_DATA = { user: null } satisfies Pick<PageData, 'user'>;
 
 function renderMenu() {
-	return render(Page, { props: { data: PAGE_DATA } });
+	return render(Page, { props: { data: PAGE_DATA as unknown as PageData } });
 }
 
 describe('Main Menu Page (routes/+page.svelte)', () => {
