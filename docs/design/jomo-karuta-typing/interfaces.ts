@@ -347,12 +347,7 @@ export interface RealtimeMessage<T = unknown> {
  * メッセージタイプ
  */
 export type MessageType =
-	| 'player_joined'
-	| 'player_left'
-	| 'game_start'
-	| 'game_end'
-	| 'progress_update'
-	| 'chat_message';
+	'player_joined' | 'player_left' | 'game_start' | 'game_end' | 'progress_update' | 'chat_message';
 
 /**
  * プログレス更新ペイロード

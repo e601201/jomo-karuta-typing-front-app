@@ -39,6 +39,15 @@ vi.mock('$app/stores', async () => {
 	};
 });
 
+// Mock SvelteKit's $env/static/public
+// テストをローカル .env の内容に依存させない。supabase-js 2.110 以降は createClient が
+// モジュール読み込み時に URL を検証するため、プレースホルダ値のままだと
+// supabaseClient.ts を import しただけで例外になる。
+vi.mock('$env/static/public', () => ({
+	PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
+	PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key'
+}));
+
 // Mock SvelteKit's $app/paths
 // happy-dom 上のテスト環境では仮想モジュール $app/paths の resolve が動く保証がなく、
 // resolve('/') を描画時に評価するルートコンポーネント（routes/game・routes/ 等）が
