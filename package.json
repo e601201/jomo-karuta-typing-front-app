@@ -28,7 +28,7 @@
 		"@testing-library/svelte": "^5.4.2",
 		"@testing-library/user-event": "^14.6.1",
 		"@vitest/browser": "^4.1.10",
-		"@vitest/coverage-v8": "^4.1.10",
+		"@vitest/coverage-v8": "^5.0.0",
 		"@vitest/ui": "^4.1.10",
 		"eslint": "^10.7.0",
 		"eslint-config-prettier": "^10.1.8",
